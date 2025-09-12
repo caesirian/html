@@ -15,7 +15,7 @@
     }
     
     body {
-        background-color: #eaf6f9; /* Fondo claro celeste */
+        background-color: #eaf6f9;
         color: #333;
         line-height: 1.6;
         overflow: hidden;
@@ -26,7 +26,7 @@
     }
     
     .header {
-        background-color: #0077b6; /* Azul fuerte */
+        background-color: #0077b6;
         color: white;
         padding: 15px;
         text-align: center;
@@ -84,9 +84,9 @@
     
     h1 {
         font-size: 36px;
-        color: #0096c7; /* Celeste fuerte */
+        color: #0096c7;
         margin-bottom: 25px;
-        border-bottom: 3px solid #00b4d8; /* Azul más claro */
+        border-bottom: 3px solid #00b4d8;
         padding-bottom: 15px;
     }
     
@@ -154,11 +154,17 @@
     .efecto-thc {
         background-color: #e0f7fa;
         border: 1px solid #90e0ef;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 10px 0;
     }
     
     .efecto-cbd {
         background-color: #e3f2fd;
         border: 1px solid #00b4d8;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 10px 0;
     }
     
     .centrado {
@@ -258,12 +264,20 @@
         transition: width 0.3s ease;
     }
     
-    .numero-pagina {
-        position: absolute;
-        bottom: 15px;
-        right: 15px;
-        color: #888;
-        font-size: 14px;
+    /* CONTADOR DE PÁGINAS MEJORADO - Ahora es fijo */
+    .contador-pagina {
+        position: fixed;
+        bottom: 80px;
+        right: 25px;
+        color: white;
+        font-size: 16px;
+        background-color: rgba(0, 150, 199, 0.9);
+        padding: 10px 18px;
+        border-radius: 25px;
+        z-index: 100;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
+        font-weight: bold;
     }
     
     .menu-movil {
@@ -388,12 +402,12 @@
             padding: 10px;
         }
         
-        .numero-pagina {
-            bottom: 10px;
-            right: 10px;
-            background-color: rgba(255, 255, 255, 0.8);
-            padding: 5px 10px;
-            border-radius: 15px;
+        /* Ajuste para el contador en móviles */
+        .contador-pagina {
+            bottom: 70px;
+            right: 15px;
+            font-size: 14px;
+            padding: 8px 15px;
         }
         
         .menu-lateral {
@@ -409,7 +423,7 @@
             height: auto;
         }
         
-        .header, .navegacion, .indicadores, .progreso, .numero-pagina, .menu-movil {
+        .header, .navegacion, .indicadores, .progreso, .contador-pagina, .menu-movil {
             display: none;
         }
         
@@ -429,9 +443,19 @@
             margin-bottom: 20px;
             transform: none !important;
         }
+        
+        /* Mostrar número de página en cada página al imprimir */
+        .pagina::after {
+            content: "Página " counter(page);
+            counter-increment: page;
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            color: #888;
+            font-size: 14px;
+        }
     }
 </style>
-
 </head>
 <body>
     <div class="header">
@@ -447,9 +471,9 @@
     
     <div class="menu-lateral" id="menuLateral">
         <div class="indicador-menu activo" data-page="1">Presentación</div>
-        <div class="indicador-menu" data-page="2">¿Qué veremos hoy?</div>
-        <div class="indicador-menu" data-page="3">¿Por qué Cannabis?</div>
-        <div class="indicador-menu" data-page="4">CBD y THC</div>
+        <div class="indicador-menu" data-page="2">Módulos de asesoramiento</div>
+        <div class="indicador-menu" data-page="3">Metodología de trabajo</div>
+        <div class="indicador-menu" data-page="4">Diagnóstico Organizacional</div>
         <div class="indicador-menu" data-page="5">Formatos de Administración</div>
         <div class="indicador-menu" data-page="6">Seguridad y Precauciones</div>
         <div class="indicador-menu" data-page="7">Conclusiones</div>
@@ -460,6 +484,9 @@
     <div class="progreso">
         <div class="barra-progreso" id="barraProgreso"></div>
     </div>
+    
+    <!-- Contador de página fijo (mejorado) -->
+    <div class="contador-pagina" id="contadorPagina">1 / 7</div>
     
     <div class="presentacion-container">
         <div class="presentacion" id="presentacion">
@@ -472,7 +499,6 @@ ORGANIZACIONES DE LA ECONOMÍA POPULAR</h1>
                     <p>Hernán E. Garbarino</p>
                     <p>Adm SR || Técnico Superior en Adm de RRHH</p>
                 </div>
-                <div class="numero-pagina">1 / 7</div>
             </div>
             
             <!-- Página 2 -->
@@ -492,48 +518,29 @@ Control de saldos.</p>
                 </div>
                 
                 <div class="tarjeta">
-                    <h2>La Regla de Oro:</h2>
-                    <p>"Micro Dosis" y regulación práctica</p>
-                </div>
-                
-                <div class="tarjeta">
                     <h2>Conciliación Básica:</h2>
                     <p>Cómo cuadrar los movimientos de dinero físico con los extractos bancarios
 o las anotaciones.</p>
                 </div>
+                
                 <div class="tarjeta">
                     <h2>Diseño de Herramientas de Gestión:</h2>
                     <p>Creación de planillas a medida para control de inventario,
 costos, socios o asistencia.</p>
                 </div>
-                                <div class="tarjeta">
+                
+                <div class="tarjeta">
                     <h2>Cumplimiento Laboral y Trámites Básicos:</h2>
                     <p>Asesoría sobre libro de sueldos, recibos, altas/bajas,
 y cómo acceder a programas específicos.</p>
                 </div>
+                
                 <div class="tarjeta">
                     <h2>Organización Documental:</h2>
                     <p>Métodos simples para archivar facturas, comprobantes y
 documentación legal de manera ordenada.</p>
                 </div>
-                
-                
-                
-                
-                
-                
-                
-                <div class="numero-pagina">2 / 7</div>
             </div>
-            
-            
-            
-            
-            
-            
-            
-            
-            
             
             <!-- Página 3 -->
             <div class="pagina" id="pagina3">
@@ -548,12 +555,9 @@ documentación legal de manera ordenada.</p>
 realidad de la organización.</p>
                             <p>° Entrega de material de apoyo (planillas modelo en Excel, guías paso a paso, checklist de
 trámites).</p>
-                            
                         </div>
-                        
                     </div>
                 </div>
-                <div class="numero-pagina">3 / 7</div>
             </div>
             
             <!-- Página 4 -->
@@ -564,11 +568,9 @@ trámites).</p>
                     <div class="columna">
                         <div class="efecto-cbd">
                             <h3 class="centrado">Objetivo:</h3>
-                            <p class="centrado"><strong></strong></p>
                             <ul>
                                 <li>Identificar la situación actual de la organización en materia administrativa, financiera y documental
 para detectar fortalezas, debilidades y oportunidades de mejora.</li>
-                              
                             </ul>
                         </div>
                     </div>
@@ -576,33 +578,15 @@ para detectar fortalezas, debilidades y oportunidades de mejora.</li>
                     <div class="columna">
                         <div class="efecto-thc">
                             <h3 class="centrado">Alcance:</h3>
-                            <p class="centrado"><strong></strong></p>
                             <ul>
                                 <li>Relevamiento de procesos internos de administración y finanzas.</li>
                                 <li>Evaluación de prácticas actuales de control y registro.</li>
-                                <li>• Revisión del manejo de documentación legal y contable.</li>
+                                <li>Revisión del manejo de documentación legal y contable.</li>
                                 <li>Análisis del nivel de digitalización y uso de herramientas tecnológicas.</li>
                             </ul>
                         </div>
                     </div>
-                    
-                    <div class="columna">
-                        <div class="efecto-thc">
-                            <h3 class="centrado">THC</h3>
-                            <p class="centrado"><strong>Psicoactivo</strong></p>
-                            <ul>
-                                <li>Analgésico</li>
-                                <li>Estimulante del Apetito</li>
-                                <li>Euforizante</li>
-                            </ul>
-                        </div>
-                    </div>
                 </div>
-                
-                <div class="consejo">
-                    <p>La sinergia entre CBD y THC permite lograr una eficacia terapéutica óptima con menores dosis de cada componente.</p>
-                </div>
-                <div class="numero-pagina">4 / 7</div>
             </div>
             
             <!-- Página 5 -->
@@ -646,7 +630,6 @@ para detectar fortalezas, debilidades y oportunidades de mejora.</li>
                         <li>Efecto de corta duración</li>
                     </ul>
                 </div>
-                <div class="numero-pagina">5 / 7</div>
             </div>
             
             <!-- Página 6 -->
@@ -678,7 +661,6 @@ para detectar fortalezas, debilidades y oportunidades de mejora.</li>
                 </div>
                 
                 <p>La mayoría de los efectos son leves, transitorios y se resuelve ajustando la dosis o eligiendo un ratio con más CBD.</p>
-                <div class="numero-pagina">6 / 7</div>
             </div>
             
             <!-- Página 7 -->
@@ -703,7 +685,6 @@ para detectar fortalezas, debilidades y oportunidades de mejora.</li>
                 <div class="consejo">
                     <p>El cannabis medicinal es una herramienta más para mejorar la calidad de vida. Su uso responsable e informado es la clave del éxito</p>
                 </div>
-                <div class="numero-pagina">7 / 7</div>
             </div>
         </div>
     </div>
@@ -743,6 +724,7 @@ para detectar fortalezas, debilidades y oportunidades de mejora.</li>
             const menuLateral = document.getElementById('menuLateral');
             const overlay = document.getElementById('overlay');
             const presentacion = document.getElementById('presentacion');
+            const contadorPagina = document.getElementById('contadorPagina');
             
             let paginaActual = 1;
             const totalPaginas = paginas.length;
@@ -783,6 +765,9 @@ para detectar fortalezas, debilidades y oportunidades de mejora.</li>
                 
                 // Actualizar barra de progreso
                 barraProgreso.style.width = `${((numero - 1) / (totalPaginas - 1)) * 100}%`;
+                
+                // Actualizar contador de página
+                contadorPagina.textContent = `${numero} / ${totalPaginas}`;
                 
                 paginaActual = numero;
             }
