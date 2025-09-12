@@ -6,456 +6,456 @@
     <title>Propuestas de Colaboración - 2025</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-    /* Estilos generales */
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: 'Segoe UI', Arial, sans-serif;
-    }
-    
-    body {
-        background-color: #eaf6f9;
-        color: #333;
-        line-height: 1.6;
-        overflow: hidden;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        touch-action: pan-y;
-    }
-    
-    .header {
-        background-color: #0077b6;
-        color: white;
-        padding: 15px;
-        text-align: center;
-        position: relative;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        z-index: 10;
-    }
-    
-    .presentacion-container {
-        flex: 1;
-        position: relative;
-        overflow: hidden;
-        background-color: #ffffff;
-        margin: 10px;
-        border-radius: 10px;
-        box-shadow: 0 0 20px rgba(0,0,0,0.1);
-    }
-    
-    .presentacion {
-        width: 100%;
-        height: 100%;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .pagina {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        padding: 40px;
-        display: none;
-        overflow-y: auto;
-        background-color: white;
-        border-radius: 10px;
-        transition: transform 0.4s ease, opacity 0.4s ease;
-    }
-    
-    .pagina.activa {
-        display: block;
-        opacity: 1;
-        transform: translateX(0);
-    }
-    
-    .pagina.siguiente {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    
-    .pagina.anterior {
-        transform: translateX(-100%);
-        opacity: 0;
-    }
-    
-    h1 {
-        font-size: 36px;
-        color: #0096c7;
-        margin-bottom: 25px;
-        border-bottom: 3px solid #00b4d8;
-        padding-bottom: 15px;
-    }
-    
-    h2 {
-        font-size: 28px;
-        color: #0077b6;
-        margin: 20px 0 15px;
-    }
-    
-    h3 {
-        font-size: 22px;
-        color: #444;
-        margin: 15px 0 10px;
-    }
-    
-    p {
-        margin-bottom: 15px;
-        font-size: 18px;
-    }
-    
-    ul {
-        margin-left: 30px;
-        margin-bottom: 20px;
-    }
-    
-    li {
-        margin-bottom: 10px;
-        font-size: 18px;
-    }
-    
-    .autores {
-        font-style: italic;
-        text-align: right;
-        margin-top: 30px;
-        color: #666;
-    }
-    
-    .contenedor-flex {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 30px;
-        flex-wrap: wrap;
-    }
-    
-    .columna {
-        flex: 1;
-        padding: 15px;
-        min-width: 300px;
-    }
-    
-    .tarjeta {
-        background: #f9f9f9;
-        border-left: 5px solid #00b4d8;
-        padding: 20px;
-        margin-bottom: 20px;
-        border-radius: 5px;
-        transition: transform 0.3s ease;
-    }
-    
-    .tarjeta:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    
-    .efecto-thc {
-        background-color: #e0f7fa;
-        border: 1px solid #90e0ef;
-        padding: 15px;
-        border-radius: 8px;
-        margin: 10px 0;
-    }
-    
-    .efecto-cbd {
-        background-color: #e3f2fd;
-        border: 1px solid #00b4d8;
-        padding: 15px;
-        border-radius: 8px;
-        margin: 10px 0;
-    }
-    
-    .centrado {
-        text-align: center;
-    }
-    
-    .advertencia {
-        background-color: #ffebee;
-        border: 1px solid #ef9a9a;
-        padding: 20px;
-        border-radius: 8px;
-        margin: 20px 0;
-    }
-    
-    .consejo {
-        background-color: #fff8e1;
-        border: 1px solid #ffe082;
-        padding: 20px;
-        border-radius: 8px;
-        margin: 20px 0;
-    }
-    
-    .formato-admin {
-        background: #f5f5f5;
-        padding: 15px;
-        margin: 15px 0;
-        border-radius: 8px;
-        border-left: 4px solid #0096c7;
-    }
-    
-    .navegacion {
-        display: flex;
-        justify-content: center;
-        padding: 15px;
-        background-color: #0077b6;
-        z-index: 10;
-    }
-    
-    .btn {
-        background-color: #0096c7;
-        color: white;
-        border: none;
-        padding: 12px 25px;
-        margin: 0 10px;
-        border-radius: 50px;
-        cursor: pointer;
-        font-size: 16px;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-    }
-    
-    .btn:hover {
-        background-color: #00b4d8;
-        transform: translateY(-2px);
-    }
-    
-    .btn:disabled {
-        background-color: #888;
-        cursor: not-allowed;
-        transform: none;
-    }
-    
-    .indicadores {
-        display: flex;
-        justify-content: center;
-        margin: 15px 0;
-    }
-    
-    .indicador {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background-color: #aaa;
-        margin: 0 5px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
-    
-    .indicador.activo {
-        background-color: #00b4d8;
-        transform: scale(1.2);
-    }
-    
-    .progreso {
-        height: 5px;
-        background-color: #ddd;
-        margin: 10px 0;
-        border-radius: 5px;
-        overflow: hidden;
-    }
-    
-    .barra-progreso {
-        height: 100%;
-        background-color: #0096c7;
-        width: 0%;
-        transition: width 0.3s ease;
-    }
-    
-    /* CONTADOR DE PÁGINAS MEJORADO - Ahora es fijo */
-    .contador-pagina {
-        position: fixed;
-        bottom: 80px;
-        right: 25px;
-        color: white;
-        font-size: 16px;
-        background-color: rgba(0, 150, 199, 0.9);
-        padding: 10px 18px;
-        border-radius: 25px;
-        z-index: 100;
-        box-shadow: 0 2px 15px rgba(0,0,0,0.3);
-        transition: all 0.3s ease;
-        font-weight: bold;
-    }
-    
-    .menu-movil {
-        display: none;
-        position: absolute;
-        top: 50px;
-        left: 20px;
-        z-index: 100;
-        background-color: #0096c7;
-        color: white;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        cursor: pointer;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    }
-    
-    .bar {
-        width: 25px;
-        height: 3px;
-        background-color: white;
-        margin: 2px 0;
-        transition: 0.3s;
-    }
-    
-    .menu-lateral {
-        position: fixed;
-        top: 0;
-        left: -300px;
-        width: 300px;
-        height: 100%;
-        background-color: #0077b6;
-        z-index: 99;
-        padding: 85px 20px 20px;
-        transition: left 0.3s ease;
-        overflow-y: auto;
-    }
-    
-    .menu-lateral.activo {
-        left: 0;
-    }
-    
-    .menu-lateral .indicador-menu {
-        display: block;
-        color: white;
-        padding: 15px;
-        margin: 10px 0;
-        border-radius: 5px;
-        background-color: #0096c7;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-    
-    .menu-lateral .indicador-menu.activo {
-        background-color: #00b4d8;
-    }
-    
-    .overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.5);
-        z-index: 98;
-        display: none;
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0.7; }
-        to { opacity: 1; }
-    }
-    
-    @media (max-width: 768px) {
-        .header {
-            padding: 10px;
+        /* Estilos generales */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
         }
         
-        .header h1 {
-            font-size: 24px;
-            padding-top: 5px;
+        body {
+            background-color: #eaf6f9;
+            color: #333;
+            line-height: 1.6;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            touch-action: pan-y;
+        }
+        
+        .header {
+            background-color: #0077b6;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 10;
         }
         
         .presentacion-container {
-            margin: 5px;
-            border-radius: 8px;
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background-color: #ffffff;
+            margin: 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .presentacion {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
         }
         
         .pagina {
-            padding: 20px 20px 60px 20px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 40px;
+            display: none;
+            overflow-y: auto;
+            background-color: white;
+            border-radius: 10px;
+            transition: transform 0.4s ease, opacity 0.4s ease;
+        }
+        
+        .pagina.activa {
+            display: block;
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .pagina.siguiente {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        
+        .pagina.anterior {
+            transform: translateX(-100%);
+            opacity: 0;
         }
         
         h1 {
-            font-size: 28px;
-            margin-bottom: 15px;
-            margin-top: 5px;
+            font-size: 36px;
+            color: #0096c7;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #00b4d8;
+            padding-bottom: 15px;
         }
         
         h2 {
-            font-size: 24px;
+            font-size: 28px;
+            color: #0077b6;
+            margin: 20px 0 15px;
+        }
+        
+        h3 {
+            font-size: 22px;
+            color: #444;
+            margin: 15px 0 10px;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        ul {
+            margin-left: 30px;
+            margin-bottom: 20px;
+        }
+        
+        li {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .autores {
+            font-style: italic;
+            text-align: right;
+            margin-top: 30px;
+            color: #666;
         }
         
         .contenedor-flex {
-            flex-direction: column;
-        }
-        
-        .btn {
-            padding: 10px 15px;
-            font-size: 14px;
-            margin: 0 5px;
-        }
-        
-        .menu-movil {
             display: flex;
-            top: 50px;
+            justify-content: space-between;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .columna {
+            flex: 1;
+            padding: 15px;
+            min-width: 300px;
+        }
+        
+        .tarjeta {
+            background: #f9f9f9;
+            border-left: 5px solid #00b4d8;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            transition: transform 0.3s ease;
+        }
+        
+        .tarjeta:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .modulo {
+            background-color: #e0f7fa;
+            border: 1px solid #90e0ef;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .objetivo {
+            background-color: #e3f2fd;
+            border: 1px solid #00b4d8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .centrado {
+            text-align: center;
+        }
+        
+        .destacado {
+            background-color: #fff8e1;
+            border: 1px solid #ffe082;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .consejo {
+            background-color: #e8f5e9;
+            border: 1px solid #a5d6a7;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .metodologia {
+            background: #f5f5f5;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 4px solid #0096c7;
         }
         
         .navegacion {
-            padding: 10px;
+            display: flex;
+            justify-content: center;
+            padding: 15px;
+            background-color: #0077b6;
+            z-index: 10;
         }
         
-        /* Ajuste para el contador en móviles */
+        .btn {
+            background-color: #0096c7;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            margin: 0 10px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        
+        .btn:hover {
+            background-color: #00b4d8;
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            background-color: #888;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .indicadores {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        
+        .indicador {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #aaa;
+            margin: 0 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .indicador.activo {
+            background-color: #00b4d8;
+            transform: scale(1.2);
+        }
+        
+        .progreso {
+            height: 5px;
+            background-color: #ddd;
+            margin: 10px 0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .barra-progreso {
+            height: 100%;
+            background-color: #0096c7;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        /* CONTADOR DE PÁGINAS MEJORADO - Ahora es fijo */
         .contador-pagina {
-            bottom: 70px;
-            right: 15px;
-            font-size: 14px;
-            padding: 8px 15px;
+            position: fixed;
+            bottom: 80px;
+            right: 25px;
+            color: white;
+            font-size: 16px;
+            background-color: rgba(0, 150, 199, 0.9);
+            padding: 10px 18px;
+            border-radius: 25px;
+            z-index: 100;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .menu-movil {
+            display: none;
+            position: absolute;
+            top: 50px;
+            left: 20px;
+            z-index: 100;
+            background-color: #0096c7;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .bar {
+            width: 25px;
+            height: 3px;
+            background-color: white;
+            margin: 2px 0;
+            transition: 0.3s;
         }
         
         .menu-lateral {
-            padding: 75px 20px 20px;
-        }
-    }
-    
-    /* Estilos para impresión */
-    @media print {
-        body {
-            background: white;
-            overflow: visible;
-            height: auto;
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100%;
+            background-color: #0077b6;
+            z-index: 99;
+            padding: 85px 20px 20px;
+            transition: left 0.3s ease;
+            overflow-y: auto;
         }
         
-        .header, .navegacion, .indicadores, .progreso, .contador-pagina, .menu-movil {
+        .menu-lateral.activo {
+            left: 0;
+        }
+        
+        .menu-lateral .indicador-menu {
+            display: block;
+            color: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background-color: #0096c7;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .menu-lateral .indicador-menu.activo {
+            background-color: #00b4d8;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 98;
             display: none;
         }
         
-        .presentacion-container {
-            box-shadow: none;
-            border-radius: 0;
-            margin: 0;
-            overflow: visible;
+        @keyframes fadeIn {
+            from { opacity: 0.7; }
+            to { opacity: 1; }
         }
         
-        .pagina {
-            position: relative;
-            page-break-after: always;
-            display: block;
-            opacity: 1;
-            height: auto;
-            margin-bottom: 20px;
-            transform: none !important;
+        @media (max-width: 768px) {
+            .header {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+                padding-top: 5px;
+            }
+            
+            .presentacion-container {
+                margin: 5px;
+                border-radius: 8px;
+            }
+            
+            .pagina {
+                padding: 20px 20px 60px 20px;
+            }
+            
+            h1 {
+                font-size: 28px;
+                margin-bottom: 15px;
+                margin-top: 5px;
+            }
+            
+            h2 {
+                font-size: 24px;
+            }
+            
+            .contenedor-flex {
+                flex-direction: column;
+            }
+            
+            .btn {
+                padding: 10px 15px;
+                font-size: 14px;
+                margin: 0 5px;
+            }
+            
+            .menu-movil {
+                display: flex;
+                top: 50px;
+            }
+            
+            .navegacion {
+                padding: 10px;
+            }
+            
+            /* Ajuste para el contador en móviles */
+            .contador-pagina {
+                bottom: 70px;
+                right: 15px;
+                font-size: 14px;
+                padding: 8px 15px;
+            }
+            
+            .menu-lateral {
+                padding: 75px 20px 20px;
+            }
         }
         
-        /* Mostrar número de página en cada página al imprimir */
-        .pagina::after {
-            content: "Página " counter(page);
-            counter-increment: page;
-            position: absolute;
-            bottom: 15px;
-            right: 15px;
-            color: #888;
-            font-size: 14px;
+        /* Estilos para impresión */
+        @media print {
+            body {
+                background: white;
+                overflow: visible;
+                height: auto;
+            }
+            
+            .header, .navegacion, .indicadores, .progreso, .contador-pagina, .menu-movil {
+                display: none;
+            }
+            
+            .presentacion-container {
+                box-shadow: none;
+                border-radius: 0;
+                margin: 0;
+                overflow: visible;
+            }
+            
+            .pagina {
+                position: relative;
+                page-break-after: always;
+                display: block;
+                opacity: 1;
+                height: auto;
+                margin-bottom: 20px;
+                transform: none !important;
+            }
+            
+            /* Mostrar número de página en cada página al imprimir */
+            .pagina::after {
+                content: "Página " counter(page);
+                counter-increment: page;
+                position: absolute;
+                bottom: 15px;
+                right: 15px;
+                color: #888;
+                font-size: 14px;
+            }
         }
-    }
-</style>
+    </style>
 </head>
 <body>
     <div class="header">
@@ -471,12 +471,14 @@
     
     <div class="menu-lateral" id="menuLateral">
         <div class="indicador-menu activo" data-page="1">Presentación</div>
-        <div class="indicador-menu" data-page="2">Módulos de asesoramiento</div>
-        <div class="indicador-menu" data-page="3">Metodología de trabajo</div>
-        <div class="indicador-menu" data-page="4">Diagnóstico Organizacional</div>
-        <div class="indicador-menu" data-page="5">Formatos de Administración</div>
-        <div class="indicador-menu" data-page="6">Seguridad y Precauciones</div>
-        <div class="indicador-menu" data-page="7">Conclusiones</div>
+        <div class="indicador-menu" data-page="2">Módulos de Asesoramiento</div>
+        <div class="indicador-menu" data-page="3">Diagnóstico Organizacional</div>
+        <div class="indicador-menu" data-page="4">Sistema de Caja y Bancos</div>
+        <div class="indicador-menu" data-page="5">Conciliación Básica</div>
+        <div class="indicador-menu" data-page="6">Herramientas de Gestión</div>
+        <div class="indicador-menu" data-page="7">Cumplimiento Laboral</div>
+        <div class="indicador-menu" data-page="8">Organización Documental</div>
+        <div class="indicador-menu" data-page="9">Programas de Formación</div>
     </div>
     
     <div class="overlay" id="overlay"></div>
@@ -486,15 +488,26 @@
     </div>
     
     <!-- Contador de página fijo (mejorado) -->
-    <div class="contador-pagina" id="contadorPagina">1 / 7</div>
+    <div class="contador-pagina" id="contadorPagina">1 / 9</div>
     
     <div class="presentacion-container">
         <div class="presentacion" id="presentacion">
             <!-- Página 1 -->
             <div class="pagina activa" id="pagina1">
-                <h1 class="centrado">PROGRAMA DE FORTALECIMIENTO ADMINISTRATIVO PARA
-ORGANIZACIONES DE LA ECONOMÍA POPULAR</h1>
+                <h1 class="centrado">PROGRAMA DE FORTALECIMIENTO ADMINISTRATIVO PARA ORGANIZACIONES DE LA ECONOMÍA POPULAR</h1>
                 <h2 class="centrado">"Asesoramiento Técnico: Fortaleciendo la Gestión Interna"</h2>
+                
+                <div class="destacado">
+                    <h3>Modalidad:</h3>
+                    <p>Asesorías personalizadas (presenciales o virtuales) por sesiones de 2 a 3 horas.</p>
+                    
+                    <h3>Público Objetivo:</h3>
+                    <p>Cooperativas, comedores comunitarios, merenderos, emprendedores con ventas consolidadas, asociaciones civiles.</p>
+                    
+                    <h3>Objetivo General:</h3>
+                    <p>Brindar herramientas administrativas básicas para mejorar la sostenibilidad, transparencia y capacidad de gestión de las organizaciones.</p>
+                </div>
+                
                 <div class="autores">
                     <p>Hernán E. Garbarino</p>
                     <p>Adm SR || Técnico Superior en Adm de RRHH</p>
@@ -503,187 +516,363 @@ ORGANIZACIONES DE LA ECONOMÍA POPULAR</h1>
             
             <!-- Página 2 -->
             <div class="pagina" id="pagina2">
-                <h1>Módulos de asesoramiento</h1>
+                <h1>Módulos de Asesoramiento</h1>
+                <p class="centrado">Se adaptan a la necesidad específica de cada organización</p>
                 
                 <div class="tarjeta">
-                    <h2>Diagnóstico Organizacional Rápido: </h2>
-                    <p>Análisis de los procesos actuales de administración,
-finanzas y documentación.</p>
+                    <h2>Diagnóstico Organizacional Rápido</h2>
+                    <p>Análisis de los procesos actuales de administración, finanzas y documentación.</p>
                 </div>
                 
                 <div class="tarjeta">
-                    <h2>Sistema Básico de Caja y Bancos:</h2>
-                    <p>Planilla unificada para registro diario de ingresos y egresos.
-Control de saldos.</p>
+                    <h2>Sistema Básico de Caja y Bancos</h2>
+                    <p>Planilla unificada para registro diario de ingresos y egresos. Control de saldos.</p>
                 </div>
                 
                 <div class="tarjeta">
-                    <h2>Conciliación Básica:</h2>
-                    <p>Cómo cuadrar los movimientos de dinero físico con los extractos bancarios
-o las anotaciones.</p>
+                    <h2>Conciliación Básica</h2>
+                    <p>Cómo cuadrar los movimientos de dinero físico con los extractos bancarios o las anotaciones.</p>
                 </div>
                 
                 <div class="tarjeta">
-                    <h2>Diseño de Herramientas de Gestión:</h2>
-                    <p>Creación de planillas a medida para control de inventario,
-costos, socios o asistencia.</p>
+                    <h2>Diseño de Herramientas de Gestión</h2>
+                    <p>Creación de planillas a medida para control de inventario, costos, socios o asistencia.</p>
                 </div>
                 
                 <div class="tarjeta">
-                    <h2>Cumplimiento Laboral y Trámites Básicos:</h2>
-                    <p>Asesoría sobre libro de sueldos, recibos, altas/bajas,
-y cómo acceder a programas específicos.</p>
+                    <h2>Cumplimiento Laboral y Trámites Básicos</h2>
+                    <p>Asesoría sobre libro de sueldos, recibos, altas/bajas, y cómo acceder a programas específicos.</p>
                 </div>
                 
                 <div class="tarjeta">
-                    <h2>Organización Documental:</h2>
-                    <p>Métodos simples para archivar facturas, comprobantes y
-documentación legal de manera ordenada.</p>
+                    <h2>Organización Documental</h2>
+                    <p>Métodos simples para archivar facturas, comprobantes y documentación legal de manera ordenada.</p>
+                </div>
+                
+                <div class="metodologia">
+                    <h3>Metodología de Trabajo:</h3>
+                    <ul>
+                        <li>Sesión inicial de diagnóstico</li>
+                        <li>Propuesta de plan de trabajo con los módulos a cubrir</li>
+                        <li>Sesiones de trabajo prácticas ("hands-on")</li>
+                        <li>Entrega de material de apoyo (planillas modelo, guías, checklist)</li>
+                    </ul>
                 </div>
             </div>
             
             <!-- Página 3 -->
             <div class="pagina" id="pagina3">
-                <h1>Metodología de trabajo</h1>
-                
-                <div class="contenedor-flex">
-                    <div class="columna">
-                        <div class="efecto-thc">
-                            <p>° Sesión inicial de diagnóstico.</p>
-                            <p>° Propuesta de plan de trabajo con los módulos a cubrir y cantidad de sesiones estimadas.</p>
-                            <p>° Sesiones de trabajo prácticas ('hands-on'), trabajando directamente sobre la documentación y
-realidad de la organización.</p>
-                            <p>° Entrega de material de apoyo (planillas modelo en Excel, guías paso a paso, checklist de
-trámites).</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Página 4 -->
-            <div class="pagina" id="pagina4">
                 <h1>Diagnóstico Organizacional Rápido</h1>
                 
+                <div class="objetivo">
+                    <h3>Objetivo:</h3>
+                    <p>Identificar la situación actual de la organización en materia administrativa, financiera y documental para detectar fortalezas, debilidades y oportunidades de mejora.</p>
+                </div>
+                
                 <div class="contenedor-flex">
                     <div class="columna">
-                        <div class="efecto-cbd">
-                            <h3 class="centrado">Objetivo:</h3>
+                        <div class="modulo">
+                            <h3>Alcance:</h3>
                             <ul>
-                                <li>Identificar la situación actual de la organización en materia administrativa, financiera y documental
-para detectar fortalezas, debilidades y oportunidades de mejora.</li>
+                                <li>Relevamiento de procesos internos de administración y finanzas</li>
+                                <li>Evaluación de prácticas actuales de control y registro</li>
+                                <li>Revisión del manejo de documentación legal y contable</li>
+                                <li>Análisis del nivel de digitalización y uso de herramientas tecnológicas</li>
                             </ul>
                         </div>
                     </div>
                     
                     <div class="columna">
-                        <div class="efecto-thc">
-                            <h3 class="centrado">Alcance:</h3>
+                        <div class="modulo">
+                            <h3>Metodología:</h3>
                             <ul>
-                                <li>Relevamiento de procesos internos de administración y finanzas.</li>
-                                <li>Evaluación de prácticas actuales de control y registro.</li>
-                                <li>Revisión del manejo de documentación legal y contable.</li>
-                                <li>Análisis del nivel de digitalización y uso de herramientas tecnológicas.</li>
+                                <li>Entrevista inicial con referentes de la organización</li>
+                                <li>Revisión de registros contables, planillas y documentación existente</li>
+                                <li>Aplicación de un checklist diagnóstico diseñado para organizaciones de la economía popular</li>
                             </ul>
                         </div>
                     </div>
+                </div>
+                
+                <div class="consejo">
+                    <h3>Beneficios:</h3>
+                    <p>Permite comprender rápidamente la realidad administrativa de la organización y establecer un plan de acción realista.</p>
+                    
+                    <h3>Entregables:</h3>
+                    <ul>
+                        <li>Informe breve de diagnóstico (1 a 2 páginas)</li>
+                        <li>Mapa de procesos básicos detectados</li>
+                        <li>Recomendaciones iniciales priorizadas</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Página 4 -->
+            <div class="pagina" id="pagina4">
+                <h1>Sistema Básico de Caja y Bancos</h1>
+                
+                <div class="objetivo">
+                    <h3>Objetivo:</h3>
+                    <p>Implementar un sistema sencillo para registrar, controlar y proyectar los movimientos financieros diarios.</p>
+                </div>
+                
+                <div class="contenedor-flex">
+                    <div class="columna">
+                        <div class="modulo">
+                            <h3>Alcance:</h3>
+                            <ul>
+                                <li>Diseño de una planilla unificada para ingresos y egresos</li>
+                                <li>Registro diferenciado de dinero en efectivo y movimientos bancarios</li>
+                                <li>Control automático de saldos diarios y mensuales</li>
+                                <li>Capacitación en la carga y actualización del sistema</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="columna">
+                        <div class="modulo">
+                            <h3>Metodología:</h3>
+                            <ul>
+                                <li>Entrevista inicial para entender la dinámica de ingresos y pagos</li>
+                                <li>Creación de una planilla en Excel o Google Sheets con fórmulas automatizadas</li>
+                                <li>Capacitación práctica a los responsables administrativos</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="consejo">
+                    <h3>Beneficios:</h3>
+                    <p>Mejora la transparencia, facilita el seguimiento financiero y permite tomar decisiones basadas en datos reales.</p>
+                    
+                    <h3>Entregables:</h3>
+                    <ul>
+                        <li>Planilla unificada de Caja y Bancos personalizada</li>
+                        <li>Manual breve de uso paso a paso</li>
+                        <li>Reporte inicial de saldos al implementar el sistema</li>
+                    </ul>
                 </div>
             </div>
             
             <!-- Página 5 -->
             <div class="pagina" id="pagina5">
-                <h1>FORMATOS DE ADMINISTRACIÓN</h1>
-                <h2>ELEGIR LA HERRAMIENTA CORRECTA</h2>
+                <h1>Conciliación Básica</h1>
                 
-                <div class="formato-admin">
-                    <h3>Aceites/Tinturas (Sublingual)</h3>
-                    <ul>
-                        <li>Inicio en 15–45 min</li>
-                        <li>Dosificación precisa</li>
-                        <li>Efecto duradero</li>
-                    </ul>
-                    <p><strong>Recomendado para iniciar</strong></p>
+                <div class="objetivo">
+                    <h3>Objetivo:</h3>
+                    <p>Enseñar a las organizaciones a conciliar el dinero físico, las operaciones bancarias y los registros administrativos, evitando errores y desbalances.</p>
                 </div>
                 
-                <div class="formato-admin">
-                    <h3>Tópicos</h3>
-                    <ul>
-                        <li>Alivio local</li>
-                        <li>Natural</li>
-                        <li>Sin efecto psicoactivo</li>
-                    </ul>
+                <div class="contenedor-flex">
+                    <div class="columna">
+                        <div class="modulo">
+                            <h3>Alcance:</h3>
+                            <ul>
+                                <li>Explicación clara del concepto de conciliación bancaria</li>
+                                <li>Diseño de un procedimiento simple para realizar conciliaciones mensuales</li>
+                                <li>Identificación de discrepancias y ajustes necesarios</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="columna">
+                        <div class="modulo">
+                            <h3>Metodología:</h3>
+                            <ul>
+                                <li>Capacitación práctica sobre conciliación con ejemplos reales</li>
+                                <li>Uso de una planilla de conciliación que cruce datos de caja, bancos y registros</li>
+                                <li>Simulación de escenarios comunes de errores y soluciones</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="formato-admin">
-                    <h3>Cápsulas</h3>
+                <div class="consejo">
+                    <h3>Beneficios:</h3>
+                    <p>Garantiza que los registros administrativos reflejen la realidad financiera y fortalece la credibilidad interna y externa de la organización.</p>
+                    
+                    <h3>Entregables:</h3>
                     <ul>
-                        <li>Inicio lento</li>
-                        <li>Efecto prolongado</li>
-                        <li>Discreto y preciso</li>
-                    </ul>
-                </div>
-                
-                <div class="formato-admin">
-                    <h3>Vaporización</h3>
-                    <ul>
-                        <li>Inicio rápido</li>
-                        <li>Precaución respiratoria</li>
-                        <li>Efecto de corta duración</li>
+                        <li>Plantilla de conciliación bancaria lista para usar</li>
+                        <li>Guía rápida de conciliación con pasos claros</li>
                     </ul>
                 </div>
             </div>
             
             <!-- Página 6 -->
             <div class="pagina" id="pagina6">
-                <h1>Seguridad: Precauciones y Manejo de Efectos</h1>
+                <h1>Diseño de Herramientas de Gestión</h1>
                 
-                <div class="advertencia">
-                    <h2 class="centrado">Atención: Consulta con tu Médico</h2>
-                    <p>Riesgo de interacción con anticoagulantes, ansiolíticos y otros fármacos. Es esencial la supervisión médica.</p>
-                    <p>El CBD es generalmente bien tolerado y tiene un perfil de seguridad favorable.</p>
-                    <p>Contraindicado en embarazo, lactancia y en historial de psicosis</p>
+                <div class="objetivo">
+                    <h3>Objetivo:</h3>
+                    <p>Desarrollar planillas personalizadas y tableros simples para mejorar el control interno de la organización.</p>
                 </div>
                 
-                <h2>Si aparecen efectos adversos (asociados usualmente al THC)</h2>
+                <div class="contenedor-flex">
+                    <div class="columna">
+                        <div class="modulo">
+                            <h3>Alcance:</h3>
+                            <ul>
+                                <li>Control de inventarios: registro de entradas, salidas y stock disponible</li>
+                                <li>Gestión de costos: cálculo real de costos directos e indirectos</li>
+                                <li>Seguimiento de socios o beneficiarios: datos de contacto, aportes, asistencia</li>
+                                <li>Tableros de indicadores básicos para seguimiento mensual</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="columna">
+                        <div class="modulo">
+                            <h3>Metodología:</h3>
+                            <ul>
+                                <li>Relevamiento de necesidades específicas de cada organización</li>
+                                <li>Desarrollo de planillas y dashboards adaptados</li>
+                                <li>Capacitación para el uso autónomo de las herramientas</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
                 
                 <div class="consejo">
-                    <h3>Boca seca:</h3>
-                    <p>Beber agua, masticar chicle sin azúcar.</p>
+                    <h3>Beneficios:</h3>
+                    <p>Permite gestionar la organización de forma más profesional y ordenada, optimizando recursos y tiempo.</p>
+                    
+                    <h3>Entregables:</h3>
+                    <ul>
+                        <li>Pack de planillas personalizadas (inventario, costos, socios, asistencia)</li>
+                        <li>Dashboard básico para indicadores clave</li>
+                        <li>Manual práctico de uso y actualización</li>
+                    </ul>
                 </div>
-                
-                <div class="consejo">
-                    <h3>Mareos:</h3>
-                    <p>Recostarse, respirar profundo. Solución: Reducir la dosis de THC y aumentar el CBD.</p>
-                </div>
-                
-                <div class="consejo">
-                    <h3>Ansiedad:</h3>
-                    <p>Mantener la calma. Es transitorio. Solución: Preferir productos ricos en CBD.</p>
-                </div>
-                
-                <p>La mayoría de los efectos son leves, transitorios y se resuelve ajustando la dosis o eligiendo un ratio con más CBD.</p>
             </div>
             
             <!-- Página 7 -->
             <div class="pagina" id="pagina7">
-                <h1>Conclusiones: Claves para un Tratamiento Exitoso</h1>
+                <h1>Cumplimiento Laboral y Trámites Básicos</h1>
                 
-                <div class="tarjeta">
-                    <h2>Supervisión Experta</h2>
-                    <p>La consulta médica es indispensable para manejar interacciones y personalizar el tratamiento</p>
+                <div class="objetivo">
+                    <h3>Objetivo:</h3>
+                    <p>Asesorar sobre el cumplimiento de obligaciones laborales y fiscales básicas, para reducir riesgos legales y facilitar el acceso a programas oficiales.</p>
                 </div>
                 
-                <div class="tarjeta">
-                    <h2>Paciencia y Precisión</h2>
-                    <p>"Micro Dosis". La clave es encontrar la dosis mínima efectiva con paciencia</p>
-                </div>
-                
-                <div class="tarjeta">
-                    <h2>Calidad y Seguridad</h2>
-                    <p>Elija productos de calidad, con análisis de laboratorio que garanticen su pureza y potencia</p>
+                <div class="contenedor-flex">
+                    <div class="columna">
+                        <div class="modulo">
+                            <h3>Alcance:</h3>
+                            <ul>
+                                <li>Introducción al libro de sueldos y emisión de recibos</li>
+                                <li>Procedimientos para altas y bajas en AFIP</li>
+                                <li>Información sobre monotributo, autónomos e ingresos brutos</li>
+                                <li>Guía para acceder a programas y beneficios estatales</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="columna">
+                        <div class="modulo">
+                            <h3>Metodología:</h3>
+                            <ul>
+                                <li>Entrevista inicial para identificar obligaciones vigentes</li>
+                                <li>Asesoramiento sobre documentación laboral requerida</li>
+                                <li>Provisión de checklist de trámites con links y pasos claros</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="consejo">
-                    <p>El cannabis medicinal es una herramienta más para mejorar la calidad de vida. Su uso responsable e informado es la clave del éxito</p>
+                    <h3>Beneficios:</h3>
+                    <p>Reduce riesgos legales, facilita el acceso a subsidios y programas y mejora la formalidad institucional.</p>
+                    
+                    <h3>Entregables:</h3>
+                    <ul>
+                        <li>Guía de obligaciones laborales y fiscales básicas</li>
+                        <li>Checklist de trámites con fechas y requisitos</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Página 8 -->
+            <div class="pagina" id="pagina8">
+                <h1>Organización Documental</h1>
+                
+                <div class="objetivo">
+                    <h3>Objetivo:</h3>
+                    <p>Implementar un sistema simple y eficiente para la clasificación, archivo y resguardo de documentos físicos y digitales.</p>
+                </div>
+                
+                <div class="contenedor-flex">
+                    <div class="columna">
+                        <div class="modulo">
+                            <h3>Alcance:</h3>
+                            <ul>
+                                <li>Creación de un esquema de carpetas digitales organizado</li>
+                                <li>Definición de categorías para documentos legales, administrativos y contables</li>
+                                <li>Métodos de digitalización y respaldo en la nube</li>
+                                <li>Buenas prácticas para el archivo físico</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="columna">
+                        <div class="modulo">
+                            <h3>Metodología:</h3>
+                            <ul>
+                                <li>Revisión del sistema actual de archivo</li>
+                                <li>Diseño de plantillas de nomenclatura para carpetas y archivos</li>
+                                <li>Capacitación práctica sobre organización и resguardo documental</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="consejo">
+                    <h3>Beneficios:</h3>
+                    <p>Facilita el acceso a la información, evita pérdidas y mejora el cumplimiento normativo.</p>
+                    
+                    <h3>Entregables:</h3>
+                    <ul>
+                        <li>Manual de organización documental</li>
+                        <li>Plantilla de estructura digital lista para implementar</li>
+                        <li>Checklist de control documental mensual</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Página 9 -->
+            <div class="pagina" id="pagina9">
+                <h1>Programas de Formación y Capacitación</h1>
+                
+                <div class="tarjeta">
+                    <h2>Curso A: "Herramientas Administrativas para Emprender"</h2>
+                    <p><strong>Duración:</strong> 4 encuentros de 2 horas cada uno (total 8 horas)</p>
+                    <p><strong>Modalidad:</strong> Presencial o Virtual</p>
+                    <p><strong>Objetivo:</strong> Que los participantes adquieran conocimientos prácticos para administrar su emprendimiento de manera eficiente</p>
+                    
+                    <h3>Contenidos por Encuentro:</h3>
+                    <ol>
+                        <li>¿Dónde está mi dinero? Separación de finanzas personales y del emprendimiento</li>
+                        <li>¿Cuánto gano realmente? Introducción al cálculo de costos y precio de venta</li>
+                        <li>Organizarse para crecer. Control de stock e inventario simple</li>
+                        <li>Mi emprendimiento y el sistema. Trámites básicos (monotributo, ingresos brutos)</li>
+                    </ol>
+                </div>
+                
+                <div class="tarjeta">
+                    <h2>Curso B: "Primeros Pasos en el Mundo Administrativo"</h2>
+                    <p><strong>Duración:</strong> 6 encuentros de 2 horas (total 12 horas)</p>
+                    <p><strong>Modalidad:</strong> Presencial</p>
+                    <p><strong>Objetivo:</strong> Capacitar a jóvenes y adultos sin experiencia para desempeñarse en un puesto entry-level en áreas administrativas</p>
+                    
+                    <h3>Contenidos:</h3>
+                    <ul>
+                        <li>El perfil del asistente administrativo. Funciones y habilidades blandas clave</li>
+                        <li>Comunicación efectiva: atención telefónica, redacción de emails formales</li>
+                        <li>Archivo y organización documental (física y digital)</li>
+                        <li>Uso de planillas de cálculo (Excel/Google Sheets) para tareas básicas</li>
+                        <li>Gestión del tiempo y de tareas. Uso de agendas</li>
+                        <li>Simulación de entrevistas laborales y armado de CV para el sector</li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -697,14 +886,16 @@ para detectar fortalezas, debilidades y oportunidades de mejora.</li>
         <div class="indicador" data-page="5"></div>
         <div class="indicador" data-page="6"></div>
         <div class="indicador" data-page="7"></div>
+        <div class="indicador" data-page="8"></div>
+        <div class="indicador" data-page="9"></div>
     </div>
     
     <div class="navegacion">
         <button class="btn" id="btnAnterior" disabled>
-            <i class="fas fa-arrow-left"></i>  Anterior
+            <i class="fas fa-arrow-left"></i> Anterior
         </button>
         <button class="btn" id="btnSiguiente">
-            Siguiente    <i class="fas fa-arrow-right"></i>
+            Siguiente <i class="fas fa-arrow-right"></i>
         </button>
         <button class="btn" id="btnImprimir">
             <i class="fas fa-print"></i> Imprimir PDF
@@ -817,7 +1008,7 @@ para detectar fortalezas, debilidades y oportunidades de mejora.</li>
                 }
             });
             
-            // Navegación táctil para dispositivos móviles - MEJORADA
+            // Navegación táctil para dispositivos móviles
             presentacion.addEventListener('touchstart', (e) => {
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
