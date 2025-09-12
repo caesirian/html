@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Propuestas de Colaboración</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+    /* Estilos generales */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    
+    body {
+        background-color: #eaf6f9; /* Fondo claro celeste */
+        color: #333;
+        line-height: 1.6;
+        overflow: hidden;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        touch-action: pan-y;
+    }
+    
+    .header {
+        background-color: #0077b6; /* Azul fuerte */
+        color: white;
+        padding: 15px;
+        text-align: center;
+        position: relative;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        z-index: 10;
+    }
+    
+    .presentacion-container {
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+        background-color: #ffffff;
+        margin: 10px;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    
+    .presentacion {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .pagina {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 40px;
+        display: none;
+        overflow-y: auto;
+        background-color: white;
+        border-radius: 10px;
+        transition: transform 0.4s ease, opacity 0.4s ease;
+    }
+    
+    .pagina.activa {
+        display: block;
+        opacity: 1;
+        transform: translateX(0);
+    }
+    
+    .pagina.siguiente {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    
+    .pagina.anterior {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    
+    h1 {
+        font-size: 36px;
+        color: #0096c7; /* Celeste fuerte */
+        margin-bottom: 25px;
+        border-bottom: 3px solid #00b4d8; /* Azul más claro */
+        padding-bottom: 15px;
+    }
+    
+    h2 {
+        font-size: 28px;
+        color: #0077b6;
+        margin: 20px 0 15px;
+    }
+    
+    h3 {
+        font-size: 22px;
+        color: #444;
+        margin: 15px 0 10px;
+    }
+    
+    p {
+        margin-bottom: 15px;
+        font-size: 18px;
+    }
+    
+    ul {
+        margin-left: 30px;
+        margin-bottom: 20px;
+    }
+    
+    li {
+        margin-bottom: 10px;
+        font-size: 18px;
+    }
+    
+    .autores {
+        font-style: italic;
+        text-align: right;
+        margin-top: 30px;
+        color: #666;
+    }
+    
+    .contenedor-flex {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .columna {
+        flex: 1;
+        padding: 15px;
+        min-width: 300px;
+    }
+    
+    .tarjeta {
+        background: #f9f9f9;
+        border-left: 5px solid #00b4d8;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        transition: transform 0.3s ease;
+    }
+    
+    .tarjeta:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .efecto-thc {
+        background-color: #e0f7fa;
+        border: 1px solid #90e0ef;
+    }
+    
+    .efecto-cbd {
+        background-color: #e3f2fd;
+        border: 1px solid #00b4d8;
+    }
+    
+    .centrado {
+        text-align: center;
+    }
+    
+    .advertencia {
+        background-color: #ffebee;
+        border: 1px solid #ef9a9a;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+    }
+    
+    .consejo {
+        background-color: #fff8e1;
+        border: 1px solid #ffe082;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+    }
+    
+    .formato-admin {
+        background: #f5f5f5;
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 8px;
+        border-left: 4px solid #0096c7;
+    }
+    
+    .navegacion {
+        display: flex;
+        justify-content: center;
+        padding: 15px;
+        background-color: #0077b6;
+        z-index: 10;
+    }
+    
+    .btn {
+        background-color: #0096c7;
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        margin: 0 10px;
+        border-radius: 50px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+    }
+    
+    .btn:hover {
+        background-color: #00b4d8;
+        transform: translateY(-2px);
+    }
+    
+    .btn:disabled {
+        background-color: #888;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .indicadores {
+        display: flex;
+        justify-content: center;
+        margin: 15px 0;
+    }
+    
+    .indicador {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: #aaa;
+        margin: 0 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    
+    .indicador.activo {
+        background-color: #00b4d8;
+        transform: scale(1.2);
+    }
+    
+    .progreso {
+        height: 5px;
+        background-color: #ddd;
+        margin: 10px 0;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+    
+    .barra-progreso {
+        height: 100%;
+        background-color: #0096c7;
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+    
+    .numero-pagina {
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        color: #888;
+        font-size: 14px;
+    }
+    
+    .menu-movil {
+        display: none;
+        position: absolute;
+        top: 50px;
+        left: 20px;
+        z-index: 100;
+        background-color: #0096c7;
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        cursor: pointer;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    
+    .bar {
+        width: 25px;
+        height: 3px;
+        background-color: white;
+        margin: 2px 0;
+        transition: 0.3s;
+    }
+    
+    .menu-lateral {
+        position: fixed;
+        top: 0;
+        left: -300px;
+        width: 300px;
+        height: 100%;
+        background-color: #0077b6;
+        z-index: 99;
+        padding: 85px 20px 20px;
+        transition: left 0.3s ease;
+        overflow-y: auto;
+    }
+    
+    .menu-lateral.activo {
+        left: 0;
+    }
+    
+    .menu-lateral .indicador-menu {
+        display: block;
+        color: white;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 5px;
+        background-color: #0096c7;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    
+    .menu-lateral .indicador-menu.activo {
+        background-color: #00b4d8;
+    }
+    
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        z-index: 98;
+        display: none;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0.7; }
+        to { opacity: 1; }
+    }
+    
+    @media (max-width: 768px) {
+        .header {
+            padding: 10px;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            padding-top: 5px;
+        }
+        
+        .presentacion-container {
+            margin: 5px;
+            border-radius: 8px;
+        }
+        
+        .pagina {
+            padding: 20px 20px 60px 20px;
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 15px;
+            margin-top: 5px;
+        }
+        
+        h2 {
+            font-size: 24px;
+        }
+        
+        .contenedor-flex {
+            flex-direction: column;
+        }
+        
+        .btn {
+            padding: 10px 15px;
+            font-size: 14px;
+            margin: 0 5px;
+        }
+        
+        .menu-movil {
+            display: flex;
+            top: 50px;
+        }
+        
+        .navegacion {
+            padding: 10px;
+        }
+        
+        .numero-pagina {
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 5px 10px;
+            border-radius: 15px;
+        }
+        
+        .menu-lateral {
+            padding: 75px 20px 20px;
+        }
+    }
+    
+    /* Estilos para impresión */
+    @media print {
+        body {
+            background: white;
+            overflow: visible;
+            height: auto;
+        }
+        
+        .header, .navegacion, .indicadores, .progreso, .numero-pagina, .menu-movil {
+            display: none;
+        }
+        
+        .presentacion-container {
+            box-shadow: none;
+            border-radius: 0;
+            margin: 0;
+            overflow: visible;
+        }
+        
+        .pagina {
+            position: relative;
+            page-break-after: always;
+            display: block;
+            opacity: 1;
+            height: auto;
+            margin-bottom: 20px;
+            transform: none !important;
+        }
+    }
+</style>
+
+</head>
+<body>
+    <div class="header">
+        <h1>Propuestas de Colaboración</h1>
+        <p>Pensado para el Fortalecimiento Interno en conjunto con IMDEL</p>
+    </div>
+    
+    <div class="menu-movil" id="menuMovil">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+    </div>
+    
+    <div class="menu-lateral" id="menuLateral">
+        <div class="indicador-menu activo" data-page="1">Presentación</div>
+        <div class="indicador-menu" data-page="2">¿Qué veremos hoy?</div>
+        <div class="indicador-menu" data-page="3">¿Por qué Cannabis?</div>
+        <div class="indicador-menu" data-page="4">CBD y THC</div>
+        <div class="indicador-menu" data-page="5">Formatos de Administración</div>
+        <div class="indicador-menu" data-page="6">Seguridad y Precauciones</div>
+        <div class="indicador-menu" data-page="7">Conclusiones</div>
+    </div>
+    
+    <div class="overlay" id="overlay"></div>
+    
+    <div class="progreso">
+        <div class="barra-progreso" id="barraProgreso"></div>
+    </div>
+    
+    <div class="presentacion-container">
+        <div class="presentacion" id="presentacion">
+            <!-- Página 1 -->
+            <div class="pagina activa" id="pagina1">
+                <h1 class="centrado">PROGRAMA DE FORTALECIMIENTO ADMINISTRATIVO PARA
+ORGANIZACIONES DE LA ECONOMÍA POPULAR</h1>
+                <h2 class="centrado">"Asesoramiento Técnico: Fortaleciendo la Gestión Interna"</h2>
+                <div class="autores">
+                    <p>Hernán E. Garbarino</p>
+                    <p>Adm SR || Técnico Superior en Adm de RRHH</p>
+                </div>
+                <div class="numero-pagina">1 / 7</div>
+            </div>
+            
+            <!-- Página 2 -->
+            <div class="pagina" id="pagina2">
+                <h1>Módulos de asesoramiento</h1>
+                
+                <div class="tarjeta">
+                    <h2>Diagnóstico Organizacional Rápido: </h2>
+                    <p>Análisis de los procesos actuales de administración,
+finanzas y documentación.</p>
+                </div>
+                
+                <div class="tarjeta">
+                    <h2>Sistema Básico de Caja y Bancos:</h2>
+                    <p>Planilla unificada para registro diario de ingresos y egresos.
+Control de saldos.</p>
+                </div>
+                
+                <div class="tarjeta">
+                    <h2>La Regla de Oro:</h2>
+                    <p>"Micro Dosis" y regulación práctica</p>
+                </div>
+                
+                <div class="tarjeta">
+                    <h2>Conciliación Básica:</h2>
+                    <p>Cómo cuadrar los movimientos de dinero físico con los extractos bancarios
+o las anotaciones.</p>
+                </div>
+                <div class="tarjeta">
+                    <h2>Diseño de Herramientas de Gestión:</h2>
+                    <p>Creación de planillas a medida para control de inventario,
+costos, socios o asistencia.</p>
+                </div>
+                                <div class="tarjeta">
+                    <h2>Cumplimiento Laboral y Trámites Básicos:</h2>
+                    <p>Asesoría sobre libro de sueldos, recibos, altas/bajas,
+y cómo acceder a programas específicos.</p>
+                </div>
+                <div class="tarjeta">
+                    <h2>Organización Documental:</h2>
+                    <p>Métodos simples para archivar facturas, comprobantes y
+documentación legal de manera ordenada.</p>
+                </div>
+                
+                
+                
+                
+                
+                
+                
+                <div class="numero-pagina">2 / 7</div>
+            </div>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <!-- Página 3 -->
+            <div class="pagina" id="pagina3">
+                <h1>Metodología de trabajo</h1>
+                
+                <div class="contenedor-flex">
+                    <div class="columna">
+                        <div class="efecto-thc">
+                            <p>° Sesión inicial de diagnóstico.</p>
+                            <p>° Propuesta de plan de trabajo con los módulos a cubrir y cantidad de sesiones estimadas.</p>
+                            <p>° Sesiones de trabajo prácticas ('hands-on'), trabajando directamente sobre la documentación y
+realidad de la organización.</p>
+                            <p>° Entrega de material de apoyo (planillas modelo en Excel, guías paso a paso, checklist de
+trámites).</p>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+                <div class="numero-pagina">3 / 7</div>
+            </div>
+            
+            <!-- Página 4 -->
+            <div class="pagina" id="pagina4">
+                <h1>Diagnóstico Organizacional Rápido</h1>
+                
+                <div class="contenedor-flex">
+                    <div class="columna">
+                        <div class="efecto-cbd">
+                            <h3 class="centrado">Objetivo:</h3>
+                            <p class="centrado"><strong></strong></p>
+                            <ul>
+                                <li>Identificar la situación actual de la organización en materia administrativa, financiera y documental
+para detectar fortalezas, debilidades y oportunidades de mejora.</li>
+                              
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="columna">
+                        <div class="efecto-thc">
+                            <h3 class="centrado">Alcance:</h3>
+                            <p class="centrado"><strong></strong></p>
+                            <ul>
+                                <li>Relevamiento de procesos internos de administración y finanzas.</li>
+                                <li>Evaluación de prácticas actuales de control y registro.</li>
+                                <li>• Revisión del manejo de documentación legal y contable.</li>
+                                <li>Análisis del nivel de digitalización y uso de herramientas tecnológicas.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="columna">
+                        <div class="efecto-thc">
+                            <h3 class="centrado">THC</h3>
+                            <p class="centrado"><strong>Psicoactivo</strong></p>
+                            <ul>
+                                <li>Analgésico</li>
+                                <li>Estimulante del Apetito</li>
+                                <li>Euforizante</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="consejo">
+                    <p>La sinergia entre CBD y THC permite lograr una eficacia terapéutica óptima con menores dosis de cada componente.</p>
+                </div>
+                <div class="numero-pagina">4 / 7</div>
+            </div>
+            
+            <!-- Página 5 -->
+            <div class="pagina" id="pagina5">
+                <h1>FORMATOS DE ADMINISTRACIÓN</h1>
+                <h2>ELEGIR LA HERRAMIENTA CORRECTA</h2>
+                
+                <div class="formato-admin">
+                    <h3>Aceites/Tinturas (Sublingual)</h3>
+                    <ul>
+                        <li>Inicio en 15–45 min</li>
+                        <li>Dosificación precisa</li>
+                        <li>Efecto duradero</li>
+                    </ul>
+                    <p><strong>Recomendado para iniciar</strong></p>
+                </div>
+                
+                <div class="formato-admin">
+                    <h3>Tópicos</h3>
+                    <ul>
+                        <li>Alivio local</li>
+                        <li>Natural</li>
+                        <li>Sin efecto psicoactivo</li>
+                    </ul>
+                </div>
+                
+                <div class="formato-admin">
+                    <h3>Cápsulas</h3>
+                    <ul>
+                        <li>Inicio lento</li>
+                        <li>Efecto prolongado</li>
+                        <li>Discreto y preciso</li>
+                    </ul>
+                </div>
+                
+                <div class="formato-admin">
+                    <h3>Vaporización</h3>
+                    <ul>
+                        <li>Inicio rápido</li>
+                        <li>Precaución respiratoria</li>
+                        <li>Efecto de corta duración</li>
+                    </ul>
+                </div>
+                <div class="numero-pagina">5 / 7</div>
+            </div>
+            
+            <!-- Página 6 -->
+            <div class="pagina" id="pagina6">
+                <h1>Seguridad: Precauciones y Manejo de Efectos</h1>
+                
+                <div class="advertencia">
+                    <h2 class="centrado">Atención: Consulta con tu Médico</h2>
+                    <p>Riesgo de interacción con anticoagulantes, ansiolíticos y otros fármacos. Es esencial la supervisión médica.</p>
+                    <p>El CBD es generalmente bien tolerado y tiene un perfil de seguridad favorable.</p>
+                    <p>Contraindicado en embarazo, lactancia y en historial de psicosis</p>
+                </div>
+                
+                <h2>Si aparecen efectos adversos (asociados usualmente al THC)</h2>
+                
+                <div class="consejo">
+                    <h3>Boca seca:</h3>
+                    <p>Beber agua, masticar chicle sin azúcar.</p>
+                </div>
+                
+                <div class="consejo">
+                    <h3>Mareos:</h3>
+                    <p>Recostarse, respirar profundo. Solución: Reducir la dosis de THC y aumentar el CBD.</p>
+                </div>
+                
+                <div class="consejo">
+                    <h3>Ansiedad:</h3>
+                    <p>Mantener la calma. Es transitorio. Solución: Preferir productos ricos en CBD.</p>
+                </div>
+                
+                <p>La mayoría de los efectos son leves, transitorios y se resuelve ajustando la dosis o eligiendo un ratio con más CBD.</p>
+                <div class="numero-pagina">6 / 7</div>
+            </div>
+            
+            <!-- Página 7 -->
+            <div class="pagina" id="pagina7">
+                <h1>Conclusiones: Claves para un Tratamiento Exitoso</h1>
+                
+                <div class="tarjeta">
+                    <h2>Supervisión Experta</h2>
+                    <p>La consulta médica es indispensable para manejar interacciones y personalizar el tratamiento</p>
+                </div>
+                
+                <div class="tarjeta">
+                    <h2>Paciencia y Precisión</h2>
+                    <p>"Micro Dosis". La clave es encontrar la dosis mínima efectiva con paciencia</p>
+                </div>
+                
+                <div class="tarjeta">
+                    <h2>Calidad y Seguridad</h2>
+                    <p>Elija productos de calidad, con análisis de laboratorio que garanticen su pureza y potencia</p>
+                </div>
+                
+                <div class="consejo">
+                    <p>El cannabis medicinal es una herramienta más para mejorar la calidad de vida. Su uso responsable e informado es la clave del éxito</p>
+                </div>
+                <div class="numero-pagina">7 / 7</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="indicadores" id="indicadores">
+        <div class="indicador activo" data-page="1"></div>
+        <div class="indicador" data-page="2"></div>
+        <div class="indicador" data-page="3"></div>
+        <div class="indicador" data-page="4"></div>
+        <div class="indicador" data-page="5"></div>
+        <div class="indicador" data-page="6"></div>
+        <div class="indicador" data-page="7"></div>
+    </div>
+    
+    <div class="navegacion">
+        <button class="btn" id="btnAnterior" disabled>
+            <i class="fas fa-arrow-left"></i>  Anterior
+        </button>
+        <button class="btn" id="btnSiguiente">
+            Siguiente    <i class="fas fa-arrow-right"></i>
+        </button>
+        <button class="btn" id="btnImprimir">
+            <i class="fas fa-print"></i> Imprimir PDF
+        </button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const paginas = document.querySelectorAll('.pagina');
+            const indicadores = document.querySelectorAll('.indicador');
+            const indicadoresMenu = document.querySelectorAll('.indicador-menu');
+            const btnAnterior = document.getElementById('btnAnterior');
+            const btnSiguiente = document.getElementById('btnSiguiente');
+            const btnImprimir = document.getElementById('btnImprimir');
+            const barraProgreso = document.getElementById('barraProgreso');
+            const menuMovil = document.getElementById('menuMovil');
+            const menuLateral = document.getElementById('menuLateral');
+            const overlay = document.getElementById('overlay');
+            const presentacion = document.getElementById('presentacion');
+            
+            let paginaActual = 1;
+            const totalPaginas = paginas.length;
+            let startX = 0;
+            let startY = 0;
+            let endX = 0;
+            let endY = 0;
+            
+            // Función para actualizar la visualización de la página
+            function mostrarPagina(numero) {
+                // Ocultar todas las páginas
+                paginas.forEach(pagina => {
+                    pagina.classList.remove('activa', 'siguiente', 'anterior');
+                });
+                
+                // Mostrar la página actual
+                document.getElementById(`pagina${numero}`).classList.add('activa');
+                
+                // Actualizar indicadores
+                indicadores.forEach(ind => {
+                    ind.classList.remove('activo');
+                    if (parseInt(ind.getAttribute('data-page')) === numero) {
+                        ind.classList.add('activo');
+                    }
+                });
+                
+                // Actualizar indicadores del menú lateral
+                indicadoresMenu.forEach(ind => {
+                    ind.classList.remove('activo');
+                    if (parseInt(ind.getAttribute('data-page')) === numero) {
+                        ind.classList.add('activo');
+                    }
+                });
+                
+                // Actualizar estado de los botones
+                btnAnterior.disabled = numero === 1;
+                btnSiguiente.disabled = numero === totalPaginas;
+                
+                // Actualizar barra de progreso
+                barraProgreso.style.width = `${((numero - 1) / (totalPaginas - 1)) * 100}%`;
+                
+                paginaActual = numero;
+            }
+            
+            // Event listeners para botones de navegación
+            btnAnterior.addEventListener('click', () => {
+                if (paginaActual > 1) {
+                    mostrarPagina(paginaActual - 1);
+                }
+            });
+            
+            btnSiguiente.addEventListener('click', () => {
+                if (paginaActual < totalPaginas) {
+                    mostrarPagina(paginaActual + 1);
+                }
+            });
+            
+            // Event listeners para indicadores
+            indicadores.forEach(ind => {
+                ind.addEventListener('click', () => {
+                    const numeroPagina = parseInt(ind.getAttribute('data-page'));
+                    mostrarPagina(numeroPagina);
+                });
+            });
+            
+            // Event listeners para indicadores del menú lateral
+            indicadoresMenu.forEach(ind => {
+                ind.addEventListener('click', () => {
+                    const numeroPagina = parseInt(ind.getAttribute('data-page'));
+                    mostrarPagina(numeroPagina);
+                    menuLateral.classList.remove('activo');
+                    overlay.style.display = 'none';
+                });
+            });
+            
+            // Event listener para imprimir
+            btnImprimir.addEventListener('click', () => {
+                window.print();
+            });
+            
+            // Navegación con teclado
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft' && paginaActual > 1) {
+                    mostrarPagina(paginaActual - 1);
+                } else if (e.key === 'ArrowRight' && paginaActual < totalPaginas) {
+                    mostrarPagina(paginaActual + 1);
+                }
+            });
+            
+            // Navegación táctil para dispositivos móviles - MEJORADA
+            presentacion.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            }, false);
+            
+            presentacion.addEventListener('touchmove', (e) => {
+                // Prevenir scroll vertical para evitar conflicto con navegación
+                if (Math.abs(e.touches[0].clientX - startX) > Math.abs(e.touches[0].clientY - startY)) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+            
+            presentacion.addEventListener('touchend', (e) => {
+                endX = e.changedTouches[0].clientX;
+                endY = e.changedTouches[0].clientY;
+                handleSwipe();
+            }, false);
+            
+            function handleSwipe() {
+                const diffX = startX - endX;
+                const diffY = startY - endY;
+                
+                // Solo considerar como swipe si el movimiento horizontal es mayor que el vertical
+                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                    if (diffX > 0 && paginaActual < totalPaginas) {
+                        // Swipe izquierda - avanzar
+                        mostrarPagina(paginaActual + 1);
+                    } else if (diffX < 0 && paginaActual > 1) {
+                        // Swipe derecha - retroceder
+                        mostrarPagina(paginaActual - 1);
+                    }
+                }
+            }
+            
+            // Menú móvil
+            menuMovil.addEventListener('click', () => {
+                menuLateral.classList.toggle('activo');
+                overlay.style.display = menuLateral.classList.contains('activo') ? 'block' : 'none';
+            });
+            
+            overlay.addEventListener('click', () => {
+                menuLateral.classList.remove('activo');
+                overlay.style.display = 'none';
+            });
+            
+            // Inicializar con la primera página
+            mostrarPagina(1);
+        });
+    </script>
+</body>
+</html>
