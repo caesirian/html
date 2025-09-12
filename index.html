@@ -29,8 +29,8 @@ body {
 
 /* HEADER */
 .header {
-    background: linear-gradient(135deg, #0077b6, #0096c7);
-    color: white;
+    background: linear-gradient(135deg, #C22F75, #27B4C3);
+    color: #FFFFFF;
     padding: 20px;
     text-align: center;
     position: relative;
@@ -66,7 +66,7 @@ body {
     padding: 50px;
     display: none;
     overflow-y: auto;
-    background-color: white;
+    background-color: #FFFFFF;
     border-radius: 14px;
     transition: transform 0.45s ease, opacity 0.45s ease;
 }
@@ -83,12 +83,12 @@ body {
 /* TITULOS */
 h1 {
     font-size: 34px;
-    color: #0096c7;
+    color: #27B4C3;
     margin-bottom: 25px;
-    border-bottom: 3px solid #00b4d8;
+    border-bottom: 3px solid #C22F75;
     padding-bottom: 10px;
 }
-h2 { font-size: 24px; color: #0077b6; margin: 20px 0 12px; }
+h2 { font-size: 24px; color: #2A9EB6; margin: 20px 0 12px; }
 h3 { font-size: 20px; color: #444; margin: 12px 0 8px; }
 
 /* TEXTO */
@@ -114,16 +114,11 @@ ul { margin-left: 25px; margin-bottom: 18px; }
 }
 
 /* BLOQUES ESPECIALES */
-.modulo, .objetivo, .destacado, .consejo, .metodologia {
-    padding: 18px;
-    border-radius: 10px;
-    margin: 15px 0;
-}
-.modulo { background: #e7f9fc; border-left: 4px solid #00b4d8; }
-.objetivo { background: #f1f9ff; border-left: 4px solid #0096c7; }
+.modulo { background: #f8ebf3; border-left: 4px solid #C22F75; }
+.objetivo { background: #e7f9fc; border-left: 4px solid #27B4C3; }
 .destacado { background: #fff9e6; border-left: 4px solid #ffd54f; }
 .consejo { background: #ecfdf0; border-left: 4px solid #4caf50; }
-.metodologia { background: #fafafa; border-left: 4px solid #90e0ef; }
+.metodologia { background: #fafafa; border-left: 4px solid #D73E94; }
 
 /* FLEX */
 .contenedor-flex {
@@ -143,11 +138,11 @@ ul { margin-left: 25px; margin-bottom: 18px; }
     display: flex;
     justify-content: center;
     padding: 15px;
-    background: linear-gradient(135deg, #0077b6, #0096c7);
+    background: linear-gradient(135deg, #C22F75, #27B4C3);
 }
 .btn {
-    background: #0096c7;
-    color: white;
+    background: #2A9EB6;
+    color: #FFFFFF;
     border: none;
     padding: 12px 26px;
     margin: 0 10px;
@@ -158,7 +153,7 @@ ul { margin-left: 25px; margin-bottom: 18px; }
     font-weight: 600;
 }
 .btn:hover {
-    background: #00b4d8;
+    background: #D73E94;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
@@ -179,7 +174,7 @@ ul { margin-left: 25px; margin-bottom: 18px; }
     cursor: pointer;
     transition: all 0.3s;
 }
-.indicador.activo { background: #00b4d8; transform: scale(1.25); }
+.indicador.activo { background: #C22F75; transform: scale(1.25); }
 
 /* PROGRESO */
 .progreso {
@@ -191,7 +186,7 @@ ul { margin-left: 25px; margin-bottom: 18px; }
 }
 .barra-progreso {
     height: 100%;
-    background: linear-gradient(90deg, #00b4d8, #0096c7);
+    background: linear-gradient(90deg, #C22F75, #27B4C3);
     width: 0%;
     transition: width 0.4s ease;
 }
@@ -201,9 +196,9 @@ ul { margin-left: 25px; margin-bottom: 18px; }
     position: fixed;
     bottom: 85px;
     right: 25px;
-    color: white;
+    color: #FFFFFF;
     font-size: 15px;
-    background: rgba(0, 150, 199, 0.9);
+    background: rgba(194, 47, 117, 0.9);
     padding: 10px 18px;
     border-radius: 25px;
     z-index: 100;
@@ -218,7 +213,7 @@ ul { margin-left: 25px; margin-bottom: 18px; }
     top: 55px;
     left: 20px;
     z-index: 100;
-    background: #0096c7;
+    background: #C22F75;
     width: 52px;
     height: 52px;
     border-radius: 50%;
@@ -230,7 +225,7 @@ ul { margin-left: 25px; margin-bottom: 18px; }
 .bar {
     width: 25px;
     height: 3px;
-    background: white;
+    background: #FFFFFF;
     margin: 3px 0;
     border-radius: 2px;
     transition: 0.3s;
@@ -241,7 +236,7 @@ ul { margin-left: 25px; margin-bottom: 18px; }
     left: -280px;
     width: 280px;
     height: 100%;
-    background: #0077b6;
+    background: #2A9EB6;
     z-index: 99;
     padding: 90px 20px 20px;
     transition: left 0.3s ease;
@@ -249,7 +244,7 @@ ul { margin-left: 25px; margin-bottom: 18px; }
 .menu-lateral.activo { left: 0; }
 .menu-lateral .indicador-menu {
     display: block;
-    color: white;
+    color: #FFFFFF;
     padding: 14px 16px;
     margin: 8px 0;
     border-radius: 8px;
@@ -259,7 +254,7 @@ ul { margin-left: 25px; margin-bottom: 18px; }
 }
 .menu-lateral .indicador-menu:hover { background: rgba(255,255,255,0.2); }
 .menu-lateral .indicador-menu.activo {
-    background: #00b4d8;
+    background: #D73E94;
     font-weight: 600;
 }
 
@@ -288,6 +283,7 @@ ul { margin-left: 25px; margin-bottom: 18px; }
     }
 }
 </style>
+
 </head>
 <body>
     <div class="header">
