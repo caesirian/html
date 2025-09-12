@@ -139,10 +139,12 @@ ul { margin-left: 25px; margin-bottom: 18px; }
     justify-content: center;
     padding: 15px;
     background: linear-gradient(135deg, #C22F75, #27B4C3);
+ z-index: 9999; /* asegura que quede por encima */
+    padding-bottom: env(safe-area-inset-bottom); /* iPhone notch y algunos Android */
 }
 @media (max-width: 768px) {
     .navegacion {
-        display: none;
+        /*display: none; */
     }
 }
 .btn {
