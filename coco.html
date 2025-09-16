@@ -435,78 +435,78 @@
         
         /* RESPONSIVE */
         /* RESPONSIVE - Modificado para pantallas horizontales */
-@media (max-width: 1920px) {
-    .pagina { padding: 25px; }
-    h1 { font-size: 26px; }
-    h2 { font-size: 22px; }
-    .btn { padding: 10px 18px; font-size: 14px; }
-    .menu-movil { 
-        display: flex;
-        top: 15px;
-        left: 15px;
-        width: 46px;
-        height: 46px;
-    }
-    .contador-pagina {
-        bottom: 70px;
-        right: 15px;
-        font-size: 13px;
-        padding: 8px 14px;
-    }
-    .tabla-excel {
-        font-size: 12px;
-    }
-    .tabla-excel th, .tabla-excel td {
-        padding: 6px 8px;
-    }
-    
-    /* Ajustes específicos para orientación horizontal */
-    @media (max-height: 600px) and (orientation: landscape) {
-        .header {
-            padding: 12px 20px;
+        @media (max-width: 1920px) {
+            .pagina { padding: 25px; }
+            h1 { font-size: 26px; }
+            h2 { font-size: 22px; }
+            .btn { padding: 10px 18px; font-size: 14px; }
+            .menu-movil { 
+                display: flex;
+                top: 15px;
+                left: 15px;
+                width: 46px;
+                height: 46px;
+            }
+            .contador-pagina {
+                bottom: 70px;
+                right: 15px;
+                font-size: 13px;
+                padding: 8px 14px;
+            }
+            .tabla-excel {
+                font-size: 12px;
+            }
+            .tabla-excel th, .tabla-excel td {
+                padding: 6px 8px;
+            }
+            
+            /* Ajustes específicos para orientación horizontal */
+            @media (max-height: 600px) and (orientation: landscape) {
+                .header {
+                    padding: 12px 20px;
+                }
+                .header h1 {
+                    font-size: 20px;
+                    margin-bottom: 5px;
+                }
+                .header p {
+                    font-size: 12px;
+                }
+                .menu-movil {
+                    top: 12px;
+                    left: 12px;
+                    width: 40px;
+                    height: 40px;
+                }
+                .bar {
+                    width: 20px;
+                    height: 2px;
+                    margin: 2px 0;
+                }
+                .pagina {
+                    padding: 20px;
+                }
+                h1 {
+                    font-size: 22px;
+                    margin-bottom: 15px;
+                }
+                h2 {
+                    font-size: 18px;
+                }
+                h3 {
+                    font-size: 16px;
+                }
+                p, li {
+                    font-size: 14px;
+                }
+                .contador-pagina {
+                    bottom: 60px;
+                    right: 12px;
+                    font-size: 12px;
+                    padding: 6px 10px;
+                }
+            }
         }
-        .header h1 {
-            font-size: 20px;
-            margin-bottom: 5px;
-        }
-        .header p {
-            font-size: 12px;
-        }
-        .menu-movil {
-            top: 12px;
-            left: 12px;
-            width: 40px;
-            height: 40px;
-        }
-        .bar {
-            width: 20px;
-            height: 2px;
-            margin: 2px 0;
-        }
-        .pagina {
-            padding: 20px;
-        }
-        h1 {
-            font-size: 22px;
-            margin-bottom: 15px;
-        }
-        h2 {
-            font-size: 18px;
-        }
-        h3 {
-            font-size: 16px;
-        }
-        p, li {
-            font-size: 14px;
-        }
-        .contador-pagina {
-            bottom: 60px;
-            right: 12px;
-            font-size: 12px;
-            padding: 6px 10px;
-        }
-    }
-}
     </style>
 </head>
 <body>
@@ -591,7 +591,7 @@
         <div class="indicador-menu" data-pagina="3">Unidades Productivas</div>
         <div class="indicador-menu" data-pagina="4">Convenios</div>
         <div class="indicador-menu" data-pagina="5">ECoCo</div>
-      <div class="indicador-menu" data-pagina="6">RNCyFS Convenios</div>
+        <div class="indicador-menu" data-pagina="6">RNCyFS Convenios</div>
     </div>
     
     <div class="overlay" id="overlay"></div>
@@ -658,14 +658,203 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Página 2: Objeto Social -->
+            <div class="pagina" id="pagina2">
+                <h1>Objeto Social</h1>
+                
+                <div class="tarjeta">
+                    <h3>Actividades Principales</h3>
+                    <p>La Cooperativa de Trabajo Coco Querandí Ltda. tiene como objetivo principal:</p>
+                    <ul>
+                        <li>Producción y comercialización de plantas medicinales, aromáticas y hierbas</li>
+                        <li>Elaboración de productos derivados de hierbas naturales</li>
+                        <li>Servicios de consultoría y asesoramiento en producción orgánica</li>
+                        <li>Desarrollo de proyectos de agricultura sustentable</li>
+                        <li>Capacitación y formación en técnicas de cultivo orgánico</li>
+                    </ul>
+                </div>
+                
+                <div class="tarjeta modulo">
+                    <h3>Alcance de Actividades</h3>
+                    <p>Nuestro objeto social nos permite realizar actividades en todo el territorio nacional, con posibilidad de expansión internacional, siempre bajo los principios cooperativos.</p>
+                </div>
+                
+                <div class="tarjeta objetivo">
+                    <h3>Compromiso Ambiental</h3>
+                    <p>Todas nuestras actividades se realizan con el máximo respeto al medio ambiente, promoviendo prácticas sustentables y de bajo impacto ecológico.</p>
+                </div>
+            </div>
+            
+            <!-- Página 3: Registros -->
+            <div class="pagina" id="pagina3">
+                <h1>Registros y Habilitaciones</h1>
+                
+                <div class="info-legal">
+                    <div class="info-item">
+                        <span class="info-label">Razón Social:</span>
+                        <span class="info-value">COOPERATIVA DE TRABAJO COCO QUERANDÍ LIMITADA</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">CUIT:</span>
+                        <span class="info-value">30-71845855-9</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Fecha de Constitución:</span>
+                        <span class="info-value">15 de Agosto de 2020</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Registro Provincial:</span>
+                        <span class="info-value">22454</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Matrícula IMES:</span>
+                        <span class="info-value">71081</span>
+                    </div>
+                </div>
+                
+                <div class="contenedor-flex">
+                    <div class="columna">
+                        <div class="tarjeta">
+                            <h3>Registro Nacional de Cooperativas</h3>
+                            <p>Inscripta en el Instituto Nacional de Asociativismo y Economía Social (INAES) bajo el número de matrícula correspondiente.</p>
+                        </div>
+                        
+                        <div class="tarjeta modulo">
+                            <h3>Habilitaciones Municipales</h3>
+                            <p>Contamos con todas las habilitaciones municipales necesarias para el desarrollo de nuestras actividades productivas y comerciales.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="columna">
+                        <div class="tarjeta objetivo">
+                            <h3>Certificaciones</h3>
+                            <ul>
+                                <li>Certificación de Producción Orgánica (en proceso)</li>
+                                <li>Protocolos de Buenas Prácticas Agrícolas</li>
+                                <li>Protocolos de Buenas Prácticas de Manufactura</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Página 4: Unidades Productivas -->
+            <div class="pagina" id="pagina4">
+                <h1>Unidades Productivas</h1>
+                
+                <div class="unidad-productiva">
+                    <h3><i class="fas fa-seedling"></i> Cultivo de Plantas Medicinales</h3>
+                    <p>Dedicada al cultivo orgánico de diversas especies de plantas medicinales y aromáticas, utilizando técnicas sustentables y respetuosas con el medio ambiente.</p>
+                    <p><strong>Principales especies:</strong> Menta, Romero, Caléndula, Lavanda, Tomillo, Orégano, Salvia, Melisa.</p>
+                </div>
+                
+                <div class="unidad-productiva">
+                    <h3><i class="fas fa-mortar-pestle"></i> Procesamiento y Elaboración</h3>
+                    <p>Unidad encargada del secado, procesamiento y elaboración de productos derivados de las plantas medicinales y aromáticas.</p>
+                    <p><strong>Productos elaborados:</strong> Tés e infusiones, Aceites esenciales, Cremas y ungüentos, Sales de baño, Sahumerios naturales.</p>
+                </div>
+                
+                <div class="unidad-productiva">
+                    <h3><i class="fas fa-store"></i> Comercialización y Ventas</h3>
+                    <p>Área dedicada a la comercialización de los productos elaborados, tanto en el mercado local como regional.</p>
+                    <p><strong>Canales de venta:</strong> Ferias locales, Venta directa, Comercios asociados, Pedidos online.</p>
+                </div>
+                
+                <div class="unidad-productiva">
+                    <h3><i class="fas fa-chalkboard-teacher"></i> Capacitación y Formación</h3>
+                    <p>Desarrollo de talleres y cursos sobre cultivo orgánico, propiedades de plantas medicinales y elaboración de productos naturales.</p>
+                    <p><strong>Talleres ofrecidos:</strong> Huertas orgánicas, Elaboración de cosmética natural, Propiedades medicinales de plantas nativas.</p>
+                </div>
+            </div>
+            
+            <!-- Página 5: Convenios -->
+            <div class="pagina" id="pagina5">
+                <h1>Convenios y Alianzas</h1>
+                
+                <div class="convenio-item">
+                    <h3><i class="fas fa-handshake"></i> Instituto Nacional de Tecnología Agropecuaria (INTA)</h3>
+                    <p>Convenio de colaboración para investigación y desarrollo de técnicas de cultivo orgánico de plantas medicinales.</p>
+                </div>
+                
+                <div class="convenio-item">
+                    <h3><i class="fas fa-handshake"></i> Universidad Nacional de La Plata</h3>
+                    <p>Acuerdo de prácticas profesionales para estudiantes de agronomía y carreras afines.</p>
+                </div>
+                
+                <div class="convenio-item">
+                    <h3><i class="fas fa-handshake"></i> Ministerio de Desarrollo Social de la Nación</h3>
+                    <p>Participación en programas de promoción de la economía social y solidaria.</p>
+                </div>
+                
+                <div class="convenio-item">
+                    <h3><i class="fas fa-handshake"></i> Red de Comercialización de la Economía Solidaria</h3>
+                    <p>Integración a red de comercialización para productores de la economía social.</p>
+                </div>
+                
+                <div class="convenio-item">
+                    <h3><i class="fas fa-handshake"></i> Municipio de La Plata</h3>
+                    <p>Convenio para el uso de espacios públicos para ferias y actividades de promoción.</p>
+                </div>
+                
+                <div class="eslogan">
+                    <h2>Trabajando en Red</h2>
+                    <p>Creemos en la fuerza de las alianzas estratégicas para fortalecer nuestro proyecto cooperativo</p>
+                </div>
+            </div>
+            
+            <!-- Página 6: ECoCo -->
             <div class="pagina" id="pagina6">
+                <h1>ECoCo - Espacio de Coordinación Cooperativa</h1>
+                
+                <div class="tarjeta">
+                    <h3>¿Qué es ECoCo?</h3>
+                    <p>ECoCo es nuestro espacio de coordinación interna donde tomamos decisiones de manera colectiva y democratica, en línea con los principios cooperativos.</p>
+                </div>
+                
+                <div class="contenedor-flex">
+                    <div class="columna">
+                        <div class="tarjeta modulo">
+                            <h3>Funcionamiento Asambleario</h3>
+                            <p>Realizamos asambleas mensuales donde todos los asociados tienen voz y voto en las decisiones importantes de la cooperativa.</p>
+                        </div>
+                        
+                        <div class="tarjeta objetivo">
+                            <h3>Comisiones de Trabajo</h3>
+                            <ul>
+                                <li>Comisión de Producción</li>
+                                <li>Comisión de Comercialización</li>
+                                <li>Comisión de Formación</li>
+                                <li>Comisión de Administración y Finanzas</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="columna">
+                        <div class="tarjeta destacado">
+                            <h3>Principios de ECoCo</h3>
+                            <ul>
+                                <li>Democracia participativa</li>
+                                <li>Transparencia en la gestión</li>
+                                <li>Equidad de género</li>
+                                <li>Sustentabilidad ambiental</li>
+                                <li>Comunicación horizontal</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+<div class="pagina" id="pagina7">
     <h1>RNCyFS Convenios</h1>
     <div style="width: 100%; height: calc(100% - 60px);">
         <iframe src="https://caesirian.github.io/html/inase.html" style="width: 100%; height: 100%; border: none; border-radius: 8px;"></iframe>
     </div>
+</div>
+                
+                <div class="tarjeta consejo">
+                    <h3>Proceso de Toma de Decisiones</h3>
+                    <p>Las decisiones se toman por consenso siempre que es posible, y cuando no se llega a acuerdo, se procede a votación democrática donde cada asociado tiene un voto.</p>
+                </div>
             </div>
-            <!-- Resto del código de las páginas se mantiene igual -->
-            <!-- ... -->
             
         </div>
     </div>
@@ -677,6 +866,7 @@
         <div class="indicador" data-page="4"></div>
         <div class="indicador" data-page="5"></div>
         <div class="indicador" data-page="6"></div>
+<div class="indicador" data-page="7"></div>
     </div>
     
     <div class="navegacion">
@@ -692,7 +882,6 @@
     </div>
 
     <script>
-        // El código JavaScript se mantiene igual
         document.addEventListener('DOMContentLoaded', function() {
             const paginas = document.querySelectorAll('.pagina');
             const indicadores = document.querySelectorAll('.indicador');
@@ -722,7 +911,10 @@
                 });
                 
                 // Mostrar la página actual
-                document.getElementById(`pagina${numero}`).classList.add('activa');
+                const paginaMostrar = document.getElementById(`pagina${numero}`);
+                if (paginaMostrar) {
+                    paginaMostrar.classList.add('activa');
+                }
                 
                 // Actualizar indicadores
                 indicadores.forEach(ind => {
