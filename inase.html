@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categorías RNCyFS - Opciones de Convenio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            padding-top: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            margin-bottom: 15px;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+        
+        .category-card {
+            cursor: pointer;
+            height: 100%;
+        }
+        
+        .category-card.selected {
+            border: 3px solid var(--secondary-color);
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+        
+        .category-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+        }
+        
+        .results-table {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .badge-category {
+            background-color: var(--secondary-color);
+            font-size: 1rem;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        
+        .convenio-facil {
+            background-color: #d4edda;
+        }
+        
+        .convenio-posible {
+            background-color: #fff3cd;
+        }
+        
+        .convenio-dificil {
+            background-color: #f8d7da;
+        }
+        
+        .btn-filter {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            margin: 5px;
+        }
+        
+        .btn-filter:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn-filter.active {
+            background-color: var(--accent-color);
+        }
+        
+        .highlight {
+            background-color: rgba(255, 255, 0, 0.2);
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .category-card {
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header text-center">
+            <h1><i class="fas fa-seedling me-2"></i>Categorías del RNCyFS</h1>
+            <p class="lead">Selecciona las categorías para ver las opciones de convenio con cooperativas</p>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3><i class="fas fa-list-check me-2"></i>Seleccionar Categorías</h3>
+                    <div>
+                        <button class="btn btn-sm btn-filter" id="selectAll">Todos</button>
+                        <button class="btn btn-sm btn-filter" id="selectNone">Ninguno</button>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Buscar categoría...">
+                </div>
+                
+                <div class="mb-3">
+                    <button class="btn btn-sm btn-filter filter-btn active" data-filter="all">Todos</button>
+                    <button class="btn btn-sm btn-filter filter-btn" data-filter="facil">Convenio Fácil</button>
+                    <button class="btn btn-sm btn-filter filter-btn" data-filter="posible">Convenio Posible</button>
+                    <button class="btn btn-sm btn-filter filter-btn" data-filter="dificil">Convenio Difícil</button>
+                </div>
+            </div>
+            <div class="col-md-6 text-end">
+                <div class="d-flex justify-content-end align-items-center">
+                    <span class="me-2">Categorías seleccionadas:</span>
+                    <span class="badge bg-primary fs-6" id="selectedCount">0</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row" id="categoriesContainer">
+            <!-- Las categorías se cargarán aquí mediante JavaScript -->
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-12">
+                <h3><i class="fas fa-table me-2"></i>Detalles de Categorías Seleccionadas</h3>
+                <div class="results-table">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Categoría</th>
+                                <th>Descripción</th>
+                                <th>Opciones de Convenio</th>
+                                <th>Facilidad</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsBody">
+                            <tr>
+                                <td colspan="4" class="text-center p-4">Selecciona al menos una categoría para ver los detalles</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Datos de las categorías
+        const categoriesData = [
+            {
+                code: 'A',
+                name: 'CRIADERO',
+                description: 'Realiza investigación y desarrollo fitotécnico para obtener nuevas variedades o híbridos comerciales. Habilita para producir en categoría original y/o híbrida, comercializar e inscribir cultivares.',
+                convenio: 'Posible convenio para tareas de apoyo en ensayos de campo bajo dirección técnica absoluta. La investigación y desarrollo debe permanecer bajo control del titular.',
+                facilidad: 'posible',
+                icon: 'flask'
+            },
+            {
+                code: 'B',
+                name: 'INTRODUCTOR',
+                description: 'Realiza ensayos de adaptación agroecológica de materiales de origen extranjero. Puede producir semilla original o híbrida, comercializar e inscribir cultivares.',
+                convenio: 'Similar a CRIADERO: posible para tareas de apoyo en ensayos, pero la decisión técnica es intransferible.',
+                facilidad: 'posible',
+                icon: 'globe-americas'
+            },
+            {
+                code: 'C',
+                name: 'PRODUCTOR DE SEMILLA BÁSICA O HÍBRIDA',
+                description: 'Produce semilla en categoría "Original" o "Híbrida" a partir de material prebásico o líneas suministradas por criadero o introductor. Habilita para comercializar.',
+                convenio: 'Puede conveniar con cooperativa para tareas operativas de producción (siembra, cultivo, cosecha) bajo supervisión técnica del titular.',
+                facilidad: 'facil',
+                icon: 'leaf'
+            },
+            {
+                code: 'D',
+                name: 'SEMILLERO',
+                description: 'Produce semilla de primera multiplicación u otras multiplicaciones bajo fiscalización. Habilita para comercializar.',
+                convenio: 'Puede conveniar con cooperativa para tareas operativas de producción bajo supervisión.',
+                facilidad: 'facil',
+                icon: 'seedling'
+            },
+            {
+                code: 'E',
+                name: 'IDENTIFICADOR',
+                description: 'Produce y/o rotula semillas en clase identificada a partir de material propio o de terceros. Habilita para comercializar.',
+                convenio: 'Puede conveniar con cooperativa para tareas de limpieza, clasificación, embolsado y etiquetado bajo supervisión.',
+                facilidad: 'facil',
+                icon: 'tag'
+            },
+            {
+                code: 'F',
+                name: 'COMERCIANTE EXPENDEDOR',
+                description: 'Vende o transfiere semilla rotulada por terceros para mercado interno o internacional.',
+                convenio: 'Puede conveniar con cooperativa para que actúe como punto de venta o almacén logístico. La titular conserva la propiedad y responsabilidad.',
+                facilidad: 'facil',
+                icon: 'shopping-cart'
+            },
+            {
+                code: 'G',
+                name: 'PROCESADOR',
+                description: 'Limpia, clasifica y/o embolsa semilla identificada por cuenta de terceros. También almacenamiento.',
+                convenio: 'Puede conveniar con cooperativa para realizar las tareas de procesamiento en las instalaciones del titular bajo supervisión.',
+                facilidad: 'facil',
+                icon: 'cogs'
+            },
+            {
+                code: 'H',
+                name: 'PRODUCTOR BAJO CONDICIONES CONTROLADAS',
+                description: 'Aplica técnicas de producción bajo laboratorio para propagación acelerada, calidad sanitaria o incorporación de germoplasma. Habilita para comercializar.',
+                convenio: 'Puede conveniar con cooperativa para tareas auxiliares en laboratorio o invernadero bajo supervisión directa e instrucciones precisas.',
+                facilidad: 'posible',
+                icon: 'vial'
+            },
+            {
+                code: 'I',
+                name: 'LABORATORIO',
+                description: 'Establecimiento habilitado para realizar análisis de calidad de semillas (físico-botánica, fisiológica, sanitaria, genética).',
+                convenio: 'Muy limitado. La cooperativa solo podría ser contratada para tareas administrativas o de limpieza. Los análisis deben ser realizados por el personal del laboratorio habilitado.',
+                facilidad: 'dificil',
+                icon: 'microscope'
+            },
+            {
+                code: 'J',
+                name: 'VIVERO CERTIFICADOR',
+                description: 'Se dedica a la producción de materiales de propagación dentro del sistema de certificación. Habilita para comercializar.',
+                convenio: 'La certificación está ligada al establecimiento. La cooperativa podría realizar tareas dentro del vivero bajo supervisión, pero no operar independientemente.',
+                facilidad: 'dificil',
+                icon: 'tree'
+            },
+            {
+                code: 'K',
+                name: 'VIVERO IDENTIFICADOR',
+                description: 'Identifica plantas y/o partes de su propia producción o adquirida a terceros. Habilita para comercializar.',
+                convenio: 'Puede conveniar con cooperativa para tareas de propagación, cuidado y acondicionamiento de plantas bajo supervisión técnica.',
+                facilidad: 'facil',
+                icon: 'fingerprint'
+            },
+            {
+                code: 'N',
+                name: 'OPERADORES DE ESPECIES NATIVAS',
+                description: 'Realiza fitomejoramiento, multiplicación, comercialización, exportación, importación, procesamiento, identificación de semillas y/o material de propagación de especies nativas.',
+                convenio: 'Muy improbable debido a marcos regulatorios estrictos. Cualquier actividad debe realizarse bajo control directo del titular del permiso.',
+                facilidad: 'dificil',
+                icon: 'mountain'
+            },
+            {
+                code: 'O',
+                name: 'OPERADOR DE OVGM',
+                description: 'Experimenta, importa, exporta, produce, multiplica y/o realiza actividades con OVGM no autorizados para comercialización en Argentina.',
+                convenio: 'Muy improbable debido a estrictas normas de bioseguridad. No se recomienda la delegación de actividades.',
+                facilidad: 'dificil',
+                icon: 'dna'
+            },
+            {
+                code: 'P',
+                name: 'MANTENEDOR DE PUREZA VARIETAL',
+                description: 'Lleva adelante el mantenimiento de pureza varietal de cultivares de uso público inscritos. Habilita para comercializar.',
+                convenio: 'Puede conveniar con cooperativa para ejecutar labores de roguing y cosecha selectiva bajo protocolo estricto supervisado por el titular.',
+                facilidad: 'facil',
+                icon: 'filter'
+            }
+        ];
+
+        // Variables globales
+        let selectedCategories = [];
+        let currentFilter = 'all';
+
+        // Inicializar la aplicación
+        document.addEventListener('DOMContentLoaded', function() {
+            renderCategories();
+            setupEventListeners();
+        });
+
+        // Renderizar las categorías en el contenedor
+        function renderCategories() {
+            const container = document.getElementById('categoriesContainer');
+            container.innerHTML = '';
+            
+            categoriesData.forEach(category => {
+                // Aplicar filtros
+                if (currentFilter !== 'all' && category.facilidad !== currentFilter) {
+                    return;
+                }
+                
+                const isSelected = selectedCategories.includes(category.code);
+                
+                const col = document.createElement('div');
+                col.className = 'col-md-3 col-sm-6';
+                col.innerHTML = `
+                    <div class="card category-card ${isSelected ? 'selected' : ''}" data-code="${category.code}">
+                        <div class="card-body text-center">
+                            <div class="category-icon">
+                                <i class="fas fa-${category.icon}"></i>
+                            </div>
+                            <h5 class="card-title">${category.code} - ${category.name}</h5>
+                            <p class="card-text">${category.description.substring(0, 80)}...</p>
+                            <span class="badge ${getFacilidadBadgeClass(category.facilidad)}">${getFacilidadText(category.facilidad)}</span>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(col);
+            });
+            
+            updateSelectedCount();
+            updateResultsTable();
+        }
+
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Selección/deselección de categorías
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.category-card')) {
+                    const card = e.target.closest('.category-card');
+                    const categoryCode = card.getAttribute('data-code');
+                    
+                    toggleCategorySelection(categoryCode);
+                }
+            });
+            
+            // Botones de filtro
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    currentFilter = this.getAttribute('data-filter');
+                    renderCategories();
+                });
+            });
+            
+            // Botones de selección total
+            document.getElementById('selectAll').addEventListener('click', function() {
+                selectedCategories = categoriesData.map(cat => cat.code);
+                renderCategories();
+            });
+            
+            document.getElementById('selectNone').addEventListener('click', function() {
+                selectedCategories = [];
+                renderCategories();
+            });
+            
+            // Búsqueda
+            document.getElementById('searchInput').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                
+                document.querySelectorAll('.category-card').forEach(card => {
+                    const categoryText = card.textContent.toLowerCase();
+                    if (categoryText.includes(searchTerm)) {
+                        card.parentElement.style.display = 'block';
+                    } else {
+                        card.parentElement.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        // Alternar selección de categoría
+        function toggleCategorySelection(code) {
+            if (selectedCategories.includes(code)) {
+                selectedCategories = selectedCategories.filter(c => c !== code);
+            } else {
+                selectedCategories.push(code);
+            }
+            
+            renderCategories();
+        }
+
+        // Actualizar contador de seleccionados
+        function updateSelectedCount() {
+            document.getElementById('selectedCount').textContent = selectedCategories.length;
+        }
+
+        // Actualizar tabla de resultados
+        function updateResultsTable() {
+            const tbody = document.getElementById('resultsBody');
+            tbody.innerHTML = '';
+            
+            if (selectedCategories.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4">Selecciona al menos una categoría para ver los detalles</td></tr>';
+                return;
+            }
+            
+            selectedCategories.forEach(code => {
+                const category = categoriesData.find(cat => cat.code === code);
+                if (category) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><span class="badge badge-category">${category.code}</span><br>${category.name}</td>
+                        <td>${category.description}</td>
+                        <td class="convenio-${category.facilidad}">${category.convenio}</td>
+                        <td><span class="badge ${getFacilidadBadgeClass(category.facilidad)}">${getFacilidadText(category.facilidad)}</span></td>
+                    `;
+                    tbody.appendChild(row);
+                }
+            });
+        }
+
+        // Obtener clase de badge según facilidad
+        function getFacilidadBadgeClass(facilidad) {
+            switch(facilidad) {
+                case 'facil': return 'bg-success';
+                case 'posible': return 'bg-warning text-dark';
+                case 'dificil': return 'bg-danger';
+                default: return 'bg-secondary';
+            }
+        }
+
+        // Obtener texto de facilidad
+        function getFacilidadText(facilidad) {
+            switch(facilidad) {
+                case 'facil': return 'Convenio Fácil';
+                case 'posible': return 'Convenio Posible';
+                case 'dificil': return 'Convenio Difícil';
+                default: return 'Desconocido';
+            }
+        }
+    </script>
+</body>
+</html>
