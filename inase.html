@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Categorías RNCyFS - Opciones de Convenio</title>
+    <title>Categorías RNCyFS - Actualizado 2024</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -11,6 +11,7 @@
             --primary-color: #2c3e50;
             --secondary-color: #3498db;
             --accent-color: #e74c3c;
+            --cannabis-color: #5b8c27;
             --light-color: #ecf0f1;
             --dark-color: #2c3e50;
         }
@@ -29,6 +30,15 @@
             border-radius: 10px;
             margin-bottom: 25px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .cannabis-notice {
+            background: linear-gradient(135deg, var(--cannabis-color), #83b643);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 5px solid #3d5819;
         }
         
         .card {
@@ -54,10 +64,18 @@
             background-color: rgba(52, 152, 219, 0.1);
         }
         
+        .category-card.cannabis-related {
+            border-left: 4px solid var(--cannabis-color);
+        }
+        
         .category-icon {
             font-size: 2.5rem;
             margin-bottom: 15px;
             color: var(--secondary-color);
+        }
+        
+        .cannabis-icon {
+            color: var(--cannabis-color);
         }
         
         .results-table {
@@ -79,6 +97,10 @@
             border-radius: 5px;
         }
         
+        .badge-cannabis {
+            background-color: var(--cannabis-color);
+        }
+        
         .convenio-facil {
             background-color: #d4edda;
         }
@@ -89,6 +111,18 @@
         
         .convenio-dificil {
             background-color: #f8d7da;
+        }
+        
+        .cambio-lugar-alta {
+            border-left: 4px solid #28a745;
+        }
+        
+        .cambio-lugar-media {
+            border-left: 4px solid #ffc107;
+        }
+        
+        .cambio-lugar-baja {
+            border-left: 4px solid #dc3545;
         }
         
         .btn-filter {
@@ -106,11 +140,29 @@
             background-color: var(--accent-color);
         }
         
+        .btn-cannabis {
+            background-color: var(--cannabis-color);
+            color: white;
+        }
+        
+        .btn-cannabis:hover {
+            background-color: #4a7520;
+            color: white;
+        }
+        
         .highlight {
             background-color: rgba(255, 255, 0, 0.2);
             padding: 2px 5px;
             border-radius: 3px;
             font-weight: bold;
+        }
+        
+        .info-box {
+            background-color: #e9f7fe;
+            border-left: 4px solid var(--secondary-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
         }
         
         @media (max-width: 768px) {
@@ -123,8 +175,18 @@
 <body>
     <div class="container">
         <div class="header text-center">
-            <h1><i class="fas fa-seedling me-2"></i>Categorías del RNCyFS</h1>
-            <p class="lead">Selecciona las categorías para ver las opciones de convenio con cooperativas</p>
+            <h1><i class="fas fa-seedling me-2"></i>Categorías del RNCyFS - Actualizado 2024</h1>
+            <p class="lead">Información actualizada sobre categorías, cambios de ubicación y regulación de cannabis</p>
+        </div>
+        
+        <div class="cannabis-notice">
+            <h4><i class="fas fa-cannabis me-2"></i>Novedades en Regulación de Cannabis</h4>
+            <p class="mb-0">Con la implementación del REPROCANN y la Ley 27.669, se han establecido requisitos específicos para la producción de cannabis medicinal y cáñamo industrial. Consulte siempre con el INASE para información actualizada.</p>
+        </div>
+        
+        <div class="info-box">
+            <h5><i class="fas fa-info-circle me-2"></i>Información sobre Cambios de Ubicación</h5>
+            <p class="mb-0">Según las últimas disposiciones del INASE, el cambio de lugar de producción debe notificarse y puede requerir una nueva inspección. Para cannabis, los requisitos son más estrictos e incluyen autorización previa.</p>
         </div>
         
         <div class="row mb-4">
@@ -146,6 +208,7 @@
                     <button class="btn btn-sm btn-filter filter-btn" data-filter="facil">Convenio Fácil</button>
                     <button class="btn btn-sm btn-filter filter-btn" data-filter="posible">Convenio Posible</button>
                     <button class="btn btn-sm btn-filter filter-btn" data-filter="dificil">Convenio Difícil</button>
+                    <button class="btn btn-sm btn-cannabis filter-btn" data-filter="cannabis">Cannabis</button>
                 </div>
             </div>
             <div class="col-md-6 text-end">
@@ -170,22 +233,50 @@
                                 <th>Categoría</th>
                                 <th>Descripción</th>
                                 <th>Opciones de Convenio</th>
-                                <th>Facilidad</th>
+                                <th>Facilidad Convenio</th>
+                                <th>Cambio Ubicación</th>
                             </tr>
                         </thead>
                         <tbody id="resultsBody">
                             <tr>
-                                <td colspan="4" class="text-center p-4">Selecciona al menos una categoría para ver los detalles</td>
+                                <td colspan="5" class="text-center p-4">Selecciona al menos una categoría para ver los detalles</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <i class="fas fa-exchange-alt me-2"></i>Leyenda - Facilidad de Convenio
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-1"><span class="badge bg-success me-2">Fácil</span> Convenio posible con supervisión técnica</p>
+                        <p class="mb-1"><span class="badge bg-warning text-dark me-2">Posible</span> Convenio limitado a tareas específicas</p>
+                        <p class="mb-0"><span class="badge bg-danger me-2">Difícil</span> Convenio muy limitado o no recomendado</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <i class="fas fa-map-marker-alt me-2"></i>Leyenda - Cambio de Ubicación
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-1"><span class="badge bg-success me-2">Alta</span> Notificación simple, posible reinspección</p>
+                        <p class="mb-1"><span class="badge bg-warning text-dark me-2">Media</span> Requiere verificación de condiciones</p>
+                        <p class="mb-0"><span class="badge bg-danger me-2">Baja</span> Muy vinculado al establecimiento original</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Datos de las categorías
+        // Datos de las categorías - Actualizado 2024
         const categoriesData = [
             {
                 code: 'A',
@@ -193,7 +284,10 @@
                 description: 'Realiza investigación y desarrollo fitotécnico para obtener nuevas variedades o híbridos comerciales. Habilita para producir en categoría original y/o híbrida, comercializar e inscribir cultivares.',
                 convenio: 'Posible convenio para tareas de apoyo en ensayos de campo bajo dirección técnica absoluta. La investigación y desarrollo debe permanecer bajo control del titular.',
                 facilidad: 'posible',
-                icon: 'flask'
+                cambioLugar: 'media',
+                cannabis: false,
+                icon: 'flask',
+                requisitosCannabis: 'Para cannabis: Requiere autorización específica y cumplimiento de protocolos de seguridad mejorados.'
             },
             {
                 code: 'B',
@@ -201,7 +295,10 @@
                 description: 'Realiza ensayos de adaptación agroecológica de materiales de origen extranjero. Puede producir semilla original o híbrida, comercializar e inscribir cultivares.',
                 convenio: 'Similar a CRIADERO: posible para tareas de apoyo en ensayos, pero la decisión técnica es intransferible.',
                 facilidad: 'posible',
-                icon: 'globe-americas'
+                cambioLugar: 'media',
+                cannabis: false,
+                icon: 'globe-americas',
+                requisitosCannabis: 'Para cannabis: Debe demostrar origen lícito del material importado y cumplir con cuarentena vegetal.'
             },
             {
                 code: 'C',
@@ -209,7 +306,10 @@
                 description: 'Produce semilla en categoría "Original" o "Híbrida" a partir de material prebásico o líneas suministradas por criadero o introductor. Habilita para comercializar.',
                 convenio: 'Puede conveniar con cooperativa para tareas operativas de producción (siembra, cultivo, cosecha) bajo supervisión técnica del titular.',
                 facilidad: 'facil',
-                icon: 'leaf'
+                cambioLugar: 'alta',
+                cannabis: false,
+                icon: 'leaf',
+                requisitosCannabis: 'Para cannabis: Necesita contrato con titular de variedad y autorización específica para producción.'
             },
             {
                 code: 'D',
@@ -217,7 +317,10 @@
                 description: 'Produce semilla de primera multiplicación u otras multiplicaciones bajo fiscalización. Habilita para comercializar.',
                 convenio: 'Puede conveniar con cooperativa para tareas operativas de producción bajo supervisión.',
                 facilidad: 'facil',
-                icon: 'seedling'
+                cambioLugar: 'alta',
+                cannabis: false,
+                icon: 'seedling',
+                requisitosCannabis: 'Para cannabis: Áreas de producción deben tener medidas de seguridad certificadas.'
             },
             {
                 code: 'E',
@@ -225,15 +328,21 @@
                 description: 'Produce y/o rotula semillas en clase identificada a partir de material propio o de terceros. Habilita para comercializar.',
                 convenio: 'Puede conveniar con cooperativa para tareas de limpieza, clasificación, embolsado y etiquetado bajo supervisión.',
                 facilidad: 'facil',
-                icon: 'tag'
+                cambioLugar: 'alta',
+                cannabis: false,
+                icon: 'tag',
+                requisitosCannabis: 'Para cannabis: Requiere sistemas de trazabilidad mejorados y control de acceso.'
             },
             {
                 code: 'F',
                 name: 'COMERCIANTE EXPENDEDOR',
-                description: 'Vende o transfiere semilla rotulada por terceros para mercado interno o internacional.',
+                description: 'Vende o transfere semilla rotulada por terceros para mercado interno o internacional.',
                 convenio: 'Puede conveniar con cooperativa para que actúe como punto de venta o almacén logístico. La titular conserva la propiedad y responsabilidad.',
                 facilidad: 'facil',
-                icon: 'shopping-cart'
+                cambioLugar: 'alta',
+                cannabis: false,
+                icon: 'shopping-cart',
+                requisitosCannabis: 'Para cannabis: Solo puede comercializar con autorización específica y para destinatarios autorizados.'
             },
             {
                 code: 'G',
@@ -241,7 +350,10 @@
                 description: 'Limpia, clasifica y/o embolsa semilla identificada por cuenta de terceros. También almacenamiento.',
                 convenio: 'Puede conveniar con cooperativa para realizar las tareas de procesamiento en las instalaciones del titular bajo supervisión.',
                 facilidad: 'facil',
-                icon: 'cogs'
+                cambioLugar: 'alta',
+                cannabis: false,
+                icon: 'cogs',
+                requisitosCannabis: 'Para cannabis: Instalaciones deben tener vigilancia y control de acceso certificado.'
             },
             {
                 code: 'H',
@@ -249,7 +361,10 @@
                 description: 'Aplica técnicas de producción bajo laboratorio para propagación acelerada, calidad sanitaria o incorporación de germoplasma. Habilita para comercializar.',
                 convenio: 'Puede conveniar con cooperativa para tareas auxiliares en laboratorio o invernadero bajo supervisión directa e instrucciones precisas.',
                 facilidad: 'posible',
-                icon: 'vial'
+                cambioLugar: 'media',
+                cannabis: true,
+                icon: 'vial',
+                requisitosCannabis: 'Para cannabis: Es la categoría principal para cultivo de cannabis medicinal. Requiere inscripción en REPROCANN y protocolos específicos.'
             },
             {
                 code: 'I',
@@ -257,7 +372,10 @@
                 description: 'Establecimiento habilitado para realizar análisis de calidad de semillas (físico-botánica, fisiológica, sanitaria, genética).',
                 convenio: 'Muy limitado. La cooperativa solo podría ser contratada para tareas administrativas o de limpieza. Los análisis deben ser realizados por el personal del laboratorio habilitado.',
                 facilidad: 'dificil',
-                icon: 'microscope'
+                cambioLugar: 'baja',
+                cannabis: true,
+                icon: 'microscope',
+                requisitosCannabis: 'Para cannabis: Debe estar acreditado por INASE y ANMAT para análisis de cannabinoides y contaminantes.'
             },
             {
                 code: 'J',
@@ -265,7 +383,10 @@
                 description: 'Se dedica a la producción de materiales de propagación dentro del sistema de certificación. Habilita para comercializar.',
                 convenio: 'La certificación está ligada al establecimiento. La cooperativa podría realizar tareas dentro del vivero bajo supervisión, pero no operar independientemente.',
                 facilidad: 'dificil',
-                icon: 'tree'
+                cambioLugar: 'baja',
+                cannabis: false,
+                icon: 'tree',
+                requisitosCannabis: 'Para cannabis: Puede producir plantines de cannabis con autorización específica y medidas de seguridad.'
             },
             {
                 code: 'K',
@@ -273,7 +394,10 @@
                 description: 'Identifica plantas y/o partes de su propia producción o adquirida a terceros. Habilita para comercializar.',
                 convenio: 'Puede conveniar con cooperativa para tareas de propagación, cuidado y acondicionamiento de plantas bajo supervisión técnica.',
                 facilidad: 'facil',
-                icon: 'fingerprint'
+                cambioLugar: 'alta',
+                cannabis: true,
+                icon: 'fingerprint',
+                requisitosCannabis: 'Para cannabis: Debe cumplir con normativa REPROCANN y tener sistemas de trazabilidad.'
             },
             {
                 code: 'N',
@@ -281,7 +405,10 @@
                 description: 'Realiza fitomejoramiento, multiplicación, comercialización, exportación, importación, procesamiento, identificación de semillas y/o material de propagación de especies nativas.',
                 convenio: 'Muy improbable debido a marcos regulatorios estrictos. Cualquier actividad debe realizarse bajo control directo del titular del permiso.',
                 facilidad: 'dificil',
-                icon: 'mountain'
+                cambioLugar: 'media',
+                cannabis: true,
+                icon: 'mountain',
+                requisitosCannabis: 'Para cannabis: Solo aplica a variedades autóctonas con autorización específica y estudios de impacto ambiental.'
             },
             {
                 code: 'O',
@@ -289,7 +416,10 @@
                 description: 'Experimenta, importa, exporta, produce, multiplica y/o realiza actividades con OVGM no autorizados para comercialización en Argentina.',
                 convenio: 'Muy improbable debido a estrictas normas de bioseguridad. No se recomienda la delegación de actividades.',
                 facilidad: 'dificil',
-                icon: 'dna'
+                cambioLugar: 'baja',
+                cannabis: true,
+                icon: 'dna',
+                requisitosCannabis: 'Para cannabis: Requiere autorización de la CONABIA y cumplimiento de protocolos de bioseguridad nivel 2 como mínimo.'
             },
             {
                 code: 'P',
@@ -297,7 +427,21 @@
                 description: 'Lleva adelante el mantenimiento de pureza varietal de cultivares de uso público inscritos. Habilita para comercializar.',
                 convenio: 'Puede conveniar con cooperativa para ejecutar labores de roguing y cosecha selectiva bajo protocolo estricto supervisado por el titular.',
                 facilidad: 'facil',
-                icon: 'filter'
+                cambioLugar: 'alta',
+                cannabis: true,
+                icon: 'filter',
+                requisitosCannabis: 'Para cannabis: Debe mantener registros detallados de selección y cumplir con estándares de identificación varietal.'
+            },
+            {
+                code: 'R',
+                name: 'REGISTRO REPROCANN',
+                description: 'Registro específico para cultivo de cannabis para fines medicinales y de investigación científica, bajo la Ley 27.669.',
+                convenio: 'Limitado. Solo permite cultivo personal o en red con un único titular registrado. No permite convenios con cooperativas para producción.',
+                facilidad: 'dificil',
+                cambioLugar: 'media',
+                cannabis: true,
+                icon: 'cannabis',
+                requisitosCannabis: 'Requiere inscripción individual o como organización, con límites de superficie y plantas. Cambio de ubicación debe notificarse y justificarse.'
             }
         ];
 
@@ -318,23 +462,30 @@
             
             categoriesData.forEach(category => {
                 // Aplicar filtros
-                if (currentFilter !== 'all' && category.facilidad !== currentFilter) {
-                    return;
+                if (currentFilter !== 'all') {
+                    if (currentFilter === 'cannabis' && !category.cannabis) return;
+                    if (currentFilter !== 'cannabis' && category.facilidad !== currentFilter) return;
                 }
                 
                 const isSelected = selectedCategories.includes(category.code);
+                const cannabisClass = category.cannabis ? 'cannabis-related' : '';
+                const cambioLugarClass = `cambio-lugar-${category.cambioLugar}`;
                 
                 const col = document.createElement('div');
                 col.className = 'col-md-3 col-sm-6';
                 col.innerHTML = `
-                    <div class="card category-card ${isSelected ? 'selected' : ''}" data-code="${category.code}">
+                    <div class="card category-card ${isSelected ? 'selected' : ''} ${cannabisClass} ${cambioLugarClass}" data-code="${category.code}">
                         <div class="card-body text-center">
-                            <div class="category-icon">
+                            <div class="category-icon ${category.cannabis ? 'cannabis-icon' : ''}">
                                 <i class="fas fa-${category.icon}"></i>
                             </div>
                             <h5 class="card-title">${category.code} - ${category.name}</h5>
                             <p class="card-text">${category.description.substring(0, 80)}...</p>
-                            <span class="badge ${getFacilidadBadgeClass(category.facilidad)}">${getFacilidadText(category.facilidad)}</span>
+                            <div>
+                                <span class="badge ${getFacilidadBadgeClass(category.facilidad)} me-1">${getFacilidadText(category.facilidad)}</span>
+                                ${category.cannabis ? '<span class="badge bg-success me-1">Cannabis</span>' : ''}
+                                <span class="badge ${getCambioLugarBadgeClass(category.cambioLugar)}">Cambio: ${getCambioLugarText(category.cambioLugar)}</span>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -417,7 +568,7 @@
             tbody.innerHTML = '';
             
             if (selectedCategories.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4">Selecciona al menos una categoría para ver los detalles</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4">Selecciona al menos una categoría para ver los detalles</td></tr>';
                 return;
             }
             
@@ -426,10 +577,11 @@
                 if (category) {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td><span class="badge badge-category">${category.code}</span><br>${category.name}</td>
-                        <td>${category.description}</td>
+                        <td><span class="badge badge-category ${category.cannabis ? 'badge-cannabis' : ''}">${category.code}</span><br>${category.name}</td>
+                        <td>${category.description}${category.cannabis ? '<div class="mt-2"><strong>Requisitos Cannabis:</strong> ' + category.requisitosCannabis + '</div>' : ''}</td>
                         <td class="convenio-${category.facilidad}">${category.convenio}</td>
                         <td><span class="badge ${getFacilidadBadgeClass(category.facilidad)}">${getFacilidadText(category.facilidad)}</span></td>
+                        <td><span class="badge ${getCambioLugarBadgeClass(category.cambioLugar)}">${getCambioLugarText(category.cambioLugar)}</span></td>
                     `;
                     tbody.appendChild(row);
                 }
@@ -452,6 +604,26 @@
                 case 'facil': return 'Convenio Fácil';
                 case 'posible': return 'Convenio Posible';
                 case 'dificil': return 'Convenio Difícil';
+                default: return 'Desconocido';
+            }
+        }
+        
+        // Obtener clase de badge según cambio de lugar
+        function getCambioLugarBadgeClass(cambioLugar) {
+            switch(cambioLugar) {
+                case 'alta': return 'bg-success';
+                case 'media': return 'bg-warning text-dark';
+                case 'baja': return 'bg-danger';
+                default: return 'bg-secondary';
+            }
+        }
+
+        // Obtener texto de cambio de lugar
+        function getCambioLugarText(cambioLugar) {
+            switch(cambioLugar) {
+                case 'alta': return 'Alta';
+                case 'media': return 'Media';
+                case 'baja': return 'Baja';
                 default: return 'Desconocido';
             }
         }
