@@ -20,17 +20,17 @@
             color: #e0e0e0;
             line-height: 1.6;
             overflow: hidden;
-            min-height: 100vh; /* Cambiado de height a min-height */
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             touch-action: pan-y;
         }
 
-        /* HEADER */
+        /* HEADER - Modificado para modo horizontal */
         .header {
             background: linear-gradient(135deg, #0D0D0D, #0F5922);
             color: #FFFFFF;
-            padding: 20px;
+            padding: 15px;
             text-align: center;
             position: relative;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
@@ -38,31 +38,31 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 20px;
-            flex-shrink: 0; /* Evita que el header se encoja */
+            gap: 15px;
+            flex-shrink: 0;
         }
         .header h1 {
             font-weight: 700;
             letter-spacing: 0.5px;
-            font-size: 2rem;
+            font-size: 1.5rem;
             margin: 0;
             color: #FFFFFF;
         }
         .header p {
-            font-size: 15px;
+            font-size: 12px;
             opacity: 0.9;
             margin: 0;
             color: #BF9A56;
         }
         
-        /* Logo containers */
+        /* Logo containers - Reducidos para horizontal */
         .logo-container {
-            width: 70px;
-            height: 70px;
+            width: 50px;
+            height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0; /* Evita que los logos se encojan */
+            flex-shrink: 0;
         }
         
         /* Logo SVG styling */
@@ -72,16 +72,16 @@
             fill: #BF9A56;
         }
 
-        /* PRESENTACION */
+        /* PRESENTACION - Ajustado para horizontal */
         .presentacion-container {
             flex: 1;
             position: relative;
             overflow: hidden;
             background: #121a12;
-            margin: 15px;
-            border-radius: 14px;
+            margin: 10px;
+            border-radius: 12px;
             box-shadow: 0 4px 30px rgba(0,0,0,0.3);
-            min-height: 400px; /* Altura mínima para asegurar visibilidad */
+            min-height: 380px;
         }
 
         .pagina {
@@ -90,11 +90,11 @@
             left: 0;
             width: 100%;
             height: 100%;
-            padding: 50px;
+            padding: 20px;
             display: none;
             overflow-y: auto;
             background-color: #121a12;
-            border-radius: 14px;
+            border-radius: 12px;
             transition: transform 0.45s ease, opacity 0.45s ease;
         }
 
@@ -107,39 +107,34 @@
         .pagina.siguiente { transform: translateX(80%); opacity: 0; }
         .pagina.anterior { transform: translateX(-80%); opacity: 0; }
 
-        /* TITULOS */
+        /* TITULOS - Ajustados para horizontal */
         h1 {
-            font-size: 34px;
+            font-size: 24px;
             color: #BF9A56;
-            margin-bottom: 25px;
-            border-bottom: 3px solid #568C30;
-            padding-bottom: 10px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #568C30;
+            padding-bottom: 8px;
         }
-        h2 { font-size: 24px; color: #BF9A56; margin: 20px 0 12px; }
-        h3 { font-size: 20px; color: #e0e0e0; margin: 12px 0 8px; }
+        h2 { font-size: 20px; color: #BF9A56; margin: 15px 0 10px; }
+        h3 { font-size: 18px; color: #e0e0e0; margin: 10px 0 6px; }
 
-        /* TEXTO */
+        /* TEXTO - Ajustado para horizontal */
         p, li {
-            font-size: 17px;
-            margin-bottom: 12px;
+            font-size: 14px;
+            margin-bottom: 8px;
             color: #d0d0d0;
         }
-        ul { margin-left: 25px; margin-bottom: 18px; }
+        ul { margin-left: 20px; margin-bottom: 12px; }
 
-        /* TARJETAS */
+        /* TARJETAS - Ajustadas para horizontal */
         .tarjeta {
             background: #1a231a;
             border: 1px solid #2c3b2c;
-            padding: 20px;
-            margin-bottom: 18px;
-            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 8px;
             transition: all 0.3s ease;
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        }
-        .tarjeta:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 6px 18px rgba(0,0,0,0.4);
-            background: #1e291e;
         }
 
         /* BLOQUES ESPECIALES */
@@ -149,437 +144,263 @@
         .consejo { background: #1a251a; border-left: 4px solid #4caf50; }
         .metodologia { background: #1a231a; border-left: 4px solid #284017; }
 
-        /* FLEX */
+        /* FLEX - Ajustado para horizontal */
         .contenedor-flex {
             display: flex;
             justify-content: space-between;
-            gap: 20px;
-            margin-top: 25px;
+            gap: 15px;
+            margin-top: 15px;
             flex-wrap: wrap;
         }
         .columna {
             flex: 1;
-            min-width: 280px;
+            min-width: 250px;
         }
 
-        /* BOTONES */
+        /* BOTONES - Ajustados para horizontal */
         .navegacion {
             display: flex;
             justify-content: center;
-            padding: 15px;
+            padding: 12px;
             background: linear-gradient(135deg, #0D0D0D, #0F5922);
             z-index: 9999;
             padding-bottom: env(safe-area-inset-bottom);
-            flex-shrink: 0; /* Evita que la navegación se encoja */
-        }
-        @media (max-width: 768px) {
-            .navegacion {
-                /*display: none; */
-            }
+            flex-shrink: 0;
         }
         .btn {
             background: #568C30;
             color: #FFFFFF;
             border: none;
-            padding: 12px 26px;
-            margin: 0 10px;
-            border-radius: 30px;
+            padding: 10px 20px;
+            margin: 0 8px;
+            border-radius: 25px;
             cursor: pointer;
-            font-size: 15px;
+            font-size: 14px;
             transition: all 0.3s ease;
             font-weight: 600;
         }
-        .btn:hover {
-            background: #BF9A56;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
-        .btn:disabled { background: #444; color: #777; cursor: not-allowed; }
 
         /* INDICADORES */
         .indicadores {
             display: flex;
             justify-content: center;
-            margin: 12px 0;
+            margin: 10px 0;
         }
         .indicador {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             background: #444;
-            margin: 0 6px;
+            margin: 0 5px;
             cursor: pointer;
             transition: all 0.3s;
         }
-        .indicador.activo { background: #BF9A56; transform: scale(1.25); }
 
         /* PROGRESO */
         .progreso {
-            height: 6px;
+            height: 5px;
             background: #2c3b2c;
-            margin: 10px 0;
+            margin: 8px 0;
             border-radius: 5px;
             overflow: hidden;
         }
-        .barra-progreso {
-            height: 100%;
-            background: linear-gradient(90deg, #0F5922, #568C30);
-            width: 0%;
-            transition: width 0.4s ease;
-        }
 
-        /* CONTADOR */
+        /* CONTADOR - Ajustado para horizontal */
         .contador-pagina {
             position: fixed;
-            bottom: 85px;
-            right: 25px;
+            bottom: 70px;
+            right: 15px;
             color: #FFFFFF;
-            font-size: 15px;
+            font-size: 13px;
             background: rgba(15, 89, 34, 0.9);
-            padding: 10px 18px;
-            border-radius: 25px;
+            padding: 8px 14px;
+            border-radius: 20px;
             z-index: 100;
             box-shadow: 0 2px 12px rgba(0,0,0,0.4);
             font-weight: 600;
         }
 
-        /* MENU LATERAL */
-        .menu-movil {
-            display: none;
-            position: fixed;
-            top: 55px;
-            left: 20px;
-            z-index: 100;
-            background: #0F5922;
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            box-shadow: 0 3px 12px rgba(0,0,0,0.4);
-            flex-direction: column;
-        }
-        .bar {
-            width: 25px;
-            height: 3px;
-            background: #FFFFFF;
-            margin: 3px 0;
-            border-radius: 2px;
-            transition: 0.3s;
-        }
-        .menu-lateral {
-            position: fixed;
-            top: 0;
-            left: -280px;
-            width: 280px;
-            height: 100%;
-            background: #1a231a;
-            z-index: 99;
-            padding: 90px 20px 20px;
-            transition: left 0.3s ease;
-            border-right: 2px solid #0F5922;
-        }
-        .menu-lateral.activo { left: 0; }
-        .menu-lateral .indicador-menu {
-            display: block;
-            color: #d0d0d0;
-            padding: 14px 16px;
-            margin: 8px 0;
-            border-radius: 8px;
-            background: rgba(255,255,255,0.05);
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        .menu-lateral .indicador-menu:hover { background: rgba(255,255,255,0.1); }
-        .menu-lateral .indicador-menu.activo {
-            background: #0F5922;
-            font-weight: 600;
-            color: #FFFFFF;
-        }
-
-        /* OVERLAY */
-        .overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 98;
-            display: none;
-        }
-
-        /* NUEVOS ESTILOS PARA LA COOPERATIVA */
+        /* NUEVOS ESTILOS PARA LA COOPERATIVA - Ajustados */
         .logo-cooperativa {
             text-align: center;
-            margin: 20px 0;
+            margin: 15px 0;
         }
         
         .logo-cooperativa h2 {
-            font-size: 2.5rem;
+            font-size: 1.8rem;
             color: #BF9A56;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             text-transform: uppercase;
         }
         
         .logo-cooperativa p {
-            font-size: 1.2rem;
+            font-size: 1rem;
             color: #568C30;
             font-weight: 600;
         }
         
         .info-legal {
             background: #1a231a;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
             border-left: 4px solid #568C30;
         }
         
         .info-item {
             display: flex;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         
         .info-label {
             font-weight: 600;
-            min-width: 180px;
+            min-width: 150px;
             color: #BF9A56;
+            font-size: 14px;
         }
         
         .info-value {
             color: #d0d0d0;
+            font-size: 14px;
         }
         
-        .articulo {
-            background: #1a231a;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            border-left: 4px solid #0F5922;
-        }
-        
-        .articulo h3 {
-            color: #BF9A56;
-            margin-bottom: 15px;
-        }
-        
-        .unidad-productiva {
-            background: #1a231a;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            border: 1px solid #2c3b2c;
-        }
-        
-        .unidad-productiva h3 {
-            color: #BF9A56;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .unidad-productiva h3 i {
-            margin-right: 10px;
-            color: #568C30;
-        }
-        
-        .convenio-item {
-            background: #1a231a;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 15px 0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            border: 1px solid #2c3b2c;
-            transition: all 0.3s ease;
-        }
-        
-        .convenio-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
-            background: #1e291e;
-        }
-        
-        .convenio-item h3 {
-            color: #BF9A56;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .convenio-item h3 i {
-            margin-right: 10px;
-            color: #568C30;
-        }
-        
-        .eslogan {
-            text-align: center;
-            padding: 30px;
-            background: linear-gradient(135deg, #1a231a, #1e291e);
-            border-radius: 10px;
-            margin: 30px 0;
-            border: 1px solid #2c3b2c;
-        }
-        
-        .eslogan h2 {
-            font-size: 2rem;
-            color: #BF9A56;
-            margin-bottom: 15px;
-        }
-        
-        .eslogan p {
-            font-size: 1.2rem;
-            color: #568C30;
-            font-weight: 600;
-        }
-        
-        .centrado {
-            text-align: center;
-        }
-        
-        /* RESPONSIVE */
-        /* RESPONSIVE - Modificado para pantallas horizontales */
-        @media (max-width: 1920px) {
-            .pagina { padding: 25px; }
-            h1 { font-size: 26px; }
-            h2 { font-size: 22px; }
-            .btn { padding: 10px 18px; font-size: 14px; }
-            .menu-movil { 
-                display: flex;
-                top: 15px;
-                left: 15px;
-                width: 46px;
-                height: 46px;
+        /* RESPONSIVE PARA HORIZONTAL - Ajustes específicos */
+        @media (max-height: 720px) and (orientation: landscape) {
+            body {
+                min-height: 720px;
             }
-            .contador-pagina {
-                bottom: 70px;
-                right: 15px;
+            
+            .header {
+                padding: 10px 15px;
+            }
+            .header h1 {
+                font-size: 18px;
+            }
+            .header p {
+                font-size: 11px;
+            }
+            .logo-container {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .presentacion-container {
+                margin: 8px;
+                min-height: 350px;
+            }
+            
+            .pagina {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 22px;
+                margin-bottom: 12px;
+            }
+            
+            h2 {
+                font-size: 18px;
+            }
+            
+            h3 {
+                font-size: 16px;
+            }
+            
+            p, li {
                 font-size: 13px;
-                padding: 8px 14px;
             }
-            .tabla-excel {
+            
+            .tarjeta {
+                padding: 12px;
+                margin-bottom: 10px;
+            }
+            
+            .contenedor-flex {
+                gap: 12px;
+                margin-top: 12px;
+            }
+            
+            .columna {
+                min-width: 220px;
+            }
+            
+            .info-label {
+                min-width: 130px;
+                font-size: 13px;
+            }
+            
+            .info-value {
+                font-size: 13px;
+            }
+            
+            .logo-cooperativa h2 {
+                font-size: 1.6rem;
+            }
+            
+            .logo-cooperativa p {
+                font-size: 0.9rem;
+            }
+            
+            .contador-pagina {
+                bottom: 60px;
+                right: 12px;
                 font-size: 12px;
-            }
-            .tabla-excel th, .tabla-excel td {
-                padding: 6px 8px;
+                padding: 6px 12px;
             }
             
-            /* Ajustes específicos para orientación horizontal */
-            @media (max-height: 720px) and (orientation: landscape) {
-                body {
-                    min-height: 720px; /* Altura mínima para Galaxy A10s en landscape */
-                }
-                
-                .header {
-                    padding: 12px 20px;
-                    flex-wrap: wrap; /* Permite que el header se ajuste mejor */
-                }
-                .header h1 {
-                    font-size: 20px;
-                    margin-bottom: 5px;
-                }
-                .header p {
-                    font-size: 12px;
-                }
-                .logo-container {
-                    width: 50px;
-                    height: 50px;
-                }
-                .menu-movil {
-                    top: 12px;
-                    left: 12px;
-                    width: 40px;
-                    height: 40px;
-                }
-                .bar {
-                    width: 20px;
-                    height: 2px;
-                    margin: 2px 0;
-                }
-                .presentacion-container {
-                    margin: 10px;
-                    min-height: 380px; /* Aseguramos altura mínima */
-                }
-                .pagina {
-                    padding: 15px; /* Reducimos padding para aprovechar espacio */
-                }
-                h1 {
-                    font-size: 22px;
-                    margin-bottom: 15px;
-                }
-                h2 {
-                    font-size: 18px;
-                }
-                h3 {
-                    font-size: 16px;
-                }
-                p, li {
-                    font-size: 14px;
-                }
-                .tarjeta {
-                    padding: 15px;
-                    margin-bottom: 12px;
-                }
-                .contenedor-flex {
-                    gap: 15px;
-                    margin-top: 15px;
-                }
-                .contador-pagina {
-                    bottom: 60px;
-                    right: 12px;
-                    font-size: 12px;
-                    padding: 6px 10px;
-                }
-                .navegacion {
-                    padding: 10px;
-                }
-                .btn {
-                    padding: 8px 16px;
-                    font-size: 13px;
-                }
-                
-                /* Ajustes específicos para contenido extenso */
-                .pagina {
-                    overflow-y: auto; /* Permite scroll si el contenido es muy largo */
-                }
+            .navegacion {
+                padding: 10px;
             }
             
-            /* Ajustes para dispositivos muy pequeños en landscape */
-            @media (max-height: 600px) and (orientation: landscape) {
-                .presentacion-container {
-                    min-height: 320px;
-                }
-                .header {
-                    padding: 8px 15px;
-                }
-                .header h1 {
-                    font-size: 18px;
-                }
-                .logo-container {
-                    width: 40px;
-                    height: 40px;
-                }
-                .pagina {
-                    padding: 10px;
-                }
-                h1 {
-                    font-size: 20px;
-                    margin-bottom: 10px;
-                }
-                .info-legal {
-                    padding: 10px;
-                }
-                .info-item {
-                    flex-direction: column;
-                    margin-bottom: 8px;
-                }
-                .info-label {
-                    min-width: auto;
-                    margin-bottom: 3px;
-                }
+            .btn {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+        }
+
+        /* Ajustes adicionales para dispositivos muy pequeños en landscape */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .presentacion-container {
+                min-height: 320px;
+            }
+            
+            .header {
+                padding: 8px 12px;
+            }
+            
+            .header h1 {
+                font-size: 16px;
+            }
+            
+            .pagina {
+                padding: 12px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            .info-item {
+                flex-direction: column;
+                margin-bottom: 6px;
+            }
+            
+            .info-label {
+                min-width: auto;
+                margin-bottom: 3px;
+            }
+            
+            .contenedor-flex {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .columna {
+                min-width: 100%;
             }
         }
     </style>
+
 </head>
 <body>
     <div class="header">
