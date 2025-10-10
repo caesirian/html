@@ -111,7 +111,7 @@
                 <p class="text-yellow-300 font-mono text-xl mb-4 text-center bg-black/30 rounded-lg p-3">trabajo.coco.dni</p>
                 <p class="text-blue-200 mb-2"><strong class="text-white">2.</strong> Monto total a transferir:</p>
                 <p id="finalAmount" class="text-green-300 font-bold text-2xl text-center mb-4"></p>
-                <p class="text-blue-200 mb-4"><strong class="text-white">3.</strong> Confirmá tu pago por WhatsApp:</p>
+                <p class="text-blue-200 mb-4"><strong class="text-white">3.</strong> Confirmá tu pago por WhatsApp adjuntando comprobante:</p>
                 <div class="text-center">
                     <a id="whatsappLink" href="#" target="_blank" rel="noopener noreferrer" class="inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 text-lg">
                         📱 Confirmar por WhatsApp
@@ -240,7 +240,7 @@
             const total = numbers.length * pricePerNumber;
             
             // Mensaje completo para WhatsApp
-            const message = `¡Hola! Quiero reservar los siguientes números:\n\n` +
+            const message = `¡Hola! Quiero reservar los siguientes números para la rifa del bajo Fretless:\n\n` +
                            `🎯 Números: ${numbersText}\n` +
                            `👤 Nombre: ${name}\n` +
                            `💰 Total a pagar: $${total.toLocaleString()}\n` +
