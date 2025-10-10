@@ -3,12 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rifa Bajo Eléctrico Fretless</title>
+    <title>Rifa Bajo Squier Jazz Bass Fretless </title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
             box-sizing: border-box;
+            position: relative;
+            overflow-x: hidden;
         }
+        
+        /* Fondo con carrusel de imágenes */
+        .background-carousel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .carousel-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        
+        .carousel-slide.active {
+            opacity: 0.3;
+        }
+        
+        /* Efecto de superposición para mejor legibilidad */
+        .background-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, 
+                rgba(76, 29, 149, 0.85) 0%, 
+                rgba(30, 58, 138, 0.85) 50%, 
+                rgba(49, 46, 129, 0.85) 100%);
+            z-index: -1;
+        }
+
         .number-button {
             transition: all 0.3s ease;
         }
@@ -34,56 +79,100 @@
             background: linear-gradient(135deg, #e5e7eb, #d1d5db);
             border-color: #10b981;
         }
+
+        /* Efectos de tarjetas mejorados */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .pulse-glow {
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(139, 92, 246, 0.8);
+            }
+        }
+
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 min-h-full">
-    <div class="container mx-auto px-4 py-8">
+<body class="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 min-h-screen">
+    <!-- Fondo con carrusel de imágenes -->
+    <div class="background-carousel">
+        <div class="carousel-slide active" style="background-image: url('1.jpg')"></div>
+        <div class="carousel-slide" style="background-image: url('2.jpg')"></div>
+        <div class="carousel-slide" style="background-image: url('3.jpg')"></div>
+        <div class="carousel-slide" style="background-image: url('4.jpg')"></div>
+        <div class="carousel-slide" style="background-image: url('5.jpg')"></div>
+        <div class="carousel-slide" style="background-image: url('6.jpg')"></div>
+        <div class="background-overlay"></div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 relative z-10">
         <!-- Header -->
-        <div class="text-center mb-8">
+        <div class="text-center mb-8 float-animation">
             <h1 class="text-4xl md:text-6xl font-bold text-white mb-4">
-                🎸 Rifa Bajo Eléctrico Fretless
+                🎸 Rifa Bajo Eléctrico Squier Jazz Bass Fretless 
             </h1>
             <p class="text-xl text-blue-200 mb-6">
-                ¡Participá por este increíble bajo usado!
+                ¡Participá por este increíble bajo usado en excelente estado! Solamente tenés que cambiarle el encordado. Viene funda de regalo!!
             </p>
-            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 max-w-2xl mx-auto">
+            <div class="glass-card rounded-2xl p-6 max-w-2xl mx-auto pulse-glow">
                 <h2 class="text-2xl font-bold text-white mb-4">📋 Información de la Rifa</h2>
                 <div class="grid md:grid-cols-2 gap-4 text-left">
-                    <div class="bg-white/20 rounded-lg p-4">
+                    <div class="bg-white/10 rounded-lg p-4">
                         <p class="text-blue-200"><strong class="text-white">🎯 Total de números:</strong> 150</p>
                         <p class="text-blue-200"><strong class="text-white">💰 Precio por número:</strong> $7.500</p>
                     </div>
-                    <div class="bg-white/20 rounded-lg p-4">
+                    <div class="bg-white/10 rounded-lg p-4">
                         <p class="text-blue-200"><strong class="text-white">🏦 Alias para pago:</strong></p>
-                        <p class="text-yellow-300 font-mono text-lg">trabajo.coco.dni</p>
+                        <p class="text-yellow-300 font-mono text-lg bg-black/30 rounded-lg p-2">trabajo.coco.dni</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Selection Panel -->
-        <div id="selectionPanel" class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8">
+        <div id="selectionPanel" class="glass-card rounded-2xl p-6 mb-8">
             <div class="flex flex-col md:flex-row justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold text-white mb-4 md:mb-0">
                     Seleccioná tus números
                 </h3>
-                <div class="text-center">
-                    <p class="text-blue-200">Números seleccionados: <span id="selectedCount" class="text-yellow-300 font-bold">0</span></p>
-                    <p class="text-blue-200">Total a pagar: <span id="totalAmount" class="text-green-300 font-bold text-xl">$0</span></p>
+                <div class="text-center bg-white/10 rounded-xl p-4">
+                    <p class="text-blue-200">Números seleccionados: <span id="selectedCount" class="text-yellow-300 font-bold text-xl">0</span></p>
+                    <p class="text-blue-200">Total a pagar: <span id="totalAmount" class="text-green-300 font-bold text-2xl">$0</span></p>
                 </div>
             </div>
 
             <!-- Legend -->
             <div class="flex flex-wrap justify-center gap-4 mb-6">
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
                     <div class="w-6 h-6 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 border-2 border-gray-300"></div>
                     <span class="text-white">Disponible</span>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
                     <div class="w-6 h-6 rounded-lg bg-gradient-to-br from-green-500 to-green-600"></div>
                     <span class="text-white">Seleccionado</span>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
                     <div class="w-6 h-6 rounded-lg bg-gradient-to-br from-red-500 to-red-600"></div>
                     <span class="text-white">Reservado</span>
                 </div>
@@ -97,23 +186,23 @@
                 <button id="clearSelection" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105">
                     🗑️ Limpiar Selección
                 </button>
-                <button id="reserveNumbers" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                <button id="reserveNumbers" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed pulse-glow" disabled>
                     ✅ Reservar Números
                 </button>
             </div>
         </div>
 
         <!-- Payment Instructions -->
-        <div id="paymentInstructions" class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 hidden">
+        <div id="paymentInstructions" class="glass-card rounded-2xl p-6 hidden">
             <h3 class="text-2xl font-bold text-white mb-4">💳 Instrucciones de Pago</h3>
             <div class="bg-white/20 rounded-lg p-6 mb-4">
-                <p class="text-blue-200 mb-2"><strong class="text-white">1.</strong> Realizá la transferencia al alias:</p>
+                <p class="text-blue-200 mb-2"><strong class="text-white">1.</strong> Realizá la transferencia al alias (A nombre de Hernan Emiliano Garbarino):</p>
                 <p class="text-yellow-300 font-mono text-xl mb-4 text-center bg-black/30 rounded-lg p-3">trabajo.coco.dni</p>
                 <p class="text-blue-200 mb-2"><strong class="text-white">2.</strong> Monto total a transferir:</p>
                 <p id="finalAmount" class="text-green-300 font-bold text-2xl text-center mb-4"></p>
-                <p class="text-blue-200 mb-4"><strong class="text-white">3.</strong> Confirmá tu pago por WhatsApp adjuntando comprobante:</p>
+                <p class="text-blue-200 mb-4"><strong class="text-white">3.</strong> Confirmá tu pago por WhatsApp:</p>
                 <div class="text-center">
-                    <a id="whatsappLink" href="#" target="_blank" rel="noopener noreferrer" class="inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 text-lg">
+                    <a id="whatsappLink" href="#" target="_blank" rel="noopener noreferrer" class="inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 text-lg pulse-glow">
                         📱 Confirmar por WhatsApp
                     </a>
                 </div>
@@ -126,8 +215,8 @@
         </div>
 
         <!-- Footer -->
-        <div class="text-center mt-8 text-blue-200">
-            <p>🍀 ¡Buena suerte a todos los participantes!</p>
+        <div class="text-center mt-8 text-blue-200 bg-white/10 rounded-xl p-4">
+            <p class="text-lg">🍀 ¡Buena suerte a todos los participantes! Podran visitar la página de la rifa para hacerle seguimiento a los números disponibles y cuando se complete se transmitirá por vivo el sorteo, 150 numeros completamente al azar.</p>
         </div>
     </div>
 
@@ -144,12 +233,26 @@
         const selectedCount = document.getElementById('selectedCount');
         const totalAmount = document.getElementById('totalAmount');
         const clearSelection = document.getElementById('clearSelection');
-        const reserveNumbers = document.getElementById('reserveNumbers');
+        const reserveNumbersBtn = document.getElementById('reserveNumbers');
         const paymentInstructions = document.getElementById('paymentInstructions');
         const finalAmount = document.getElementById('finalAmount');
         const whatsappLink = document.getElementById('whatsappLink');
         const backToSelection = document.getElementById('backToSelection');
         const selectionPanel = document.getElementById('selectionPanel');
+
+        // Carrusel de fondo
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.carousel-slide');
+        const totalSlides = slides.length;
+
+        function nextSlide() {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % totalSlides;
+            slides[currentSlide].classList.add('active');
+        }
+
+        // Cambiar slide cada 5 segundos
+        setInterval(nextSlide, 5000);
 
         function initializeGrid() {
             numbersGrid.innerHTML = '';
@@ -188,7 +291,7 @@
             });
             selectedCount.textContent = selectedNumbers.size;
             totalAmount.textContent = `$${(selectedNumbers.size * pricePerNumber).toLocaleString()}`;
-            reserveNumbers.disabled = selectedNumbers.size === 0;
+            reserveNumbersBtn.disabled = selectedNumbers.size === 0;
         }
 
         clearSelection.addEventListener('click', () => {
@@ -197,54 +300,38 @@
         });
 
         async function loadReservedNumbers() {
-    try {
-        console.log("Cargando números reservados desde CSV...");
-        const csvRes = await fetch(csvUrl);
-        const csvText = await csvRes.text();
-        
-        console.log("CSV completo:", csvText);
-        
-        const rows = csvText.split('\n');
-        console.log("Todas las filas:", rows);
-        
-        const reservedNumbersArray = [];
-        
-        // Empezar desde 1 para saltar el header
-        for (let i = 1; i < rows.length; i++) {
-            const row = rows[i].trim();
-            if (row) {
-                const columns = row.split(',');
-                console.log(`Fila ${i}:`, columns);
+            try {
+                const csvRes = await fetch(csvUrl);
+                const csvText = await csvRes.text();
                 
-                // Diferentes formas de detectar números reservados
-                if (columns.length >= 3) {
-                    const numero = parseInt(columns[0]);
-                    const estado = columns[1] ? columns[1].trim() : '';
-                    const nombre = columns[2] ? columns[2].trim() : '';
-                    
-                    console.log(`Número: ${numero}, Estado: "${estado}", Nombre: "${nombre}"`);
-                    
-                    // Si tiene nombre O si el estado es "RESERVADO"
-                    if (nombre !== '' || estado.toUpperCase() === 'RESERVADO') {
-                        if (!isNaN(numero) && numero >= 1 && numero <= 150) {
-                            reservedNumbersArray.push(numero);
-                            console.log(`✅ Número ${numero} marcado como RESERVADO`);
+                const rows = csvText.split('\n');
+                const reservedNumbersArray = [];
+                
+                // Empezar desde 1 para saltar el header
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i].trim();
+                    if (row) {
+                        const columns = row.split(',');
+                        // Solo considerar reservados los que tienen nombre (columna 3)
+                        if (columns.length >= 3 && columns[2] && columns[2].trim() !== '') {
+                            const number = parseInt(columns[0]);
+                            if (!isNaN(number) && number >= 1 && number <= 150) {
+                                reservedNumbersArray.push(number);
+                            }
                         }
                     }
                 }
+                
+                reservedNumbers = new Set(reservedNumbersArray);
+                updateDisplay();
+                
+            } catch (err) {
+                console.error("Error cargando datos desde CSV:", err);
+                reservedNumbers = new Set();
+                updateDisplay();
             }
         }
-        
-        console.log("Números reservados finales:", reservedNumbersArray);
-        reservedNumbers = new Set(reservedNumbersArray);
-        updateDisplay();
-        
-    } catch (err) {
-        console.error("Error cargando datos desde CSV:", err);
-        reservedNumbers = new Set();
-        updateDisplay();
-    }
-}
+
         async function saveReservation(numbers) {
             const name = prompt("Ingresá tu nombre para registrar la reserva:");
             if (!name) return false;
@@ -253,7 +340,7 @@
             const total = numbers.length * pricePerNumber;
             
             // Mensaje completo para WhatsApp
-            const message = `¡Hola! Quiero reservar los siguientes números para la rifa del bajo Fretless:\n\n` +
+            const message = `¡Hola! Quiero reservar los siguientes números:\n\n` +
                            `🎯 Números: ${numbersText}\n` +
                            `👤 Nombre: ${name}\n` +
                            `💰 Total a pagar: $${total.toLocaleString()}\n` +
@@ -275,7 +362,7 @@
             return true;
         }
 
-        reserveNumbers.addEventListener('click', async () => {
+        reserveNumbersBtn.addEventListener('click', async () => {
             if (selectedNumbers.size === 0) return;
             
             const numbersArray = Array.from(selectedNumbers);
