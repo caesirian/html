@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rifa Bajo Eléctrico Fretless</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        .number-button {
+            transition: all 0.3s ease;
+        }
+        .number-button:hover {
+            transform: scale(1.05);
+        }
+        .selected {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+        .reserved {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            cursor: not-allowed;
+        }
+        .available {
+            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+            color: #374151;
+            border: 2px solid #d1d5db;
+        }
+        .available:hover {
+            background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+            border-color: #10b981;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 min-h-full">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl md:text-6xl font-bold text-white mb-4">
+                🎸 Rifa Bajo Eléctrico Fretless
+            </h1>
+            <p class="text-xl text-blue-200 mb-6">
+                ¡Participá por este increíble bajo usado!
+            </p>
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 max-w-2xl mx-auto">
+                <h2 class="text-2xl font-bold text-white mb-4">📋 Información de la Rifa</h2>
+                <div class="grid md:grid-cols-2 gap-4 text-left">
+                    <div class="bg-white/20 rounded-lg p-4">
+                        <p class="text-blue-200"><strong class="text-white">🎯 Total de números:</strong> 150</p>
+                        <p class="text-blue-200"><strong class="text-white">💰 Precio por número:</strong> $7.500</p>
+                    </div>
+                    <div class="bg-white/20 rounded-lg p-4">
+                        <p class="text-blue-200"><strong class="text-white">🏦 Alias para pago:</strong></p>
+                        <p class="text-yellow-300 font-mono text-lg">trabajo.coco.dni</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Selection Panel -->
+        <div id="selectionPanel" class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-white mb-4 md:mb-0">
+                    Seleccioná tus números
+                </h3>
+                <div class="text-center">
+                    <p class="text-blue-200">Números seleccionados: <span id="selectedCount" class="text-yellow-300 font-bold">0</span></p>
+                    <p class="text-blue-200">Total a pagar: <span id="totalAmount" class="text-green-300 font-bold text-xl">$0</span></p>
+                </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="flex flex-wrap justify-center gap-4 mb-6">
+                <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 border-2 border-gray-300"></div>
+                    <span class="text-white">Disponible</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded-lg bg-gradient-to-br from-green-500 to-green-600"></div>
+                    <span class="text-white">Seleccionado</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded-lg bg-gradient-to-br from-red-500 to-red-600"></div>
+                    <span class="text-white">Reservado</span>
+                </div>
+            </div>
+
+            <!-- Numbers Grid -->
+            <div id="numbersGrid" class="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-15 gap-2 mb-6"></div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button id="clearSelection" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105">
+                    🗑️ Limpiar Selección
+                </button>
+                <button id="reserveNumbers" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    ✅ Reservar Números
+                </button>
+            </div>
+        </div>
+
+        <!-- Payment Instructions -->
+        <div id="paymentInstructions" class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 hidden">
+            <h3 class="text-2xl font-bold text-white mb-4">💳 Instrucciones de Pago</h3>
+            <div class="bg-white/20 rounded-lg p-6 mb-4">
+                <p class="text-blue-200 mb-2"><strong class="text-white">1.</strong> Realizá la transferencia al alias:</p>
+                <p class="text-yellow-300 font-mono text-xl mb-4 text-center bg-black/30 rounded-lg p-3">trabajo.coco.dni</p>
+                <p class="text-blue-200 mb-2"><strong class="text-white">2.</strong> Monto total a transferir:</p>
+                <p id="finalAmount" class="text-green-300 font-bold text-2xl text-center mb-4"></p>
+                <p class="text-blue-200 mb-4"><strong class="text-white">3.</strong> Confirmá tu pago por WhatsApp:</p>
+                <div class="text-center">
+                    <a id="whatsappLink" href="#" target="_blank" rel="noopener noreferrer" class="inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 text-lg">
+                        📱 Confirmar por WhatsApp
+                    </a>
+                </div>
+            </div>
+            <div class="text-center">
+                <button id="backToSelection" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-all duration-300">
+                    ← Volver a la selección
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 text-blue-200">
+            <p>🍀 ¡Buena suerte a todos los participantes!</p>
+        </div>
+    </div>
+
+    <script>
+        const apiUrl = "https://script.google.com/macros/s/AKfycbxu9kOUUbx5oRBV7vcxs_vqrQoLKPuw1nggVV2MRa-oY4ze3fWwnnLgVqozGfpvy37Z/exec"; // <-- REEMPLAZAR AQUÍ
+
+        let selectedNumbers = new Set();
+        let reservedNumbers = new Set();
+        const pricePerNumber = 7500;
+        const totalNumbers = 150;
+
+        const numbersGrid = document.getElementById('numbersGrid');
+        const selectedCount = document.getElementById('selectedCount');
+        const totalAmount = document.getElementById('totalAmount');
+        const clearSelection = document.getElementById('clearSelection');
+        const reserveNumbers = document.getElementById('reserveNumbers');
+        const paymentInstructions = document.getElementById('paymentInstructions');
+        const finalAmount = document.getElementById('finalAmount');
+        const whatsappLink = document.getElementById('whatsappLink');
+        const backToSelection = document.getElementById('backToSelection');
+        const selectionPanel = document.getElementById('selectionPanel');
+
+        function initializeGrid() {
+            numbersGrid.innerHTML = '';
+            for (let i = 1; i <= totalNumbers; i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                button.className = 'number-button w-12 h-12 rounded-lg font-bold text-sm available';
+                button.dataset.number = i;
+                button.addEventListener('click', () => toggleNumber(i));
+                numbersGrid.appendChild(button);
+            }
+        }
+
+        function toggleNumber(number) {
+            if (reservedNumbers.has(number)) return;
+            if (selectedNumbers.has(number)) {
+                selectedNumbers.delete(number);
+            } else {
+                selectedNumbers.add(number);
+            }
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            const buttons = numbersGrid.querySelectorAll('.number-button');
+            buttons.forEach(button => {
+                const number = parseInt(button.dataset.number);
+                button.className = 'number-button w-12 h-12 rounded-lg font-bold text-sm ';
+                if (reservedNumbers.has(number)) {
+                    button.className += 'reserved';
+                } else if (selectedNumbers.has(number)) {
+                    button.className += 'selected';
+                } else {
+                    button.className += 'available';
+                }
+            });
+            selectedCount.textContent = selectedNumbers.size;
+            totalAmount.textContent = `$${(selectedNumbers.size * pricePerNumber).toLocaleString()}`;
+            reserveNumbers.disabled = selectedNumbers.size === 0;
+        }
+
+        clearSelection.addEventListener('click', () => {
+            selectedNumbers.clear();
+            updateDisplay();
+        });
+
+        async function loadReservedNumbers() {
+            try {
+                const res = await fetch(apiUrl);
+                const reserved = await res.json();
+                reservedNumbers = new Set(reserved.map(Number));
+                updateDisplay();
+            } catch (err) {
+                console.error("Error cargando datos:", err);
+            }
+        }
+
+        async function saveReservation(numbers) {
+            const name = prompt("Ingresá tu nombre para registrar la reserva:");
+            try {
+                const res = await fetch(apiUrl, {
+                    method: "POST",
+                    body: JSON.stringify({ numbers, name }),
+                    headers: { "Content-Type": "application/json" }
+                });
+                if (res.ok) {
+                    alert("✅ Reserva registrada correctamente!");
+                    await loadReservedNumbers();
+                } else {
+                    alert("❌ Error al registrar la reserva.");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Error de conexión con la hoja.");
+            }
+        }
+
+        reserveNumbers.addEventListener('click', async () => {
+            if (selectedNumbers.size === 0) return;
+            const numbersArray = Array.from(selectedNumbers);
+            await saveReservation(numbersArray);
+            const total = numbersArray.length * pricePerNumber;
+            finalAmount.textContent = `$${total.toLocaleString()}`;
+            const numbersText = numbersArray.join(', ');
+            const message = `Quiero comprar los números: ${numbersText}`;
+            whatsappLink.href = `https://wa.me/541134796562?text=${encodeURIComponent(message)}`;
+            selectedNumbers.clear();
+            updateDisplay();
+            selectionPanel.style.display = 'none';
+            paymentInstructions.classList.remove('hidden');
+        });
+
+        backToSelection.addEventListener('click', () => {
+            paymentInstructions.classList.add('hidden');
+            selectionPanel.style.display = 'block';
+        });
+
+        initializeGrid();
+        loadReservedNumbers();
+    </script>
+</body>
+</html>
