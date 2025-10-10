@@ -132,7 +132,7 @@
     </div>
 
     <script>
-        const apiUrl = "https://script.google.com/macros/s/AKfycby9WUcwlJrJ0V2ys-6NBFXu-7_VlC3YbdLLOj24eVe1vJFB9X3K5Sak6fNp5G6BVnpxLg/exec"; // <-- REEMPLAZAR AQUÍ
+        const apiUrl = "https://script.google.com/macros/s/AKfycbxdBAwaUXZtueI9IDH0OlwHz9j7z5xSNoH7-iQ3EnevJ8GD_Krp8w3Z315N3LRPMvUt-A/exec"; // <-- REEMPLAZAR AQUÍ
 
         let selectedNumbers = new Set();
         let reservedNumbers = new Set();
@@ -248,13 +248,15 @@ async function saveReservation(numbers) {
             const result = await res.json();
             if (result.success) {
                 alert("✅ Reserva registrada correctamente!");
-                // Agregar los números a reservedNumbers localmente
-                numbers.forEach(num => reservedNumbers.add(num));
-                updateDisplay();
+                // Recargar los números reservados
+                await loadReservedNumbers();
                 return true;
+            } else {
+                alert("❌ Error: " + (result.error || "Error desconocido"));
             }
+        } else {
+            alert("❌ Error de conexión con el servidor.");
         }
-        alert("❌ Error al registrar la reserva.");
         return false;
     } catch (err) {
         console.error(err);
