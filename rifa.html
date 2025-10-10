@@ -197,51 +197,39 @@
 
 async function loadReservedNumbers() {
     try {
-        console.log("Cargando números reservados...");
-        const res = await fetch(apiUrl);
-        console.log("Respuesta recibida:", res);
+        console.log("Cargando números reservados desde CSV...");
+        const csvRes = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSCsDyItDkK6arDKDp7Ntnzd7d81ruMAIETM0j58E_pr1C1PCcK2MNQBBjjxbua6u-x_3D-d2TVnIyY/pub?output=csv");
+        const csvText = await csvRes.text();
         
-        const text = await res.text();
-        console.log("Texto crudo recibido:", text);
+        const rows = csvText.split('\n');
+        const reservedNumbersArray = [];
         
-        const reserved = await res.json();
-        console.log("JSON parseado:", reserved);
-        
-        reservedNumbers = new Set(reserved);
-        console.log("Números reservados:", Array.from(reservedNumbers));
-        
-        updateDisplay();
-    } catch (err) {
-        console.error("Error cargando datos:", err);
-        // Fallback temporal - usar CSV directamente
-        try {
-            console.log("Intentando cargar desde CSV...");
-            const csvRes = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSCsDyItDkK6arDKDp7Ntnzd7d81ruMAIETM0j58E_pr1C1PCcK2MNQBBjjxbua6u-x_3D-d2TVnIyY/pub?output=csv");
-            const csvText = await csvRes.text();
-            console.log("CSV crudo:", csvText);
-            
-            const rows = csvText.split('\n');
-            console.log("Filas del CSV:", rows);
-            
-            const numbers = [];
-            for (let i = 1; i < rows.length; i++) { // Empezar desde 1 para saltar el header
-                if (rows[i].trim()) {
-                    const number = parseInt(rows[i].split(',')[0]);
-                    if (!isNaN(number)) {
-                        numbers.push(number);
+        // Empezar desde 1 para saltar el header
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i].trim();
+            if (row) {
+                const columns = row.split(',');
+                // Solo considerar reservados los que tienen "RESERVADO" en Estado O tienen nombre
+                if (columns.length >= 3 && (columns[1] === 'RESERVADO' || (columns[2] && columns[2].trim() !== ''))) {
+                    const number = parseInt(columns[0]);
+                    if (!isNaN(number) && number >= 1 && number <= 150) {
+                        reservedNumbersArray.push(number);
                     }
                 }
             }
-            
-            console.log("Números extraídos del CSV:", numbers);
-            reservedNumbers = new Set(numbers);
-            updateDisplay();
-        } catch (fallbackErr) {
-            console.error("Error con fallback CSV:", fallbackErr);
         }
+        
+        console.log("Números realmente reservados:", reservedNumbersArray);
+        reservedNumbers = new Set(reservedNumbersArray);
+        updateDisplay();
+        
+    } catch (err) {
+        console.error("Error cargando datos desde CSV:", err);
+        // Si falla, no marcar ningún número como reservado
+        reservedNumbers = new Set();
+        updateDisplay();
     }
 }
-
 async function saveReservation(numbers) {
     const name = prompt("Ingresá tu nombre para registrar la reserva:");
     if (!name) return false;
