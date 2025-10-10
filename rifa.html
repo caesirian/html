@@ -132,7 +132,8 @@
     </div>
 
     <script>
-        const apiUrl = "https://script.google.com/macros/s/AKfycbxdBAwaUXZtueI9IDH0OlwHz9j7z5xSNoH7-iQ3EnevJ8GD_Krp8w3Z315N3LRPMvUt-A/exec"; // <-- REEMPLAZAR AQUÍ
+        // URL del CSV publicado de tu Google Sheet
+        const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSCsDyItDkK6arDKDp7Ntnzd7d81ruMAIETM0j58E_pr1C1PCcK2MNQBBjjxbua6u-x_3D-d2TVnIyY/pub?output=csv";
 
         let selectedNumbers = new Set();
         let reservedNumbers = new Set();
@@ -195,94 +196,90 @@
             updateDisplay();
         });
 
-async function loadReservedNumbers() {
-    try {
-        console.log("Cargando números reservados desde CSV...");
-        const csvRes = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSCsDyItDkK6arDKDp7Ntnzd7d81ruMAIETM0j58E_pr1C1PCcK2MNQBBjjxbua6u-x_3D-d2TVnIyY/pub?output=csv");
-        const csvText = await csvRes.text();
-        
-        const rows = csvText.split('\n');
-        const reservedNumbersArray = [];
-        
-        // Empezar desde 1 para saltar el header
-        for (let i = 1; i < rows.length; i++) {
-            const row = rows[i].trim();
-            if (row) {
-                const columns = row.split(',');
-                // Solo considerar reservados los que tienen "RESERVADO" en Estado O tienen nombre
-                if (columns.length >= 3 && (columns[1] === 'RESERVADO' || (columns[2] && columns[2].trim() !== ''))) {
-                    const number = parseInt(columns[0]);
-                    if (!isNaN(number) && number >= 1 && number <= 150) {
-                        reservedNumbersArray.push(number);
+        async function loadReservedNumbers() {
+            try {
+                console.log("Cargando números reservados desde CSV...");
+                const csvRes = await fetch(csvUrl);
+                const csvText = await csvRes.text();
+                
+                const rows = csvText.split('\n');
+                const reservedNumbersArray = [];
+                
+                // Empezar desde 1 para saltar el header
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i].trim();
+                    if (row) {
+                        const columns = row.split(',');
+                        // Solo considerar reservados los que tienen nombre (columna 3)
+                        if (columns.length >= 3 && columns[2] && columns[2].trim() !== '') {
+                            const number = parseInt(columns[0]);
+                            if (!isNaN(number) && number >= 1 && number <= 150) {
+                                reservedNumbersArray.push(number);
+                            }
+                        }
                     }
                 }
+                
+                console.log("Números realmente reservados:", reservedNumbersArray);
+                reservedNumbers = new Set(reservedNumbersArray);
+                updateDisplay();
+                
+            } catch (err) {
+                console.error("Error cargando datos desde CSV:", err);
+                // Si falla, no marcar ningún número como reservado
+                reservedNumbers = new Set();
+                updateDisplay();
             }
         }
-        
-        console.log("Números realmente reservados:", reservedNumbersArray);
-        reservedNumbers = new Set(reservedNumbersArray);
-        updateDisplay();
-        
-    } catch (err) {
-        console.error("Error cargando datos desde CSV:", err);
-        // Si falla, no marcar ningún número como reservado
-        reservedNumbers = new Set();
-        updateDisplay();
-    }
-}
-async function saveReservation(numbers) {
-    const name = prompt("Ingresá tu nombre para registrar la reserva:");
-    if (!name) return false;
-    
-    try {
-        const res = await fetch(apiUrl, {
-            method: "POST",
-            body: JSON.stringify({ 
-                numbers: Array.from(numbers), 
-                name: name 
-            }),
-            headers: { "Content-Type": "application/json" }
-        });
-        
-        if (res.ok) {
-            const result = await res.json();
-            if (result.success) {
-                alert("✅ Reserva registrada correctamente!");
-                // Recargar los números reservados
-                await loadReservedNumbers();
-                return true;
-            } else {
-                alert("❌ Error: " + (result.error || "Error desconocido"));
-            }
-        } else {
-            alert("❌ Error de conexión con el servidor.");
+
+        async function saveReservation(numbers) {
+            const name = prompt("Ingresá tu nombre para registrar la reserva:");
+            if (!name) return false;
+            
+            const numbersText = numbers.join(', ');
+            const total = numbers.length * pricePerNumber;
+            
+            // Mensaje completo para WhatsApp
+            const message = `¡Hola! Quiero reservar los siguientes números:\n\n` +
+                           `🎯 Números: ${numbersText}\n` +
+                           `👤 Nombre: ${name}\n` +
+                           `💰 Total a pagar: $${total.toLocaleString()}\n` +
+                           `📅 Fecha: ${new Date().toLocaleDateString('es-AR')}\n\n` +
+                           `Por favor, confirmame la disponibilidad y datos para el pago.`;
+            
+            // Actualizar el link de WhatsApp
+            whatsappLink.href = `https://wa.me/541134796562?text=${encodeURIComponent(message)}`;
+            finalAmount.textContent = `$${total.toLocaleString()}`;
+            
+            // Marcar como reservados localmente (hasta que se confirme el pago)
+            numbers.forEach(num => reservedNumbers.add(num));
+            updateDisplay();
+            
+            alert("✅ ¡Perfecto! Ahora serás redirigido a WhatsApp para confirmar tu reserva.\n\nUna vez que confirmes por WhatsApp, tu reserva quedará registrada.");
+            
+            selectionPanel.style.display = 'none';
+            paymentInstructions.classList.remove('hidden');
+            return true;
         }
-        return false;
-    } catch (err) {
-        console.error(err);
-        alert("Error de conexión. Por favor, intentá nuevamente.");
-        return false;
-    }
-}
+
         reserveNumbers.addEventListener('click', async () => {
-    if (selectedNumbers.size === 0) return;
-    
-    const numbersArray = Array.from(selectedNumbers);
-    const success = await saveReservation(numbersArray);
-    
-    if (success) {
-        const total = numbersArray.length * pricePerNumber;
-        finalAmount.textContent = `$${total.toLocaleString()}`;
-        const numbersText = numbersArray.join(', ');
-        const message = `¡Hola! Quiero confirmar mi reserva para los números: ${numbersText}\nTotal a pagar: $${total.toLocaleString()}`;
-        whatsappLink.href = `https://wa.me/541134796562?text=${encodeURIComponent(message)}`;
-        
-        selectedNumbers.clear();
-        updateDisplay();
-        selectionPanel.style.display = 'none';
-        paymentInstructions.classList.remove('hidden');
-    }
-});
+            if (selectedNumbers.size === 0) return;
+            
+            const numbersArray = Array.from(selectedNumbers);
+            const success = await saveReservation(numbersArray);
+            
+            if (success) {
+                selectedNumbers.clear();
+                updateDisplay();
+            }
+        });
+
+        backToSelection.addEventListener('click', () => {
+            paymentInstructions.classList.add('hidden');
+            selectionPanel.style.display = 'block';
+        });
+
+        // Inicializar
         initializeGrid();
         loadReservedNumbers();
     </script>
