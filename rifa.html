@@ -340,12 +340,12 @@
             const total = numbers.length * pricePerNumber;
             
             // Mensaje completo para WhatsApp
-            const message = `¡Hola! Quiero reservar los siguientes números:\n\n` +
+            const message = `¡Hola! Quiero reservar los siguientes números para la rifa del bajo:\n\n` +
                            `🎯 Números: ${numbersText}\n` +
                            `👤 Nombre: ${name}\n` +
                            `💰 Total a pagar: $${total.toLocaleString()}\n` +
                            `📅 Fecha: ${new Date().toLocaleDateString('es-AR')}\n\n` +
-                           `Por favor, confirmame la disponibilidad y datos para el pago.`;
+                           `Te adjunto comprobante, por favor confirmame que recibiste el pago. Gracias!!.`;
             
             // Actualizar el link de WhatsApp
             whatsappLink.href = `https://wa.me/541134796562?text=${encodeURIComponent(message)}`;
@@ -355,7 +355,7 @@
             numbers.forEach(num => reservedNumbers.add(num));
             updateDisplay();
             
-            alert("✅ ¡Perfecto! Ahora serás redirigido a WhatsApp para confirmar tu reserva.\n\nUna vez que confirmes por WhatsApp, tu reserva quedará registrada.");
+            alert("✅ ¡Perfecto! Ahora serás redirigido para confirmar tu reserva.\n\nUna vez que confirmes por WhatsApp adjuntando el comprobante, tu reserva quedará registrada.");
             
             selectionPanel.style.display = 'none';
             paymentInstructions.classList.remove('hidden');
