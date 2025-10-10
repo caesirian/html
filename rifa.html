@@ -132,7 +132,7 @@
     </div>
 
     <script>
-        const apiUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vScw7D5KysOcHMMZOPk0D_wrg0CcukNDl4kM8O5xarnKRpPFMWl--A02ERvQ9KJlpV1SKmk7nzhpWYs/pub?output=csv"; // <-- REEMPLAZAR AQUÍ
+        const apiUrl = "https://script.google.com/macros/s/AKfycby9WUcwlJrJ0V2ys-6NBFXu-7_VlC3YbdLLOj24eVe1vJFB9X3K5Sak6fNp5G6BVnpxLg/exec"; // <-- REEMPLAZAR AQUÍ
 
         let selectedNumbers = new Set();
         let reservedNumbers = new Set();
@@ -195,57 +195,81 @@
             updateDisplay();
         });
 
-        async function loadReservedNumbers() {
-            try {
-                const res = await fetch(apiUrl);
-                const reserved = await res.json();
-                reservedNumbers = new Set(reserved.map(Number));
-                updateDisplay();
-            } catch (err) {
-                console.error("Error cargando datos:", err);
-            }
-        }
-
-        async function saveReservation(numbers) {
-            const name = prompt("Ingresá tu nombre para registrar la reserva:");
-            try {
-                const res = await fetch(apiUrl, {
-                    method: "POST",
-                    body: JSON.stringify({ numbers, name }),
-                    headers: { "Content-Type": "application/json" }
-                });
-                if (res.ok) {
-                    alert("✅ Reserva registrada correctamente!");
-                    await loadReservedNumbers();
-                } else {
-                    alert("❌ Error al registrar la reserva.");
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Error de conexión con la hoja.");
-            }
-        }
-
-        reserveNumbers.addEventListener('click', async () => {
-            if (selectedNumbers.size === 0) return;
-            const numbersArray = Array.from(selectedNumbers);
-            await saveReservation(numbersArray);
-            const total = numbersArray.length * pricePerNumber;
-            finalAmount.textContent = `$${total.toLocaleString()}`;
-            const numbersText = numbersArray.join(', ');
-            const message = `Quiero comprar los números: ${numbersText}`;
-            whatsappLink.href = `https://wa.me/541134796562?text=${encodeURIComponent(message)}`;
-            selectedNumbers.clear();
+async function loadReservedNumbers() {
+    try {
+        const res = await fetch(apiUrl);
+        const reserved = await res.json();
+        reservedNumbers = new Set(reserved);
+        updateDisplay();
+    } catch (err) {
+        console.error("Error cargando datos:", err);
+        // Fallback: cargar desde CSV si el JSON falla
+        try {
+            const csvRes = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSCsDyItDkK6arDKDp7Ntnzd7d81ruMAIETM0j58E_pr1C1PCcK2MNQBBjjxbua6u-x_3D-d2TVnIyY/pub?output=csv");
+            const csvText = await csvRes.text();
+            const numbers = csvText.split('\n')
+                .slice(1) // Saltar header
+                .map(row => parseInt(row.split(',')[0]))
+                .filter(num => !isNaN(num));
+            reservedNumbers = new Set(numbers);
             updateDisplay();
-            selectionPanel.style.display = 'none';
-            paymentInstructions.classList.remove('hidden');
-        });
+        } catch (fallbackErr) {
+            console.error("Error con fallback CSV:", fallbackErr);
+        }
+    }
+}
 
-        backToSelection.addEventListener('click', () => {
-            paymentInstructions.classList.add('hidden');
-            selectionPanel.style.display = 'block';
+async function saveReservation(numbers) {
+    const name = prompt("Ingresá tu nombre para registrar la reserva:");
+    if (!name) return false;
+    
+    try {
+        const res = await fetch(apiUrl, {
+            method: "POST",
+            body: JSON.stringify({ 
+                numbers: Array.from(numbers), 
+                name: name 
+            }),
+            headers: { "Content-Type": "application/json" }
         });
-
+        
+        if (res.ok) {
+            const result = await res.json();
+            if (result.success) {
+                alert("✅ Reserva registrada correctamente!");
+                // Agregar los números a reservedNumbers localmente
+                numbers.forEach(num => reservedNumbers.add(num));
+                updateDisplay();
+                return true;
+            }
+        }
+        alert("❌ Error al registrar la reserva.");
+        return false;
+    } catch (err) {
+        console.error(err);
+        alert("Error de conexión. Por favor, intentá nuevamente.");
+        return false;
+    }
+}
+        reserveNumbers.addEventListener('click', async () => {
+    if (selectedNumbers.size === 0) return;
+    
+    const numbersArray = Array.from(selectedNumbers);
+    const success = await saveReservation(numbersArray);
+    
+    if (success) {
+        const total = numbersArray.length * pricePerNumber;
+        finalAmount.textContent = `$${total.toLocaleString()}`;
+        const numbersText = numbersArray.join(', ');
+        const message = `¡Hola! Quiero confirmar mi reserva para los números: ${numbersText}\nTotal a pagar: $${total.toLocaleString()}`;
+        whatsappLink.href = `https://wa.me/541134796562?text=${encodeURIComponent(message)}`;
+        
+        selectedNumbers.clear();
+        updateDisplay();
+        selectionPanel.style.display = 'none';
+        paymentInstructions.classList.remove('hidden');
+    }
+});
         initializeGrid();
         loadReservedNumbers();
     </script>
