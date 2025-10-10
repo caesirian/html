@@ -197,20 +197,43 @@
 
 async function loadReservedNumbers() {
     try {
+        console.log("Cargando números reservados...");
         const res = await fetch(apiUrl);
+        console.log("Respuesta recibida:", res);
+        
+        const text = await res.text();
+        console.log("Texto crudo recibido:", text);
+        
         const reserved = await res.json();
+        console.log("JSON parseado:", reserved);
+        
         reservedNumbers = new Set(reserved);
+        console.log("Números reservados:", Array.from(reservedNumbers));
+        
         updateDisplay();
     } catch (err) {
         console.error("Error cargando datos:", err);
-        // Fallback: cargar desde CSV si el JSON falla
+        // Fallback temporal - usar CSV directamente
         try {
+            console.log("Intentando cargar desde CSV...");
             const csvRes = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSCsDyItDkK6arDKDp7Ntnzd7d81ruMAIETM0j58E_pr1C1PCcK2MNQBBjjxbua6u-x_3D-d2TVnIyY/pub?output=csv");
             const csvText = await csvRes.text();
-            const numbers = csvText.split('\n')
-                .slice(1) // Saltar header
-                .map(row => parseInt(row.split(',')[0]))
-                .filter(num => !isNaN(num));
+            console.log("CSV crudo:", csvText);
+            
+            const rows = csvText.split('\n');
+            console.log("Filas del CSV:", rows);
+            
+            const numbers = [];
+            for (let i = 1; i < rows.length; i++) { // Empezar desde 1 para saltar el header
+                if (rows[i].trim()) {
+                    const number = parseInt(rows[i].split(',')[0]);
+                    if (!isNaN(number)) {
+                        numbers.push(number);
+                    }
+                }
+            }
+            
+            console.log("Números extraídos del CSV:", numbers);
             reservedNumbers = new Set(numbers);
             updateDisplay();
         } catch (fallbackErr) {
