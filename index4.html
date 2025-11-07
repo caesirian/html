@@ -1,91 +1,131 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HG Soluciones - Dashboard</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
-      background-color: #0b172a;
-      color: #e8ecf4;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
-    header {
-      background-color: #12294b;
-      padding: 1.5rem;
-      color: #fff;
-      font-size: 1.6rem;
-      font-weight: 600;
-      letter-spacing: 1px;
-    }
-    main {
-      padding: 2rem;
-    }
-    .card {
-      background: #162a4a;
-      border-radius: 12px;
-      padding: 1rem;
-      margin: 1rem auto;
-      max-width: 600px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-    }
-    .btn {
-      background-color: #1e3a8a;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 18px;
-      font-size: 1rem;
-      cursor: pointer;
-      margin-top: 1rem;
-      transition: background 0.3s;
-    }
-    .btn:hover {
-      background-color: #3b82f6;
-    }
-    pre {
-      background: #0f1a33;
-      color: #9cd6ff;
-      padding: 1rem;
-      text-align: left;
-      overflow-x: auto;
-      border-radius: 8px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HG Dashboard - Finanzas</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    background-color: #0d1b2a;
+    color: #e0e1dd;
+    margin: 0;
+    padding: 0;
+  }
+  header {
+    background-color: #1b263b;
+    padding: 1rem 2rem;
+    text-align: center;
+    border-bottom: 2px solid #415a77;
+  }
+  h1 {
+    margin: 0;
+    color: #e0e1dd;
+    letter-spacing: 1px;
+  }
+  .contenedor {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 2rem;
+    gap: 1.5rem;
+  }
+  .tarjeta {
+    background-color: #1b263b;
+    border: 1px solid #415a77;
+    border-radius: 10px;
+    padding: 1.5rem;
+    width: 300px;
+    text-align: center;
+    box-shadow: 0 0 8px rgba(0,0,0,0.3);
+  }
+  .tarjeta h2 {
+    margin-top: 0;
+    color: #778da9;
+  }
+  .monto {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #e0e1dd;
+  }
+  footer {
+    text-align: center;
+    padding: 1rem;
+    font-size: 0.9rem;
+    color: #778da9;
+  }
+</style>
 </head>
 <body>
-  <header>HG Soluciones - Dashboard de Datos</header>
-  <main>
-    <div class="card">
-      <h2>Conexión con Google Sheets</h2>
-      <p>Presioná el botón para obtener los datos actualizados desde el servidor GAS.</p>
-      <button class="btn" onclick="refreshAll()">Actualizar Datos</button>
-      <pre id="output">Esperando conexión...</pre>
+  <header>
+    <h1>HG Dashboard - Finanzas</h1>
+  </header>
+
+  <section class="contenedor">
+    <div class="tarjeta">
+      <h2>Saldo General</h2>
+      <div id="saldo" class="monto">Cargando...</div>
     </div>
-  </main>
 
-  <script>
-    const gasURL = 'https://script.google.com/macros/s/AKfycbyTLrGiqes1VOp8E51Kq91P7YihPKNtN1f0f6u2JitXOteGyGrNXqiSjdXYJ8HAtfs/exec';
+    <div class="tarjeta">
+      <h2>Total Ingresos</h2>
+      <div id="ingresos" class="monto">Cargando...</div>
+    </div>
 
-    async function refreshAll() {
-      document.getElementById('output').textContent = 'Cargando datos...';
-      try {
-        const response = await fetch(gasURL, {
-          method: 'GET',
-          mode: 'cors',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        if (!response.ok) throw new Error(`Error HTTP ${response.status}`);
-        const data = await response.json();
-        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
-      } catch (err) {
-        document.getElementById('output').textContent = `Error al obtener datos: ${err.message}`;
-        console.error('Error refreshAll:', err);
-      }
-    }
-  </script>
+    <div class="tarjeta">
+      <h2>Total Egresos</h2>
+      <div id="egresos" class="monto">Cargando...</div>
+    </div>
+  </section>
+
+  <footer>
+    HG Soluciones Administrativas © 2025
+  </footer>
+
+<script>
+async function fetchData() {
+  const url = "https://script.google.com/macros/s/AKfycbyTLrGiqes1VOp8E51Kq91P7YihPKNtN1f0f6u2JitXOteGyGrNXqiSjdXYJ8HAtfs/exec";
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Error al conectar con GAS");
+  return await res.json();
+}
+
+function renderFinanzas(finanzas){
+  if(!finanzas || finanzas.length === 0) return;
+
+  const ingresos = finanzas
+    .filter(r => (r["Tipo (Ingreso/Egreso)"] || "").toString().toLowerCase().includes("ingreso"))
+    .reduce((a,b)=>{
+      const val = parseFloat((b["Monto"] || "0").toString().replace(/[^\d,.-]/g,"").replace(",","."));
+      return a + (isNaN(val)?0:val);
+    },0);
+
+  const egresos = finanzas
+    .filter(r => (r["Tipo (Ingreso/Egreso)"] || "").toString().toLowerCase().includes("egreso"))
+    .reduce((a,b)=>{
+      const val = parseFloat((b["Monto"] || "0").toString().replace(/[^\d,.-]/g,"").replace(",","."));
+      return a + (isNaN(val)?0:val);
+    },0);
+
+  const saldo = ingresos - egresos;
+
+  document.getElementById("ingresos").textContent = "$ " + ingresos.toLocaleString("es-AR");
+  document.getElementById("egresos").textContent = "$ " + egresos.toLocaleString("es-AR");
+  document.getElementById("saldo").textContent = "$ " + saldo.toLocaleString("es-AR");
+}
+
+async function initDashboard(){
+  try{
+    const data = await fetchData();
+    const finanzas = data["Finanzas_RegistroDiario"];
+    renderFinanzas(finanzas);
+  }catch(err){
+    console.error("Error:", err);
+    document.getElementById("saldo").textContent = "Error de conexión";
+  }
+}
+
+initDashboard();
+</script>
 </body>
 </html>
