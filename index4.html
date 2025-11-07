@@ -1,253 +1,91 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HG Dashboard</title>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HG Soluciones - Dashboard</title>
   <style>
-    /* === ESTILO BASE HG === */
     body {
-      font-family: "Segoe UI", Roboto, sans-serif;
-      background: #f9fafb;
-      color: #222;
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      background-color: #0b172a;
+      color: #e8ecf4;
       margin: 0;
       padding: 0;
+      text-align: center;
     }
     header {
-      background: linear-gradient(90deg, #004aad, #0077ff);
-      color: white;
-      padding: 1rem 2rem;
-      text-align: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      background-color: #12294b;
+      padding: 1.5rem;
+      color: #fff;
+      font-size: 1.6rem;
+      font-weight: 600;
+      letter-spacing: 1px;
     }
-    .container {
-      max-width: 1200px;
-      margin: 2rem auto;
-      padding: 1rem;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
+    main {
+      padding: 2rem;
     }
     .card {
-      background: white;
+      background: #162a4a;
       border-radius: 12px;
-      padding: 1.2rem;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      transition: transform 0.2s;
+      padding: 1rem;
+      margin: 1rem auto;
+      max-width: 600px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
     }
-    .card:hover { transform: translateY(-3px); }
-    h2 {
-      font-size: 1.1rem;
-      margin-top: 0;
-      color: #004aad;
+    .btn {
+      background-color: #1e3a8a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: background 0.3s;
     }
-    .saldo {
-      font-size: 2.2rem;
-      font-weight: bold;
-      color: #0077ff;
+    .btn:hover {
+      background-color: #3b82f6;
     }
-    canvas {
-      width: 100%;
-      height: 240px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9rem;
-    }
-    table th, table td {
-      border-bottom: 1px solid #ddd;
-      padding: 0.4rem 0.6rem;
+    pre {
+      background: #0f1a33;
+      color: #9cd6ff;
+      padding: 1rem;
       text-align: left;
-    }
-    table th {
-      background: #f3f6fa;
-      color: #004aad;
-    }
-    #cache-status {
-      font-size: 0.85rem;
-      color: #666;
-      margin-left: 8px;
+      overflow-x: auto;
+      border-radius: 8px;
     }
   </style>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <header>
-    <h1>📊 Dashboard HG Soluciones</h1>
-    <div id="cache-status">(cache: no)</div>
-  </header>
-
-  <main class="container">
-    <section class="card">
-      <h2>Saldo Actual</h2>
-      <div id="saldo" class="saldo">Cargando...</div>
-    </section>
-
-    <section class="card">
-      <h2>Ingresos Mensuales</h2>
-      <canvas id="chartIngresos"></canvas>
-    </section>
-
-    <section class="card">
-      <h2>Egresos Mensuales</h2>
-      <canvas id="chartEgresos"></canvas>
-    </section>
-
-    <section class="card">
-      <h2>Cuentas Pendientes</h2>
-      <table id="tablaPendientes">
-        <thead>
-          <tr><th>Tipo</th><th>Código</th><th>Monto</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
+  <header>HG Soluciones - Dashboard de Datos</header>
+  <main>
+    <div class="card">
+      <h2>Conexión con Google Sheets</h2>
+      <p>Presioná el botón para obtener los datos actualizados desde el servidor GAS.</p>
+      <button class="btn" onclick="refreshAll()">Actualizar Datos</button>
+      <pre id="output">Esperando conexión...</pre>
+    </div>
   </main>
 
   <script>
-    // === CONFIGURACIÓN ===
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbyTLrGiqes1VOp8E51Kq91P7YihPKNtN1f0f6u2JitXOteGyGrNXqiSjdXYJ8HAtfs/exec";
-    const PROXY = "https://api.allorigins.win/get?url="; // evita CORS
-    const CACHE_KEY = "hg_dashboard_cache_v1";
-    const CACHE_TTL_MS = 1000 * 60 * 30; // 30 minutos
+    const gasURL = 'https://script.google.com/macros/s/AKfycbyTLrGiqes1VOp8E51Kq91P7YihPKNtN1f0f6u2JitXOteGyGrNXqiSjdXYJ8HAtfs/exec';
 
-    async function fetchAllFromGAS() {
-      const cached = loadCache();
-      if (cached) return cached;
-
-      const url = PROXY + encodeURIComponent(GAS_URL);
-      const res = await fetch(url);
-      const json = await res.json();
-      const data = JSON.parse(json.contents);
-
-      saveCache(data);
-      return data;
-    }
-
-    function saveCache(data) {
-      localStorage.setItem(CACHE_KEY, JSON.stringify({ts:Date.now(), data}));
-      document.getElementById("cache-status").textContent = "(cache: sí)";
-    }
-    function loadCache() {
-      const raw = localStorage.getItem(CACHE_KEY);
-      if (!raw) return null;
-      try {
-        const parsed = JSON.parse(raw);
-        if (Date.now() - parsed.ts > CACHE_TTL_MS) return null;
-        document.getElementById("cache-status").textContent = "(cache: sí)";
-        return parsed.data;
-      } catch {
-        return null;
-      }
-    }
-
-    // === PROCESAMIENTO DE DATOS ===
-    function parseNumber(v) {
-      if (!v) return 0;
-      if (typeof v === "number") return v;
-      const s = String(v).replace(/[^0-9,\-\.]/g, "").replace(/\./g, "").replace(",", ".");
-      return parseFloat(s) || 0;
-    }
-
-    function calcularSaldo(finanzas) {
-      let saldo = 0;
-      finanzas.forEach(f => {
-        if (f["Tipo (Ingreso/Egreso)"] === "Ingreso") saldo += parseNumber(f["Monto"]);
-        if (f["Tipo (Ingreso/Egreso)"] === "Egreso") saldo -= parseNumber(f["Monto"]);
-      });
-      return saldo;
-    }
-
-    function mostrarSaldo(saldo) {
-      document.getElementById("saldo").textContent = "$ " + saldo.toLocaleString("es-AR", {minimumFractionDigits:2});
-    }
-
-    function graficarComparativo(ctx, datosMesActual, datosMesAnterior, titulo) {
-      new Chart(ctx, {
-        type: "bar",
-        data: {
-          labels: ["Mes anterior", "Mes actual"],
-          datasets: [{
-            label: titulo,
-            data: [datosMesAnterior, datosMesActual],
-            backgroundColor: ["#6c8cff", "#0077ff"]
-          }]
-        },
-        options: {responsive:true, plugins:{legend:{display:false}}}
-      });
-    }
-
-    function mostrarPendientes(pendientes) {
-      const tbody = document.querySelector("#tablaPendientes tbody");
-      tbody.innerHTML = "";
-      pendientes.forEach(p => {
-        const fila = document.createElement("tr");
-        fila.innerHTML = `
-          <td>${p["Tipo"] || ""}</td>
-          <td>${p["Código"] || ""}</td>
-          <td>$${parseNumber(p["Monto"]).toLocaleString("es-AR")}</td>
-        `;
-        tbody.appendChild(fila);
-      });
-    }
-
-    // === PRINCIPAL ===
     async function refreshAll() {
+      document.getElementById('output').textContent = 'Cargando datos...';
       try {
-        const data = await fetchAllFromGAS();
-
-        const finanzas = data["Finanzas_RegistroDiario"] || [];
-        const pendientes = data["Cuentas_Pendientes"] || [];
-
-        // Saldo
-        const saldo = calcularSaldo(finanzas);
-        mostrarSaldo(saldo);
-
-        // Gráficos mensuales
-        const hoy = new Date();
-        const mesActual = hoy.getMonth();
-        const mesAnterior = mesActual === 0 ? 11 : mesActual - 1;
-        const añoActual = hoy.getFullYear();
-
-        const ingresosActual = finanzas.filter(f =>
-          f["Tipo (Ingreso/Egreso)"] === "Ingreso" &&
-          new Date(f["Fecha"]).getMonth() === mesActual &&
-          new Date(f["Fecha"]).getFullYear() === añoActual
-        ).reduce((a,b) => a + parseNumber(b["Monto"]), 0);
-
-        const ingresosAnterior = finanzas.filter(f =>
-          f["Tipo (Ingreso/Egreso)"] === "Ingreso" &&
-          new Date(f["Fecha"]).getMonth() === mesAnterior &&
-          new Date(f["Fecha"]).getFullYear() === añoActual
-        ).reduce((a,b) => a + parseNumber(b["Monto"]), 0);
-
-        const egresosActual = finanzas.filter(f =>
-          f["Tipo (Ingreso/Egreso)"] === "Egreso" &&
-          new Date(f["Fecha"]).getMonth() === mesActual &&
-          new Date(f["Fecha"]).getFullYear() === añoActual
-        ).reduce((a,b) => a + parseNumber(b["Monto"]), 0);
-
-        const egresosAnterior = finanzas.filter(f =>
-          f["Tipo (Ingreso/Egreso)"] === "Egreso" &&
-          new Date(f["Fecha"]).getMonth() === mesAnterior &&
-          new Date(f["Fecha"]).getFullYear() === añoActual
-        ).reduce((a,b) => a + parseNumber(b["Monto"]), 0);
-
-        graficarComparativo(document.getElementById("chartIngresos"), ingresosActual, ingresosAnterior, "Ingresos");
-        graficarComparativo(document.getElementById("chartEgresos"), egresosActual, egresosAnterior, "Egresos");
-
-        // Pendientes
-        mostrarPendientes(pendientes);
-
+        const response = await fetch(gasURL, {
+          method: 'GET',
+          mode: 'cors',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        if (!response.ok) throw new Error(`Error HTTP ${response.status}`);
+        const data = await response.json();
+        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
       } catch (err) {
-        console.error("Error refreshAll:", err);
+        document.getElementById('output').textContent = `Error al obtener datos: ${err.message}`;
+        console.error('Error refreshAll:', err);
       }
     }
-
-    refreshAll();
   </script>
 </body>
 </html>
