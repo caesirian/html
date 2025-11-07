@@ -3,228 +3,151 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HG Dashboard Profesional</title>
-<!-- Chart.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<title>HG Dashboard Avanzado</title>
 <style>
-  /* Diseño azul oscuro profesional HG */
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #0d1b2a;
-    color: #ffffff;
-  }
-  header {
-    background-color: #1b2a41;
-    padding: 15px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 18px;
-    font-weight: bold;
-  }
-  nav {
-    width: 220px;
-    background-color: #1b2a41;
-    position: fixed;
-    top: 60px;
-    bottom: 0;
-    padding-top: 20px;
-  }
-  nav a {
-    display: block;
-    padding: 12px 20px;
-    color: #ffffff;
-    text-decoration: none;
-    font-weight: 500;
-  }
-  nav a:hover {
-    background-color: #162036;
-  }
-  main {
-    margin-left: 240px;
-    padding: 20px;
-  }
-  section {
-    margin-bottom: 40px;
-  }
-  h2 {
-    border-bottom: 2px solid #162036;
-    padding-bottom: 5px;
-    margin-bottom: 15px;
-    color: #00bcd4;
-  }
-  canvas {
-    background-color: #162036;
-    border-radius: 8px;
-    padding: 10px;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-    background-color: #1b2a41;
-  }
-  table th, table td {
-    border: 1px solid #0d1b2a;
-    padding: 8px;
-    text-align: left;
-  }
-  table th {
-    background-color: #162036;
-  }
+  body { margin:0; font-family:Arial, sans-serif; background:#0d1b2a; color:#e0e1dd; }
+  header { background:#1b263b; padding:10px 20px; display:flex; align-items:center; }
+  nav { width:220px; background:#1b263b; position:fixed; top:0; bottom:0; left:0; padding-top:60px; }
+  nav a { display:block; color:#e0e1dd; padding:10px 15px; text-decoration:none; }
+  nav a:hover { background:#415a77; }
+  main { margin-left:220px; padding:20px; }
+  h1, h2 { color:#e0e1dd; }
+  table { border-collapse:collapse; width:100%; margin-top:10px; }
+  th, td { border:1px solid #415a77; padding:5px; text-align:left; }
+  th { background:#1b263b; }
+  canvas { background:#0d1b2a; }
+  .card { background:#1b263b; padding:15px; margin-bottom:20px; border-radius:5px; box-shadow:0 0 10px rgba(0,0,0,0.5); }
 </style>
 </head>
 <body>
-
 <header>
-  HG Dashboard Profesional
-  <div id="cache-status">Cache: cargando...</div>
+  <h1>HG Dashboard Avanzado</h1>
 </header>
-
 <nav>
-  <a href="#finanzas">Finanzas</a>
-  <a href="#ventas">Ventas</a>
+  <a href="#finanzas">Finanzas Mensuales</a>
+  <a href="#ventas">Ventas Mensuales</a>
   <a href="#caja">Caja Movimientos</a>
   <a href="#pendientes">Cuentas Pendientes</a>
 </nav>
-
 <main>
+  <div id="finanzas" class="card">
+    <h2>Finanzas Mensuales</h2>
+    <canvas id="graficoFinanzas" width="600" height="300"></canvas>
+  </div>
+  <div id="ventas" class="card">
+    <h2>Ventas Mensuales</h2>
+    <canvas id="graficoVentas" width="600" height="300"></canvas>
+  </div>
+  <div id="caja" class="card">
+    <h2>Caja Movimientos</h2>
+    <canvas id="graficoCaja" width="600" height="300"></canvas>
+  </div>
+  <div id="pendientes" class="card">
+    <h2>Cuentas Pendientes</h2>
+    <table id="tablaPendientes">
+      <thead>
+        <tr><th>Cliente/Proveedor</th><th>Monto</th><th>Vencimiento</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</main>
 
-<section id="finanzas">
-  <h2>Finanzas Mensuales</h2>
-  <canvas id="chartFinanzas"></canvas>
-</section>
-
-<section id="ventas">
-  <h2>Ventas Mensuales</h2>
-  <canvas id="chartVentas"></canvas>
-</section>
-
-<section id="caja">
-  <h2>Caja Movimientos</h2>
-  <canvas id="chartCaja"></canvas>
-</section>
-
-<section id="pendientes">
-  <h2>Cuentas Pendientes</h2>
-  <table id="tablaPendientes">
-    <thead>
-      <tr>
-        <th>Cliente/Proveedor</th>
-        <th>Categoría</th>
-        <th>Subcategoría</th>
-        <th>Monto</th>
-        <th>Fecha</th>
-      </tr>
-    </thead>
-    <tbody>
-    </tbody>
-  </table>
-</section>
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// === Conexión GAS ===
-const GAS_URL = "https://script.google.com/macros/s/AKfycbyTLrGiqes1VOp8E51Kq91P7YihPKNtN1f0f6u2JitXOteGyGrNXqiSjdXYJ8HAtfs/exec";
+const URL_GAS = "https://script.google.com/macros/s/YOUR_DEPLOY_ID/exec";
 
-async function fetchData() {
-  try {
-    const res = await fetch(GAS_URL);
-    const data = await res.json();
-    document.getElementById('cache-status').innerText = 'Cache: OK';
-    return data;
-  } catch (err) {
-    console.error("Error fetch GAS:", err);
-    document.getElementById('cache-status').innerText = 'Cache: ERROR';
-    return null;
-  }
+function parseMonto(val){
+  if(val===null||val===undefined||val==="") return 0;
+  const n = parseFloat(String(val).replace(/[^0-9,\-\.]/g,"").replace(",","."));
+  return isNaN(n)?0:n;
 }
 
-// === Funciones de gráficos ===
-function crearGraficoBarras(ctx, labels, data, label, color) {
-  return new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label,
-        data,
-        backgroundColor: color,
-        borderColor: '#00bcd4',
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: { y: { beginAtZero: true } }
-    }
-  });
+async function fetchData(){
+  const res = await fetch(URL_GAS);
+  return await res.json();
 }
 
-function crearGraficoLineas(ctx, labels, data, label, color) {
-  return new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        label,
-        data,
-        borderColor: color,
-        backgroundColor: 'rgba(0,188,212,0.2)',
-        tension: 0.2
-      }]
-    },
-    options: { responsive: true }
-  });
-}
-
-function actualizarTablaPendientes(tablaId, datos) {
-  const tbody = document.querySelector(`#${tablaId} tbody`);
-  tbody.innerHTML = '';
-  datos.forEach(row => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${row["Cliente/Proveedor"]}</td>
-      <td>${row.Categoría}</td>
-      <td>${row["Subcategoría"]}</td>
-      <td>${parseFloat(row.Monto).toLocaleString("es-AR", {style:"currency", currency:"ARS"})}</td>
-      <td>${row.Fecha}</td>
-    `;
+function renderTablaPendientes(pendientes){
+  const tbody = document.querySelector("#tablaPendientes tbody");
+  tbody.innerHTML = "";
+  pendientes.forEach(p => {
+    const tr = document.createElement("tr");
+    const cliente = p["Cliente/Proveedor"] || "";
+    const monto = parseMonto(p["Monto"]).toLocaleString("es-AR",{style:"currency",currency:"ARS"});
+    const venc = p["Vencimiento"] || p["Fecha"] || "";
+    tr.innerHTML = `<td>${cliente}</td><td>${monto}</td><td>${venc}</td>`;
     tbody.appendChild(tr);
   });
 }
 
-// === Renderizar todo ===
-async function initDashboard() {
-  const data = await fetchData();
-  if (!data) return;
+function renderGraficoLinea(canvasId, labels, data, labelText, color="#415a77"){
+  const ctx = document.getElementById(canvasId).getContext("2d");
+  const gradient = ctx.createLinearGradient(0,0,0,300);
+  gradient.addColorStop(0,color);
+  gradient.addColorStop(1,"rgba(0,0,0,0)");
+  new Chart(ctx,{
+    type:'line',
+    data:{
+      labels,
+      datasets:[{
+        label:labelText,
+        data,
+        borderColor:color,
+        backgroundColor:gradient,
+        fill:true,
+        tension:0.3,
+        pointRadius:4,
+        pointBackgroundColor:color
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{legend:{labels:{color:'#e0e1dd'}}, tooltip:{callbacks:{label:ctx=>parseMonto(ctx.raw).toLocaleString('es-AR',{style:'currency',currency:'ARS'})}}},
+      scales:{
+        x:{ticks:{color:'#e0e1dd'}},
+        y:{ticks:{color:'#e0e1dd'}}
+      }
+    }
+  });
+}
+
+function calcularSaldoAcumulado(caja){
+  let saldo=0;
+  return caja.map(c=>{
+    saldo+=parseMonto(c.Monto);
+    return saldo;
+  });
+}
+
+async function initDashboard(){
+  const d = await fetchData();
 
   // Finanzas Mensuales
-  const finanzas = data["Finanzas_Mensual"] || [];
-  const labelsFinanzas = finanzas.map(f => f.Mes);
-  const valoresFinanzas = finanzas.map(f => parseFloat(f.Total || 0));
-  crearGraficoLineas(document.getElementById('chartFinanzas'), labelsFinanzas, valoresFinanzas, 'Saldo Mensual', '#00bcd4');
+  const finanzas = d["Finanzas_Mensual"] || [];
+  const labelsFin = finanzas.map(f => f.Mes);
+  const dataFin = finanzas.map(f => parseMonto(f.Total));
+  renderGraficoLinea("graficoFinanzas", labelsFin, dataFin, "Saldo Mensual");
 
   // Ventas Mensuales
-  const ventas = data["Ventas_Mensual"] || [];
-  const labelsVentas = ventas.map(v => v.Mes);
-  const valoresVentas = ventas.map(v => parseFloat(v.Total || 0));
-  crearGraficoBarras(document.getElementById('chartVentas'), labelsVentas, valoresVentas, 'Ventas', '#00bcd4');
+  const ventas = d["Ventas_Mensual"] || [];
+  const labelsVen = ventas.map(v => v.Mes);
+  const dataVen = ventas.map(v => parseMonto(v.Total));
+  renderGraficoLinea("graficoVentas", labelsVen, dataVen, "Ventas Mensuales", "#ff7f50");
 
-  // Caja Movimientos
-  const caja = data["Caja_Movimientos"] || [];
+  // Caja Movimientos (saldo acumulado)
+  const caja = d["Caja_Movimientos"] || [];
   const labelsCaja = caja.map(c => c.Fecha);
-  const valoresCaja = caja.map(c => parseFloat(c.Monto || 0));
-  crearGraficoBarras(document.getElementById('chartCaja'), labelsCaja, valoresCaja, 'Movimientos Caja', '#00bcd4');
+  const dataCaja = calcularSaldoAcumulado(caja);
+  renderGraficoLinea("graficoCaja", labelsCaja, dataCaja, "Saldo Acumulado Caja", "#00bfff");
 
   // Cuentas Pendientes
-  const pendientes = data["Cuentas_Pendientes"] || [];
-  actualizarTablaPendientes('tablaPendientes', pendientes);
+  const pendientes = (d["Cuentas_Pendientes"] || []).filter(p => parseMonto(p.Monto)>0);
+  renderTablaPendientes(pendientes);
 }
 
 // Inicializar
 initDashboard();
 </script>
-
 </body>
 </html>
