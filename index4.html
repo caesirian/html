@@ -3,129 +3,139 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HG Dashboard - Finanzas</title>
+<title>HG Dashboard</title>
 <style>
-  body {
-    font-family: 'Segoe UI', Roboto, sans-serif;
-    background-color: #0d1b2a;
-    color: #e0e1dd;
-    margin: 0;
-    padding: 0;
-  }
-  header {
-    background-color: #1b263b;
-    padding: 1rem 2rem;
-    text-align: center;
-    border-bottom: 2px solid #415a77;
-  }
-  h1 {
-    margin: 0;
-    color: #e0e1dd;
-    letter-spacing: 1px;
-  }
-  .contenedor {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding: 2rem;
-    gap: 1.5rem;
-  }
-  .tarjeta {
-    background-color: #1b263b;
-    border: 1px solid #415a77;
-    border-radius: 10px;
-    padding: 1.5rem;
-    width: 300px;
-    text-align: center;
-    box-shadow: 0 0 8px rgba(0,0,0,0.3);
-  }
-  .tarjeta h2 {
-    margin-top: 0;
-    color: #778da9;
-  }
-  .monto {
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: #e0e1dd;
-  }
-  footer {
-    text-align: center;
-    padding: 1rem;
-    font-size: 0.9rem;
-    color: #778da9;
-  }
+body { margin:0; font-family:Arial,sans-serif; background-color:#0d1b2a; color:#fff; }
+header { background-color:#1b2a41; padding:15px; display:flex; align-items:center; justify-content:space-between; }
+header h1 { margin:0; font-size:1.5em; color:#fff; }
+nav { width:200px; background-color:#162a44; position:fixed; top:60px; bottom:0; padding-top:20px; }
+nav a { display:block; color:#fff; text-decoration:none; padding:10px 20px; }
+nav a:hover { background-color:#1f3a5a; }
+main { margin-left:200px; padding:20px; }
+.module { background-color:#1b2a41; padding:15px; margin-bottom:20px; border-radius:8px; }
+.module h2 { margin-top:0; font-size:1.2em; color:#00bfff; }
+canvas { background-color:#0d1b2a; border-radius:8px; }
 </style>
 </head>
 <body>
-  <header>
-    <h1>HG Dashboard - Finanzas</h1>
-  </header>
 
-  <section class="contenedor">
-    <div class="tarjeta">
-      <h2>Saldo General</h2>
-      <div id="saldo" class="monto">Cargando...</div>
-    </div>
+<header>
+<h1>HG Dashboard</h1>
+</header>
 
-    <div class="tarjeta">
-      <h2>Total Ingresos</h2>
-      <div id="ingresos" class="monto">Cargando...</div>
-    </div>
+<nav>
+<a href="#">Saldo Actual</a>
+<a href="#">Ingresos Mensuales</a>
+<a href="#">Egresos Mensuales</a>
+<a href="#">Cuentas Pendientes</a>
+</nav>
 
-    <div class="tarjeta">
-      <h2>Total Egresos</h2>
-      <div id="egresos" class="monto">Cargando...</div>
-    </div>
-  </section>
+<main>
+<div class="module" id="saldo-actual">
+<h2>Saldo Actual</h2>
+<p id="saldo">Cargando...</p>
+</div>
 
-  <footer>
-    HG Soluciones Administrativas © 2025
-  </footer>
+<div class="module">
+<h2>Ingresos Mensuales</h2>
+<canvas id="ingresosChart" width="400" height="200"></canvas>
+</div>
 
+<div class="module">
+<h2>Egresos Mensuales</h2>
+<canvas id="egresosChart" width="400" height="200"></canvas>
+</div>
+
+<div class="module">
+<h2>Cuentas Pendientes</h2>
+<table id="cuentasTable" border="1" width="100%" style="border-collapse:collapse; color:#fff;">
+<thead>
+<tr>
+<th>Cliente/Proveedor</th>
+<th>Monto</th>
+<th>Vencimiento</th>
+</tr>
+</thead>
+<tbody>
+<tr><td colspan="3">Cargando...</td></tr>
+</tbody>
+</table>
+</div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyTLrGiqes1VOp8E51Kq91P7YihPKNtN1f0f6u2JitXOteGyGrNXqiSjdXYJ8HAtfs/exec";
+
 async function fetchData() {
-  const url = "https://script.google.com/macros/s/AKfycbyTLrGiqes1VOp8E51Kq91P7YihPKNtN1f0f6u2JitXOteGyGrNXqiSjdXYJ8HAtfs/exec";
-  const res = await fetch(url);
-  if (!res.ok) throw new Error("Error al conectar con GAS");
-  return await res.json();
+    const res = await fetch(GAS_URL);
+    const data = await res.json();
+    return data;
 }
 
-function renderFinanzas(finanzas){
-  if(!finanzas || finanzas.length === 0) return;
-
-  const ingresos = finanzas
-    .filter(r => (r["Tipo (Ingreso/Egreso)"] || "").toString().toLowerCase().includes("ingreso"))
-    .reduce((a,b)=>{
-      const val = parseFloat((b["Monto"] || "0").toString().replace(/[^\d,.-]/g,"").replace(",","."));
-      return a + (isNaN(val)?0:val);
-    },0);
-
-  const egresos = finanzas
-    .filter(r => (r["Tipo (Ingreso/Egreso)"] || "").toString().toLowerCase().includes("egreso"))
-    .reduce((a,b)=>{
-      const val = parseFloat((b["Monto"] || "0").toString().replace(/[^\d,.-]/g,"").replace(",","."));
-      return a + (isNaN(val)?0:val);
-    },0);
-
-  const saldo = ingresos - egresos;
-
-  document.getElementById("ingresos").textContent = "$ " + ingresos.toLocaleString("es-AR");
-  document.getElementById("egresos").textContent = "$ " + egresos.toLocaleString("es-AR");
-  document.getElementById("saldo").textContent = "$ " + saldo.toLocaleString("es-AR");
+function parseNumber(val){
+    if(val===null||val===undefined||val==="") return 0;
+    if(typeof val==="number") return val;
+    const s = String(val).replace(/[^0-9,\-\.]/g,"");
+    const normalized = s.replace(/\./g,'').replace(',','.');
+    const n = parseFloat(normalized);
+    return isNaN(n)?0:n;
 }
 
-async function initDashboard(){
-  try{
-    const data = await fetchData();
-    const finanzas = data["Finanzas_RegistroDiario"];
-    renderFinanzas(finanzas);
-  }catch(err){
-    console.error("Error:", err);
-    document.getElementById("saldo").textContent = "Error de conexión";
-  }
+function updateSaldo(datos){
+    const movimientos = datos["Caja_Movimientos"];
+    const saldo = movimientos.reduce((sum,row)=>sum+parseNumber(row["Monto"]),0);
+    document.getElementById("saldo").innerText = "$ "+saldo.toLocaleString("es-AR",{minimumFractionDigits:2});
 }
 
-initDashboard();
+function updateIngresos(datos){
+    const rows = datos["Finanzas_Mensual"];
+    const labels = rows.map(r=>r["Mes"]);
+    const ingresos = rows.map(r=>parseNumber(r["Ingreso"]));
+    const ctx = document.getElementById("ingresosChart").getContext("2d");
+    new Chart(ctx,{
+        type:'bar',
+        data:{ labels, datasets:[{ label:'Ingresos', data:ingresos, backgroundColor:'#00bfff' }]},
+        options:{ responsive:true, plugins:{ legend:{ labels:{ color:'#fff' } } }, scales:{ x:{ ticks:{ color:'#fff' } }, y:{ ticks:{ color:'#fff' } } } }
+    });
+}
+
+function updateEgresos(datos){
+    const rows = datos["Finanzas_Mensual"];
+    const labels = rows.map(r=>r["Mes"]);
+    const egresos = rows.map(r=>parseNumber(r["Egreso"]));
+    const ctx = document.getElementById("egresosChart").getContext("2d");
+    new Chart(ctx,{
+        type:'bar',
+        data:{ labels, datasets:[{ label:'Egresos', data:egresos, backgroundColor:'#ff6347' }]},
+        options:{ responsive:true, plugins:{ legend:{ labels:{ color:'#fff' } } }, scales:{ x:{ ticks:{ color:'#fff' } }, y:{ ticks:{ color:'#fff' } } } }
+    });
+}
+
+function updateCuentas(datos){
+    const table = document.getElementById("cuentasTable").querySelector("tbody");
+    const rows = datos["Cuentas_Pendientes"];
+    if(!rows || rows.length===0){ table.innerHTML="<tr><td colspan='3'>No hay datos</td></tr>"; return;}
+    table.innerHTML = rows.map(r=>`<tr>
+        <td>${r["Cliente/Proveedor"]}</td>
+        <td>$ ${parseNumber(r["Monto"]).toLocaleString("es-AR",{minimumFractionDigits:2})}</td>
+        <td>${r["Vencimiento"]}</td>
+    </tr>`).join('');
+}
+
+async function refreshAll(){
+    try{
+        const datos = await fetchData();
+        updateSaldo(datos);
+        updateIngresos(datos);
+        updateEgresos(datos);
+        updateCuentas(datos);
+    }catch(e){
+        console.error("Error refrescando dashboard:", e);
+    }
+}
+
+refreshAll();
 </script>
 </body>
 </html>
