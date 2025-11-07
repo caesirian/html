@@ -1,187 +1,730 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Dashboard Financiero - HG Soluciones</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Dashboard Financiero - HG Soluciones</title>
 
-  <!-- Librerías -->
-  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-
-  <!-- Estilos -->
-  <style>
-    body {
-      font-family: Calibri, sans-serif;
-      margin: 0; padding: 0;
-      background: #f5f6fa;
-      color: #333;
-    }
-    header {
-      background: #23395b;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-    main { padding: 20px; }
-    .section {
-      margin-bottom: 40px;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      padding: 20px;
-    }
-    h2 { color: #23395b; }
-    canvas { max-width: 100%; margin-top: 20px; }
-    .kpi-container {
-      display: flex; flex-wrap: wrap;
-      gap: 15px; margin-bottom: 25px;
-    }
-    .kpi {
-      flex: 1;
-      min-width: 150px;
-      background: #eef2f6;
-      border-radius: 10px;
-      padding: 15px;
-      text-align: center;
-    }
-    .kpi h3 { margin: 5px 0; color: #23395b; }
-    .kpi p { font-size: 1.3em; margin: 0; }
-    footer {
-      background: #23395b;
-      color: #fff;
-      text-align: center;
-      padding: 10px;
-      margin-top: 40px;
-    }
-  </style>
+<!-- CSS: simple, HG look -->
+<link href="https://cdn.jsdelivr.net/npm/datatables.net-dt@1.13.6/css/jquery.dataTables.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/datatables.net-buttons-dt@2.4.1/css/buttons.dataTables.min.css" rel="stylesheet"/>
+<style>
+  :root{
+    --bg:#0f1724; --card:#0b1220; --accent:#3ea6ff; --muted:#9aa8ba; --glass: rgba(255,255,255,0.03);
+    --accent-2:#7b61ff;
+    font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  html,body{height:100%; margin:0; background:linear-gradient(180deg,#071226 0%, #081426 100%); color:#e6eef8;}
+  .app{display:flex; min-height:100vh;}
+  aside.sidebar{width:260px; background:linear-gradient(180deg, rgba(11,18,32,0.9), rgba(6,10,18,0.85)); padding:18px; box-shadow: 0 6px 24px rgba(2,6,12,0.6);}
+  aside h1{font-size:18px; margin:0 0 12px; letter-spacing:0.6px; color:var(--accent);}
+  aside .nav{display:flex; flex-direction:column; gap:8px;}
+  aside .nav button{background:transparent; border:0; color:var(--muted); text-align:left; padding:10px; border-radius:8px; cursor:pointer;}
+  aside .nav button.active, aside .nav button:hover{background:var(--glass); color:#fff;}
+  main{flex:1; padding:18px; display:flex; flex-direction:column; gap:12px;}
+  header.topbar{display:flex; justify-content:space-between; align-items:center; gap:12px;}
+  .controls{display:flex; gap:8px; align-items:center;}
+  .card-row{display:grid; grid-template-columns: repeat(4, 1fr); gap:12px;}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:14px; border-radius:12px; box-shadow: 0 6px 20px rgba(3,7,12,0.6);}
+  .card h3{margin:0; font-size:12px; color:var(--muted)}
+  .card p{margin:6px 0 0; font-size:20px; font-weight:600; color:#fff;}
+  .layout{display:grid; grid-template-columns: 2fr 1fr; gap:12px; align-items:start;}
+  .panel{background:var(--card); padding:12px; border-radius:12px; min-height:160px;}
+  .filters{display:flex; gap:8px; align-items:center;}
+  .btn{background:var(--accent); color:#00121a; border:0; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:600;}
+  .btn.secondary{background:transparent; color:var(--muted); border:1px solid rgba(255,255,255,0.04);}
+  .small{font-size:12px; padding:6px 8px;}
+  .table-wrap{overflow:auto; max-height:520px;}
+  footer.note{color:var(--muted); font-size:12px; margin-top:8px;}
+  @media (max-width:1000px){ .card-row{grid-template-columns: repeat(2,1fr);} .layout{grid-template-columns:1fr; } aside{display:none;} }
+  /* Loader */
+  .loader{display:inline-block; width:18px; height:18px; border:2px solid rgba(255,255,255,0.08); border-top-color:var(--accent); border-radius:50%; animation:spin 1s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .kpi-trend{font-size:12px; color:var(--muted);}
+</style>
 </head>
-
 <body>
-  <header>
-    <h1>HG Soluciones Administrativas</h1>
-    <p>Dashboard Financiero Integrado</p>
-  </header>
+<div class="app">
+  <aside class="sidebar" role="navigation">
+    <h1>HG - Dashboard Financiero</h1>
+    <div class="nav">
+      <button id="nav-overview" class="active">Resumen</button>
+      <button id="nav-ventas">Ventas</button>
+      <button id="nav-finanzas">Finanzas</button>
+      <button id="nav-simulador">Simulador</button>
+      <button id="nav-tablas">Tablas</button>
+    </div>
+    <footer style="margin-top:14px;color:var(--muted);font-size:12px">
+      <div>Conexión: <span id="conn-status">sin iniciar</span></div>
+      <div style="margin-top:8px"><button class="btn small" id="refresh-data">Actualizar datos</button></div>
+    </footer>
+  </aside>
 
   <main>
-    <!-- KPIs -->
-    <section class="section">
-      <h2>Resumen General</h2>
-      <div class="kpi-container">
-        <div class="kpi"><h3>Ingresos</h3><p id="kpiIngresos">–</p></div>
-        <div class="kpi"><h3>Egresos</h3><p id="kpiEgresos">–</p></div>
-        <div class="kpi"><h3>Balance</h3><p id="kpiBalance">–</p></div>
+    <header class="topbar">
+      <div>
+        <h2 style="margin:0">Dashboard Financiero</h2>
+        <div style="color:var(--muted);font-size:13px">Conexión en vivo a Google Sheets — estilo HG</div>
+      </div>
+      <div class="controls">
+        <div class="filters">
+          <label style="font-size:13px;color:var(--muted);">Mes:</label>
+          <select id="filter-month" class="small"></select>
+          <label style="font-size:13px;color:var(--muted);">Año:</label>
+          <select id="filter-year" class="small"></select>
+          <button id="btn-reset" class="btn secondary small">Reset filtros</button>
+        </div>
+        <div style="width:10px"></div>
+        <button id="btn-export" class="btn small">Exportar CSV</button>
+      </div>
+    </header>
+
+    <!-- KPI cards -->
+    <section class="card-row" id="kpi-cards">
+      <div class="card">
+        <h3>Ingresos (mes)</h3>
+        <p id="kpi-ingresos">$0</p>
+        <div class="kpi-trend" id="kpi-ingresos-trend">—</div>
+      </div>
+      <div class="card">
+        <h3>Egresos (mes)</h3>
+        <p id="kpi-egresos">$0</p>
+        <div class="kpi-trend" id="kpi-egresos-trend">—</div>
+      </div>
+      <div class="card">
+        <h3>Balance (mes)</h3>
+        <p id="kpi-balance">$0</p>
+        <div class="kpi-trend" id="kpi-balance-trend">—</div>
+      </div>
+      <div class="card">
+        <h3>Ventas (cantidad)</h3>
+        <p id="kpi-ventas">0</p>
+        <div class="kpi-trend" id="kpi-ventas-trend">—</div>
       </div>
     </section>
 
-    <!-- Finanzas -->
-    <section class="section">
-      <h2>Finanzas Registradas</h2>
-      <table id="tablaFinanzas" class="display"></table>
-      <canvas id="graficoFinanzas"></canvas>
+    <section class="layout">
+      <div>
+        <div class="panel" style="margin-bottom:12px">
+          <canvas id="chart-income-expense" height="160"></canvas>
+        </div>
+
+        <div class="panel" style="margin-bottom:12px; display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+          <div class="panel" id="panel-sales-product" style="padding:10px;">
+            <h4 style="margin-top:0;color:var(--muted)">Top productos / servicios</h4>
+            <canvas id="chart-top-products" height="180"></canvas>
+          </div>
+          <div class="panel" id="panel-payment-method" style="padding:10px;">
+            <h4 style="margin-top:0;color:var(--muted)">Medios de pago</h4>
+            <canvas id="chart-payment-method" height="180"></canvas>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h4 style="margin-top:0;color:var(--muted)">Proyección de caja (simulación)</h4>
+          <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+            <input id="sim-increment" type="number" value="0" step="100" class="small" style="width:140px" />
+            <button id="btn-simulate" class="btn small">Aplicar simulación (sumar al flujo)</button>
+            <button id="btn-reset-sim" class="btn secondary small">Reset simulador</button>
+          </div>
+          <canvas id="chart-cashflow" height="120"></canvas>
+        </div>
+      </div>
+
+      <aside style="display:flex; flex-direction:column; gap:12px;">
+        <div class="panel">
+          <h4 style="margin-top:0;color:var(--muted)">KPIs rápidos</h4>
+          <div style="display:grid; gap:8px; margin-top:8px;">
+            <div style="display:flex; justify-content:space-between;"><div style="color:var(--muted)">Promedio venta</div><div id="avg-sale">$0</div></div>
+            <div style="display:flex; justify-content:space-between;"><div style="color:var(--muted)">Ticket medio</div><div id="ticket-medio">$0</div></div>
+            <div style="display:flex; justify-content:space-between;"><div style="color:var(--muted)">Top cliente</div><div id="top-client">—</div></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h4 style="margin-top:0;color:var(--muted)">Atajos</h4>
+          <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+            <button class="btn small" id="goto-tablas">Ir a Tablas</button>
+            <button class="btn secondary small" id="download-all">Descargar datos (JSON)</button>
+            <div style="color:var(--muted); font-size:12px; margin-top:6px">Cache local: <span id="cache-status">no</span></div>
+          </div>
+        </div>
+      </aside>
     </section>
 
-    <!-- Ventas -->
-    <section class="section">
-      <h2>Ventas Diarias</h2>
-      <table id="tablaVentas" class="display"></table>
-      <canvas id="graficoVentas"></canvas>
+    <!-- Tablas -->
+    <section id="section-tablas" style="display:none;">
+      <div class="panel">
+        <h4 style="margin-top:0;color:var(--muted)">Tablas Detalladas</h4>
+        <div style="margin:8px 0;">
+          <label style="color:var(--muted)">Seleccionar hoja:</label>
+          <select id="select-sheet" class="small"></select>
+        </div>
+        <div class="table-wrap">
+          <table id="data-table" class="display stripe" style="width:100%"></table>
+        </div>
+      </div>
     </section>
+
+    <section id="section-ventas" style="display:none;">
+      <div class="panel">
+        <h4 style="margin-top:0;color:var(--muted)">Detalle Ventas</h4>
+        <div class="table-wrap">
+          <table id="ventas-table" class="display stripe" style="width:100%"></table>
+        </div>
+      </div>
+    </section>
+
+    <section id="section-finanzas" style="display:none;">
+      <div class="panel">
+        <h4 style="margin-top:0;color:var(--muted)">Detalle Finanzas</h4>
+        <div class="table-wrap">
+          <table id="finanzas-table" class="display stripe" style="width:100%"></table>
+        </div>
+      </div>
+    </section>
+
+    <section id="section-simulador" style="display:none;">
+      <div class="panel">
+        <h4 style="margin-top:0;color:var(--muted)">Simulador y escenarios</h4>
+        <p style="margin:6px 0;color:var(--muted)">Sumá ingresos/egresos de prueba y observá el efecto en la proyección.</p>
+      </div>
+    </section>
+
+    <footer class="note">Última sincronización: <span id="last-sync">nunca</span></footer>
   </main>
+</div>
 
-  <footer>
-    <p>© 2025 HG Soluciones Administrativas | Dashboard financiero conectado a Google Sheets</p>
-  </footer>
+<!-- Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/datatables.net-buttons@2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/datatables.net-buttons@2.4.1/js/buttons.html5.min.js"></script>
+<script>
+/*
+  Dashboard financiero - HG
+  - Conexión en vivo a Google Sheets usando endpoint gviz (public sheet required)
+  - Expected sheet names (if exist):
+      - Finanzas_RegistroDiario
+      - Ventas_RegistroDiario
+      - Ventas_RegistroMensual (optional)
+      - Otros: any sheet name will be listed
+  - Performance:
+      - caching in localStorage (1h default)
+      - minimal transforms client-side
+*/
 
-  <script>
-    const SHEET_ID = "1ljNxLlIV7mExU3yp3g74AeDshTphT2deD4xXhlR1saU";
+const SHEET_ID = "1ljNxLlIV7mExU3yp3g74AeDshTphT2deD4xXhlR1saU"; // tu sheet
+const SHEET_CACHE_KEY = "hg_dashboard_cache_v1";
+const CACHE_TTL_MS = 1000 * 60 * 60; // 1 hora
 
-    async function cargarHoja(nombreHoja) {
-      const url = `https://opensheet.elk.sh/${SHEET_ID}/${nombreHoja}`;
-      const res = await fetch(url);
-      return await res.json();
+// sheets to try to fetch / prioritize
+const EXPECTED_SHEETS = [
+  "Finanzas_RegistroDiario",
+  "Ventas_RegistroDiario",
+  "Ventas_RegistroMensual",
+  "Finanzas_Mensual",
+  "Ventas_RegistroDiario (resumen)"
+];
+
+// util: fetch gviz sheet as json
+async function fetchSheet(sheetName){
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error("No se pudo leer la hoja: " + sheetName);
+  const text = await res.text();
+  // gviz wraps JSON in )]}'\n
+  const jsonText = text.replace(/^[^\{]*/, "");
+  const data = JSON.parse(jsonText);
+  return gvizToArray(data);
+}
+
+// convert gviz table to array of objects
+function gvizToArray(gviz){
+  if(!gviz.table) return {cols:[], rows:[]};
+  const cols = gviz.table.cols.map(c => c.label || c.id || "col");
+  const rows = gviz.table.rows.map(r => {
+    const obj = {};
+    r.c.forEach((cell, idx) => {
+      obj[cols[idx]] = cell ? (cell.v === null ? "" : cell.v) : "";
+    });
+    return obj;
+  });
+  return {cols, rows};
+}
+
+// try to fetch list of sheets by fetching the spreadsheet metadata (public)
+async function fetchSheetNames(){
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?&tqx=out:json`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error("No se pudo leer metadata del sheet");
+  const text = await res.text();
+  const jsonText = text.replace(/^[^\{]*/, "");
+  const data = JSON.parse(jsonText);
+  // fallback: use EXPECTED_SHEETS
+  return EXPECTED_SHEETS;
+}
+
+// caching helpers
+function saveCache(obj){ localStorage.setItem(SHEET_CACHE_KEY, JSON.stringify({ts:Date.now(), data:obj})); document.getElementById('cache-status').innerText = 'sí';}
+function loadCache(){ try{ const raw = localStorage.getItem(SHEET_CACHE_KEY); if(!raw) return null; const parsed = JSON.parse(raw); if(Date.now() - parsed.ts > CACHE_TTL_MS) return null; return parsed.data;}catch(e){return null;} }
+
+// parse monetary values safely
+function parseNumber(val){
+  if(val === null || val === undefined || val === "") return 0;
+  if(typeof val === "number") return val;
+  // remove currency symbols, dots for thousands, replace comma decimal
+  const s = String(val).replace(/[^0-9,\-\.]/g, "");
+  if(!s) return 0;
+  // if multiple commas/dots, handle common formats
+  let normalized = s.replace(/\./g, '').replace(',', '.');
+  const n = parseFloat(normalized);
+  return isNaN(n) ? 0 : n;
+}
+
+// main loader
+async function loadAllData(force=false){
+  setConnStatus('cargando...');
+  const cached = loadCache();
+  if(cached && !force){
+    window.DATA = cached;
+    setConnStatus('cache local');
+    renderAll();
+    return;
+  }
+
+  try{
+    const sheetNames = await fetchSheetNames();
+    const namesToFetch = Array.from(new Set([...EXPECTED_SHEETS, ...sheetNames])).slice(0, 12);
+    const results = {};
+    for(const s of namesToFetch){
+      try{
+        const parsed = await fetchSheet(s);
+        if(parsed.rows && parsed.rows.length) results[s] = parsed;
+      }catch(e){
+        // ignore missing sheets
+        console.warn("no sheet", s, e.message);
+      }
     }
+    if(Object.keys(results).length === 0) throw new Error("No se encontraron hojas con datos. Confirmá que la hoja sea pública.");
+    window.DATA = results;
+    saveCache(results);
+    setConnStatus('conectado');
+    document.getElementById('last-sync').innerText = new Date().toLocaleString();
+    renderAll();
+  }catch(err){
+    setConnStatus('error: ' + err.message);
+    alert("Error al cargar datos: " + err.message + ". Verificá que la hoja sea pública ('Cualquiera con el enlace puede ver').");
+    console.error(err);
+  }
+}
 
-    async function iniciarDashboard() {
-      const finanzas = await cargarHoja("Finanzas_RegistroDiario");
-      const ventas = await cargarHoja("Ventas_RegistroDiario");
+function setConnStatus(txt){ document.getElementById('conn-status').innerText = txt; }
 
-      // --- KPIs ---
-      const ingresos = finanzas.filter(f => f.Tipo?.toLowerCase().includes("ingreso"))
-        .reduce((s, f) => s + (parseFloat(f.Monto.replace(",", ".")) || 0), 0);
-      const egresos = finanzas.filter(f => f.Tipo?.toLowerCase().includes("egreso"))
-        .reduce((s, f) => s + (parseFloat(f.Monto.replace(",", ".")) || 0), 0);
-      const balance = ingresos - egresos;
+// UTIL: groupBy
+function groupBy(arr, keyFn){
+  return arr.reduce((acc, x) => { const k = keyFn(x); acc[k] = acc[k] || []; acc[k].push(x); return acc; }, {});
+}
 
-      document.getElementById("kpiIngresos").textContent = `$${ingresos.toLocaleString()}`;
-      document.getElementById("kpiEgresos").textContent = `$${egresos.toLocaleString()}`;
-      document.getElementById("kpiBalance").textContent = `$${balance.toLocaleString()}`;
+// Render everything
+let charts = {};
+function renderAll(){
+  populateSheetSelector();
+  renderKPIsAndFilters();
+  renderCharts();
+  initTables();
+}
 
-      // --- Tabla Finanzas ---
-      const tablaF = document.getElementById("tablaFinanzas");
-      const headersF = Object.keys(finanzas[0]);
-      tablaF.innerHTML = `
-        <thead><tr>${headersF.map(h => `<th>${h}</th>`).join('')}</tr></thead>
-        <tbody>${finanzas.map(r => `<tr>${headersF.map(h => `<td>${r[h]}</td>`).join('')}</tr>`).join('')}</tbody>
-      `;
-      new DataTable(tablaF);
+// Fill sheet selector
+function populateSheetSelector(){
+  const select = document.getElementById('select-sheet');
+  select.innerHTML = '';
+  Object.keys(window.DATA).forEach(name => {
+    const opt = document.createElement('option'); opt.value = name; opt.textContent = name; select.appendChild(opt);
+  });
+  // when selection changes, populate table
+  select.onchange = () => populateTableBySheet(select.value);
+  // default populate first
+  populateTableBySheet(select.value);
+}
 
-      // --- Gráfico Finanzas ---
-      const fechas = finanzas.map(f => f.Fecha);
-      const montos = finanzas.map(f => parseFloat(f.Monto.replace(",", ".")) || 0);
-      const ctxF = document.getElementById("graficoFinanzas").getContext("2d");
-      new Chart(ctxF, {
-        type: "bar",
-        data: {
-          labels: fechas,
-          datasets: [{
-            label: "Movimientos ($)",
-            data: montos,
-            backgroundColor: "rgba(54,162,235,0.6)"
-          }]
-        },
-        options: { responsive: true, plugins: { legend: { position: 'top' } } }
-      });
+// extract specific datasets
+function getRows(name){
+  if(!window.DATA) return [];
+  const s = window.DATA[name];
+  return s ? s.rows : [];
+}
 
-      // --- Tabla Ventas ---
-      const tablaV = document.getElementById("tablaVentas");
-      const headersV = Object.keys(ventas[0]);
-      tablaV.innerHTML = `
-        <thead><tr>${headersV.map(h => `<th>${h}</th>`).join('')}</tr></thead>
-        <tbody>${ventas.map(r => `<tr>${headersV.map(h => `<td>${r[h]}</td>`).join('')}</tr>`).join('')}</tbody>
-      `;
-      new DataTable(tablaV);
+function renderKPIsAndFilters(){
+  // Attempt to find relevant sheets
+  const finRows = getRows("Finanzas_RegistroDiario") || getRows("Finanzas_RegistroDiario ");
+  const ventasRows = getRows("Ventas_RegistroDiario") || getRows("Ventas_RegistroDiario ");
+  // normalize date parsing (attempt multiple columns)
+  const allFin = finRows.map(r => {
+    const obj = {...r};
+    obj.Monto = parseNumber(r["Monto"] ?? r["monto"] ?? r["Monto (ARS)"] ?? r["Importe"] ?? r["Total"] ?? r["total"]);
+    obj.Tipo = r["Tipo (Ingreso/Egreso)"] ?? r["Tipo"] ?? r["Tipo (Ingreso/Egreso)"] ?? r["Tipo Movimiento"] ?? r["TipoMovimiento"] ?? "Ingreso";
+    obj.FechaRaw = r["Fecha"] ?? r["fecha"] ?? r["Date"] ?? "";
+    obj.Fecha = parseDate(obj.FechaRaw);
+    return obj;
+  });
 
-      // --- Gráfico Ventas ---
-      const ctxV = document.getElementById("graficoVentas").getContext("2d");
-      const ventasPorDia = {};
-      ventas.forEach(v => {
-        const dia = v.Fecha;
-        const total = parseFloat(v.Total?.replace(",", ".")) || 0;
-        ventasPorDia[dia] = (ventasPorDia[dia] || 0) + total;
-      });
-      const dias = Object.keys(ventasPorDia);
-      const totales = Object.values(ventasPorDia);
+  const allVentas = ventasRows.map(r => {
+    const obj = {...r};
+    obj.Total = parseNumber(r["Total"] ?? r["total"] ?? r["Precio Unitario"] ?? r["Importe"] ?? r["Monto"]);
+    obj.Cantidad = parseNumber(r["Cantidad"] ?? r["cantidad"] ?? r["Qty"] ?? 1);
+    obj.FechaRaw = r["Fecha"] ?? r["fecha"] ?? r["Date"] ?? "";
+    obj.Fecha = parseDate(obj.FechaRaw);
+    obj.Producto = r["Producto/Servicio"] ?? r["Producto"] ?? r["Item"] ?? "Sin producto";
+    obj.MedioPago = r["Medio de Pago"] ?? r["MedioPago"] ?? r["Pago"] ?? "—";
+    obj.Cliente = r["Cliente"] ?? r["cliente"] ?? r["Cliente/Empresa"] ?? "—";
+    return obj;
+  });
 
-      new Chart(ctxV, {
-        type: "line",
-        data: {
-          labels: dias,
-          datasets: [{
-            label: "Ventas Totales ($)",
-            data: totales,
-            borderColor: "rgba(75,192,192,1)",
-            backgroundColor: "rgba(75,192,192,0.2)",
-            fill: true,
-            tension: 0.3
-          }]
-        },
-        options: { responsive: true, plugins: { legend: { position: 'top' } } }
-      });
+  // Save processed into window
+  window.PROC = {fin: allFin, ventas: allVentas};
+
+  // populate month/year filters
+  const months = {};
+  const years = {};
+  allFin.concat(allVentas).forEach(r => {
+    if(r.Fecha && !isNaN(r.Fecha.getTime())){
+      months[r.Fecha.getMonth()] = true;
+      years[r.Fecha.getFullYear()] = true;
     }
+  });
+  const monthSelect = document.getElementById('filter-month'), yearSelect = document.getElementById('filter-year');
+  monthSelect.innerHTML = '';
+  yearSelect.innerHTML = '';
+  const monthNames = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+  const sortedYears = Object.keys(years).map(Number).sort((a,b)=>b-a);
+  // allow 'Todos' option
+  const optAllM = document.createElement('option'); optAllM.value='all'; optAllM.textContent='Todos'; monthSelect.appendChild(optAllM);
+  Object.keys(months).map(Number).sort((a,b)=>b-a).forEach(m => {
+    const opt = document.createElement('option'); opt.value = m; opt.textContent = monthNames[m]; monthSelect.appendChild(opt);
+  });
+  const optAllY = document.createElement('option'); optAllY.value='all'; optAllY.textContent='Todos'; yearSelect.appendChild(optAllY);
+  sortedYears.forEach(y => { const o = document.createElement('option'); o.value=y; o.textContent=y; yearSelect.appendChild(o); });
 
-    iniciarDashboard();
-  </script>
+  // Wire filter change
+  monthSelect.onchange = renderCharts;
+  yearSelect.onchange = renderCharts;
+  document.getElementById('btn-reset').onclick = () => { monthSelect.value='all'; yearSelect.value='all'; renderCharts(); }
+
+  // compute KPIs for current filter
+  computeAndRenderKPIs();
+}
+
+function computeAndRenderKPIs(){
+  const {fin, ventas} = window.PROC;
+  const ffilter = applyFilters(fin);
+  const vfilter = applyFilters(ventas);
+  const ingresos = ffilter.filter(r=> String((r.Tipo || "").toLowerCase()).includes('ingre') || Number(r.Monto) > 0).reduce((s,x)=>s+Number(x.Monto),0);
+  const egresos = ffilter.filter(r=> String((r.Tipo || "").toLowerCase()).includes('egre') || Number(r.Monto) < 0).reduce((s,x)=>s+Math.abs(Number(x.Monto)),0);
+  const balance = ingresos - egresos;
+  const ventasCount = vfilter.length;
+  document.getElementById('kpi-ingresos').innerText = formatCurrency(ingresos);
+  document.getElementById('kpi-egresos').innerText = formatCurrency(egresos);
+  document.getElementById('kpi-balance').innerText = formatCurrency(balance);
+  document.getElementById('kpi-ventas').innerText = ventasCount;
+  // simple trends (month over month) - naive
+  document.getElementById('kpi-ingresos-trend').innerText = '—';
+  document.getElementById('kpi-egresos-trend').innerText = '—';
+  document.getElementById('kpi-balance-trend').innerText = '—';
+  document.getElementById('kpi-ventas-trend').innerText = '—';
+
+  // KPIs right panel
+  const avgSale = vfilter.reduce((s,x)=>s+Number(x.Total||0),0) / Math.max(1, vfilter.length);
+  document.getElementById('avg-sale').innerText = formatCurrency(avgSale);
+  document.getElementById('ticket-medio').innerText = formatCurrency(avgSale);
+  // top client
+  const groupedClients = groupBy(vfilter, r => r.Cliente || 'Sin cliente');
+  const topClient = Object.entries(groupedClients).map(([k,v])=>({k, total:v.reduce((s,x)=>s+Number(x.Total||0),0)})).sort((a,b)=>b.total-a.total)[0];
+  document.getElementById('top-client').innerText = topClient ? `${topClient.k} (${formatCurrency(topClient.total)})` : '—';
+}
+
+function applyFilters(arr){
+  const monthVal = document.getElementById('filter-month').value;
+  const yearVal = document.getElementById('filter-year').value;
+  return arr.filter(r => {
+    if(!r.Fecha || isNaN(r.Fecha.getTime())) return true;
+    if(monthVal !== 'all' && String(r.Fecha.getMonth()) !== String(monthVal)) return false;
+    if(yearVal !== 'all' && String(r.Fecha.getFullYear()) !== String(yearVal)) return false;
+    return true;
+  });
+}
+
+// render charts
+function renderCharts(){
+  computeAndRenderKPIs();
+  const {fin, ventas} = window.PROC;
+  const f = applyFilters(fin);
+  const v = applyFilters(ventas);
+
+  // 1. Income vs Expense over time (month)
+  const monthsMap = {};
+  f.forEach(r => {
+    const d = r.Fecha && !isNaN(r.Fecha.getTime()) ? new Date(r.Fecha.getFullYear(), r.Fecha.getMonth(), 1) : null;
+    const key = d ? d.toISOString().slice(0,7) : 'Sin fecha';
+    monthsMap[key] = monthsMap[key] || {ing:0, eg:0};
+    if(String((r.Tipo||'').toLowerCase()).includes('ingre') || Number(r.Monto) > 0) monthsMap[key].ing += Number(r.Monto);
+    else monthsMap[key].eg += Math.abs(Number(r.Monto));
+  });
+
+  const sortedKeys = Object.keys(monthsMap).sort();
+  const labels = sortedKeys.map(k => {
+    if(k==='Sin fecha') return k;
+    const [y,m] = k.split('-'); return `${m}/${y}`;
+  });
+  const dataIngs = sortedKeys.map(k => monthsMap[k].ing || 0);
+  const dataEgs = sortedKeys.map(k => monthsMap[k].eg || 0);
+
+  makeOrUpdateLine('chart-income-expense', labels, [
+    {label:'Ingresos', data:dataIngs, borderColor: '#3ea6ff', backgroundColor: gradient('#3ea6ff')},
+    {label:'Egresos', data:dataEgs, borderColor: '#ff7b7b', backgroundColor: gradient('#ff7b7b')}
+  ]);
+
+  // 2. Top products (bar)
+  const prodGroup = groupBy(v, r => r.Producto || 'Sin producto');
+  const prodAgg = Object.entries(prodGroup).map(([k,rows]) => ({producto:k, total: rows.reduce((s,x)=>s+Number(x.Total||0),0)})).sort((a,b)=>b.total-a.total).slice(0,8);
+  makeOrUpdateBar('chart-top-products', prodAgg.map(x=>x.producto), [{label:'Ventas', data:prodAgg.map(x=>x.total)}]);
+
+  // 3. Payment methods donut
+  const payGroup = groupBy(v, r => r.MedioPago || 'Sin medio');
+  const payAgg = Object.entries(payGroup).map(([k,rows]) => ({medio:k, total: rows.reduce((s,x)=>s+Number(x.Total||0),0)})).sort((a,b)=>b.total-a.total).slice(0,10);
+  makeOrUpdateDoughnut('chart-payment-method', payAgg.map(x=>x.medio), payAgg.map(x=>x.total));
+
+  // 4. Cashflow (cumulative)
+  const monthsCF = sortedKeys;
+  const cfData = monthsCF.map((k,i) => {
+    const ing = dataIngs[i]||0;
+    const eg = dataEgs[i]||0;
+    return ing - eg;
+  });
+  // cumulative sum
+  let cum=0;
+  const cumData = cfData.map(vv => { cum += vv; return cum; });
+  makeOrUpdateLine('chart-cashflow', labels, [{label:'Caja acumulada', data:cumData, borderColor:'#7b61ff', backgroundColor: gradient('#7b61ff')}]);
+
+  document.getElementById('last-sync').innerText = new Date().toLocaleString();
+}
+
+// helper: color gradient
+function gradient(hex){
+  // Chart.js will accept color strings; we use semi-transparent fill via pattern
+  return (ctx) => {
+    const g = ctx.createLinearGradient(0,0,0,200);
+    g.addColorStop(0, hex + '33');
+    g.addColorStop(1, hex + '00');
+    return g;
+  };
+}
+
+// Chart creators (create or update)
+function makeOrUpdateLine(id, labels, datasets){
+  if(charts[id]){ charts[id].data.labels = labels; charts[id].data.datasets = datasets; charts[id].update(); return; }
+  const ctx = document.getElementById(id).getContext('2d');
+  charts[id] = new Chart(ctx, {
+    type:'line',
+    data:{labels, datasets: datasets.map(ds => ({...ds, tension:0.3, fill:true, pointRadius:3}))},
+    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:'#cfeaff'}}}, scales:{x:{ticks:{color:'#cbdff3'}}, y:{ticks:{color:'#cbdff3'}}}
+  });
+}
+
+function makeOrUpdateBar(id, labels, datasets){
+  if(charts[id]){ charts[id].data.labels = labels; charts[id].data.datasets = datasets; charts[id].update(); return; }
+  const ctx = document.getElementById(id).getContext('2d');
+  charts[id] = new Chart(ctx, {
+    type:'bar',
+    data:{labels, datasets: datasets.map(ds=>({...ds, backgroundColor: ds.backgroundColor || undefined }))},
+    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{mode:'index'}}, scales:{x:{ticks:{color:'#cbdff3'}}, y:{ticks:{color:'#cbdff3'}}}
+  });
+}
+
+function makeOrUpdateDoughnut(id, labels, dataArr){
+  if(charts[id]){ charts[id].data.labels = labels; charts[id].data.datasets[0].data = dataArr; charts[id].update(); return; }
+  const ctx = document.getElementById(id).getContext('2d');
+  charts[id] = new Chart(ctx, {
+    type:'doughnut',
+    data:{labels, datasets:[{data:dataArr}]},
+    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom', labels:{color:'#cbdff3'}}}}
+  });
+}
+
+// DataTables
+let dtInstance = null;
+function initTables(){
+  // ventas table
+  const ventasRows = applyFilters(window.PROC.ventas || []);
+  const finRows = applyFilters(window.PROC.fin || []);
+  buildDataTable('#ventas-table', ventasRows);
+  buildDataTable('#finanzas-table', finRows);
+}
+
+// Build generic data table from rows array
+function buildDataTable(selector, rows){
+  const $table = $(selector);
+  if($.fn.dataTable.isDataTable($table)) { $table.DataTable().clear().rows.add(rows).draw(); return; }
+  if(!rows || rows.length === 0){
+    $table.html('<thead><tr><th>No hay datos</th></tr></thead>');
+    return;
+  }
+  const cols = Object.keys(rows[0]).map(k => ({title:k, data:k}));
+  $table.DataTable({
+    data: rows,
+    columns: cols,
+    dom: 'Bfrtip',
+    buttons: [{extend:'csv', text:'Exportar CSV'}, {extend:'excel', text:'Exportar Excel'}],
+    pageLength: 10,
+    scrollX:true,
+    language: { search: "Buscar:" }
+  });
+}
+
+// populate selected sheet table
+function populateTableBySheet(sheetName){
+  const selected = sheetName;
+  const data = getRows(selected);
+  const table = document.getElementById('data-table');
+  if(!data || data.length === 0){
+    $(table).DataTable().clear().destroy();
+    table.innerHTML = '<thead><tr><th>No hay datos en esta hoja</th></tr></thead>';
+    return;
+  }
+  // transform to array of objects
+  const rows = data.map(r => r);
+  // build DataTable
+  buildDataTable('#data-table', rows);
+}
+
+// parse dates flexibly
+function parseDate(v){
+  if(!v) return new Date(NaN);
+  if(v instanceof Date) return v;
+  // Google Sheets often provides numbers (serial) or "2025-10-30", or "30/10/2025"
+  // try ISO first
+  let s = String(v).trim();
+  // if number-like and > 2000 -> treat as year
+  if(/^\d{4}-\d{2}-\d{2}/.test(s)) return new Date(s);
+  if(/^\d{2}\/\d{2}\/\d{4}/.test(s)) {
+    const [d,m,y] = s.split('/');
+    return new Date(Number(y), Number(m)-1, Number(d));
+  }
+  // if numeric: might be Google serial (days since 1899-12-30)
+  if(!isNaN(Number(s))){
+    const serial = Number(s);
+    // treat as Excel/Google serial if > 30000
+    if(serial > 30000){
+      const epoch = new Date(Date.UTC(1899,11,30));
+      epoch.setUTCDate(epoch.getUTCDate() + Math.floor(serial));
+      return epoch;
+    }
+  }
+  // fallback
+  const d = new Date(s);
+  return d;
+}
+
+function formatCurrency(n){
+  const sign = n < 0 ? '-' : '';
+  const abs = Math.abs(Number(n) || 0);
+  return sign + '$' + abs.toLocaleString('es-AR', {minimumFractionDigits:0, maximumFractionDigits:0});
+}
+
+// Export full JSON
+function downloadJSON(){
+  const data = window.DATA || {};
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download = 'hg_dashboard_data.json'; a.click(); URL.revokeObjectURL(url);
+}
+
+// init UI wiring
+document.getElementById('refresh-data').addEventListener('click', ()=> loadAllData(true));
+document.getElementById('btn-export').addEventListener('click', ()=> {
+  // export currently selected table
+  const sel = document.getElementById('select-sheet').value;
+  const rows = getRows(sel) || [];
+  const csv = convertToCSV(rows);
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `${sel || 'sheet'}.csv`;
+  link.click();
+});
+document.getElementById('download-all').addEventListener('click', downloadJSON);
+document.getElementById('goto-tablas').addEventListener('click', ()=> { showSection('section-tablas'); document.getElementById('nav-tablas').click(); });
+
+document.getElementById('nav-overview').addEventListener('click', ()=> showSection('overview'));
+document.getElementById('nav-ventas').addEventListener('click', ()=> showSection('section-ventas'));
+document.getElementById('nav-finanzas').addEventListener('click', ()=> showSection('section-finanzas'));
+document.getElementById('nav-simulador').addEventListener('click', ()=> showSection('section-simulador'));
+document.getElementById('nav-tablas').addEventListener('click', ()=> showSection('section-tablas'));
+
+function showSection(id){
+  // nav active toggles
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  const map = {
+    'overview':'nav-overview',
+    'section-ventas':'nav-ventas',
+    'section-finanzas':'nav-finanzas',
+    'section-simulador':'nav-simulador',
+    'section-tablas':'nav-tablas'
+  };
+  if(map[id]) document.getElementById(map[id]).classList.add('active');
+  // hide all main sections except overview layout
+  document.getElementById('section-tablas').style.display = 'none';
+  document.getElementById('section-ventas').style.display = 'none';
+  document.getElementById('section-finanzas').style.display = 'none';
+  document.getElementById('section-simulador').style.display = 'none';
+  // if id == overview -> show default layout by ensuring none visible
+  if(id === 'overview') return;
+  document.getElementById(id).style.display = 'block';
+}
+
+// convert objects array to CSV (simple)
+function convertToCSV(rows){
+  if(!rows || rows.length===0) return '';
+  const cols = Object.keys(rows[0]);
+  const esc = v => `"${String(v).replace(/"/g,'""')}"`;
+  const lines = [cols.map(esc).join(',')];
+  rows.forEach(r => {
+    lines.push(cols.map(c => esc(r[c] ?? '')).join(','));
+  });
+  return lines.join('\n');
+}
+
+// CSV export button for dataTables handled by datatables Buttons
+
+// populate table by sheet on load
+document.getElementById('select-sheet').addEventListener('change', (e)=> populateTableBySheet(e.target.value));
+
+// simulate addition to cashflow
+document.getElementById('btn-simulate').addEventListener('click', ()=> {
+  const inc = parseNumber(document.getElementById('sim-increment').value);
+  if(!inc){ alert('Ingresá un monto numérico para simular.'); return; }
+  // add inc to last month cumulative (we'll modify chart-cashflow dataset visually)
+  const ch = charts['chart-cashflow'];
+  if(!ch) return;
+  const ds = ch.data.datasets[0].data;
+  if(ds.length === 0) return;
+  ch.data.datasets[0].data = ds.map((v,i) => i === ds.length -1 ? v + inc : v);
+  ch.update();
+});
+
+// reset sim
+document.getElementById('btn-reset-sim').addEventListener('click', ()=> {
+  // reload charts from data
+  renderCharts();
+});
+
+// download JSON
+document.getElementById('download-all').addEventListener('click', ()=> downloadJSON());
+
+// simple startup
+loadAllData();
+
+</script>
 </body>
 </html>
