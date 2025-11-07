@@ -3,151 +3,228 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HG Dashboard</title>
+<title>HG Dashboard Profesional</title>
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-body { margin:0; font-family:Arial,sans-serif; background-color:#0d1b2a; color:#fff; }
-header { background-color:#1b2a41; padding:15px; display:flex; align-items:center; justify-content:space-between; position:fixed; width:100%; top:0; z-index:1000; }
-header h1 { margin:0; font-size:1.5em; color:#00bfff; }
-nav { width:220px; background-color:#162a44; position:fixed; top:60px; bottom:0; padding-top:20px; overflow-y:auto; }
-nav a { display:block; color:#fff; text-decoration:none; padding:12px 20px; }
-nav a:hover { background-color:#1f3a5a; cursor:pointer; }
-main { margin-left:220px; padding:80px 20px 20px 20px; }
-.module { background-color:#1b2a41; padding:20px; margin-bottom:20px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.5); }
-.module h2 { margin-top:0; font-size:1.3em; color:#00bfff; }
-canvas { background-color:#0d1b2a; border-radius:8px; }
-table { width:100%; border-collapse:collapse; }
-table th, table td { padding:10px; text-align:left; border-bottom:1px solid #334a63; }
-table th { color:#00bfff; }
-table tr:hover { background-color:#1f3a5a; }
+  /* Diseño azul oscuro profesional HG */
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #0d1b2a;
+    color: #ffffff;
+  }
+  header {
+    background-color: #1b2a41;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+    font-weight: bold;
+  }
+  nav {
+    width: 220px;
+    background-color: #1b2a41;
+    position: fixed;
+    top: 60px;
+    bottom: 0;
+    padding-top: 20px;
+  }
+  nav a {
+    display: block;
+    padding: 12px 20px;
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  nav a:hover {
+    background-color: #162036;
+  }
+  main {
+    margin-left: 240px;
+    padding: 20px;
+  }
+  section {
+    margin-bottom: 40px;
+  }
+  h2 {
+    border-bottom: 2px solid #162036;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+    color: #00bcd4;
+  }
+  canvas {
+    background-color: #162036;
+    border-radius: 8px;
+    padding: 10px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    background-color: #1b2a41;
+  }
+  table th, table td {
+    border: 1px solid #0d1b2a;
+    padding: 8px;
+    text-align: left;
+  }
+  table th {
+    background-color: #162036;
+  }
 </style>
 </head>
 <body>
 
 <header>
-<h1>HG Dashboard</h1>
+  HG Dashboard Profesional
+  <div id="cache-status">Cache: cargando...</div>
 </header>
 
 <nav>
-<a onclick="scrollToModule('saldo-actual')">Saldo Actual</a>
-<a onclick="scrollToModule('ingresosChart')">Ingresos Mensuales</a>
-<a onclick="scrollToModule('egresosChart')">Egresos Mensuales</a>
-<a onclick="scrollToModule('cuentasTable')">Cuentas Pendientes</a>
+  <a href="#finanzas">Finanzas</a>
+  <a href="#ventas">Ventas</a>
+  <a href="#caja">Caja Movimientos</a>
+  <a href="#pendientes">Cuentas Pendientes</a>
 </nav>
 
 <main>
-<div class="module" id="saldo-actual">
-<h2>Saldo Actual</h2>
-<p id="saldo">Cargando...</p>
-</div>
 
-<div class="module">
-<h2>Ingresos Mensuales</h2>
-<canvas id="ingresosChart" width="600" height="300"></canvas>
-</div>
+<section id="finanzas">
+  <h2>Finanzas Mensuales</h2>
+  <canvas id="chartFinanzas"></canvas>
+</section>
 
-<div class="module">
-<h2>Egresos Mensuales</h2>
-<canvas id="egresosChart" width="600" height="300"></canvas>
-</div>
+<section id="ventas">
+  <h2>Ventas Mensuales</h2>
+  <canvas id="chartVentas"></canvas>
+</section>
 
-<div class="module">
-<h2>Cuentas Pendientes</h2>
-<table id="cuentasTable">
-<thead>
-<tr>
-<th>Cliente/Proveedor</th>
-<th>Monto</th>
-<th>Vencimiento</th>
-</tr>
-</thead>
-<tbody>
-<tr><td colspan="3">Cargando...</td></tr>
-</tbody>
-</table>
-</div>
-</main>
+<section id="caja">
+  <h2>Caja Movimientos</h2>
+  <canvas id="chartCaja"></canvas>
+</section>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<section id="pendientes">
+  <h2>Cuentas Pendientes</h2>
+  <table id="tablaPendientes">
+    <thead>
+      <tr>
+        <th>Cliente/Proveedor</th>
+        <th>Categoría</th>
+        <th>Subcategoría</th>
+        <th>Monto</th>
+        <th>Fecha</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+</section>
+
 <script>
+// === Conexión GAS ===
 const GAS_URL = "https://script.google.com/macros/s/AKfycbyTLrGiqes1VOp8E51Kq91P7YihPKNtN1f0f6u2JitXOteGyGrNXqiSjdXYJ8HAtfs/exec";
 
-async function fetchData(){
+async function fetchData() {
+  try {
     const res = await fetch(GAS_URL);
-    if(!res.ok) throw new Error("Error al obtener datos");
-    return await res.json();
+    const data = await res.json();
+    document.getElementById('cache-status').innerText = 'Cache: OK';
+    return data;
+  } catch (err) {
+    console.error("Error fetch GAS:", err);
+    document.getElementById('cache-status').innerText = 'Cache: ERROR';
+    return null;
+  }
 }
 
-function parseNumber(val){
-    if(val===null||val===undefined||val==="") return 0;
-    if(typeof val==="number") return val;
-    const s = String(val).replace(/[^0-9,\-\.]/g,"");
-    const normalized = s.replace(/\./g,'').replace(',','.');
-    const n = parseFloat(normalized);
-    return isNaN(n)?0:n;
-}
-
-function updateSaldo(datos){
-    const movimientos = datos["Caja_Movimientos"];
-    let saldo = 0;
-    movimientos.forEach(m=>{
-        saldo += parseNumber(m["Monto"]);
-    });
-    document.getElementById("saldo").innerText = "$ "+saldo.toLocaleString("es-AR",{minimumFractionDigits:2});
-}
-
-function updateIngresos(datos){
-    const rows = datos["Finanzas_Mensual"];
-    const labels = rows.map(r=>r["Mes"]);
-    const ingresos = rows.map(r=>parseNumber(r["Ingreso"]));
-    const ctx = document.getElementById("ingresosChart").getContext("2d");
-    new Chart(ctx,{
-        type:'bar',
-        data:{ labels, datasets:[{ label:'Ingresos', data:ingresos, backgroundColor:'#00bfff' }]},
-        options:{ responsive:true, plugins:{ legend:{ labels:{ color:'#fff' } } }, scales:{ x:{ ticks:{ color:'#fff' } }, y:{ ticks:{ color:'#fff' } } } }
-    });
-}
-
-function updateEgresos(datos){
-    const rows = datos["Finanzas_Mensual"];
-    const labels = rows.map(r=>r["Mes"]);
-    const egresos = rows.map(r=>parseNumber(r["Egreso"]));
-    const ctx = document.getElementById("egresosChart").getContext("2d");
-    new Chart(ctx,{
-        type:'bar',
-        data:{ labels, datasets:[{ label:'Egresos', data:egresos, backgroundColor:'#ff6347' }]},
-        options:{ responsive:true, plugins:{ legend:{ labels:{ color:'#fff' } } }, scales:{ x:{ ticks:{ color:'#fff' } }, y:{ ticks:{ color:'#fff' } } } }
-    });
-}
-
-function updateCuentas(datos){
-    const table = document.getElementById("cuentasTable").querySelector("tbody");
-    const rows = datos["Cuentas_Pendientes"];
-    if(!rows || rows.length===0){ table.innerHTML="<tr><td colspan='3'>No hay datos</td></tr>"; return;}
-    table.innerHTML = rows.map(r=>`<tr>
-        <td>${r["Cliente/Proveedor"]}</td>
-        <td>$ ${parseNumber(r["Monto"]).toLocaleString("es-AR",{minimumFractionDigits:2})}</td>
-        <td>${r["Vencimiento"]}</td>
-    </tr>`).join('');
-}
-
-async function refreshAll(){
-    try{
-        const datos = await fetchData();
-        updateSaldo(datos);
-        updateIngresos(datos);
-        updateEgresos(datos);
-        updateCuentas(datos);
-    }catch(e){
-        console.error("Error refrescando dashboard:", e);
+// === Funciones de gráficos ===
+function crearGraficoBarras(ctx, labels, data, label, color) {
+  return new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label,
+        data,
+        backgroundColor: color,
+        borderColor: '#00bcd4',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: { y: { beginAtZero: true } }
     }
+  });
 }
 
-// Scroll a módulo desde menú
-function scrollToModule(id){
-    document.getElementById(id).scrollIntoView({behavior:'smooth'});
+function crearGraficoLineas(ctx, labels, data, label, color) {
+  return new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label,
+        data,
+        borderColor: color,
+        backgroundColor: 'rgba(0,188,212,0.2)',
+        tension: 0.2
+      }]
+    },
+    options: { responsive: true }
+  });
 }
 
-refreshAll();
+function actualizarTablaPendientes(tablaId, datos) {
+  const tbody = document.querySelector(`#${tablaId} tbody`);
+  tbody.innerHTML = '';
+  datos.forEach(row => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${row["Cliente/Proveedor"]}</td>
+      <td>${row.Categoría}</td>
+      <td>${row["Subcategoría"]}</td>
+      <td>${parseFloat(row.Monto).toLocaleString("es-AR", {style:"currency", currency:"ARS"})}</td>
+      <td>${row.Fecha}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// === Renderizar todo ===
+async function initDashboard() {
+  const data = await fetchData();
+  if (!data) return;
+
+  // Finanzas Mensuales
+  const finanzas = data["Finanzas_Mensual"] || [];
+  const labelsFinanzas = finanzas.map(f => f.Mes);
+  const valoresFinanzas = finanzas.map(f => parseFloat(f.Total || 0));
+  crearGraficoLineas(document.getElementById('chartFinanzas'), labelsFinanzas, valoresFinanzas, 'Saldo Mensual', '#00bcd4');
+
+  // Ventas Mensuales
+  const ventas = data["Ventas_Mensual"] || [];
+  const labelsVentas = ventas.map(v => v.Mes);
+  const valoresVentas = ventas.map(v => parseFloat(v.Total || 0));
+  crearGraficoBarras(document.getElementById('chartVentas'), labelsVentas, valoresVentas, 'Ventas', '#00bcd4');
+
+  // Caja Movimientos
+  const caja = data["Caja_Movimientos"] || [];
+  const labelsCaja = caja.map(c => c.Fecha);
+  const valoresCaja = caja.map(c => parseFloat(c.Monto || 0));
+  crearGraficoBarras(document.getElementById('chartCaja'), labelsCaja, valoresCaja, 'Movimientos Caja', '#00bcd4');
+
+  // Cuentas Pendientes
+  const pendientes = data["Cuentas_Pendientes"] || [];
+  actualizarTablaPendientes('tablaPendientes', pendientes);
+}
+
+// Inicializar
+initDashboard();
 </script>
+
 </body>
 </html>
