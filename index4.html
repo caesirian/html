@@ -1,166 +1,91 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HG Dashboard Financiero</title>
-
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-body {
-  margin: 0;
-  font-family: "Inter", sans-serif;
-  background: radial-gradient(circle at top left, #0b132b, #1c2541);
-  color: #fff;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-header {
-  background: rgba(255,255,255,0.05);
-  width: 100%;
-  text-align: center;
-  padding: 1.2rem 0;
-  font-size: 1.6rem;
-  letter-spacing: 1px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-#content {
-  width: 90%;
-  max-width: 1200px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-  gap: 1.5rem;
-  margin: 2rem 0;
-}
-.card {
-  background: rgba(255,255,255,0.05);
-  border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 0 10px rgba(0,0,0,0.3);
-  transition: 0.2s;
-}
-.card:hover {
-  transform: scale(1.02);
-  box-shadow: 0 0 14px rgba(0,0,0,0.5);
-}
-.card h3 { margin-top: 0; color: #7dcfff; }
-
-#saldo {
-  font-size: 2.6rem;
-  text-align: center;
-  color: #4ee1a0;
-}
-
-.error {
-  text-align: center;
-  background: rgba(255,0,0,0.1);
-  border: 1px solid rgba(255,0,0,0.3);
-  border-radius: 8px;
-  padding: 1rem;
-  color: #ff6b6b;
-}
-canvas { background: rgba(255,255,255,0.03); border-radius: 8px; }
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1rem;
-}
-table th, table td {
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  padding: 0.4rem;
-}
-table th { color: #7dcfff; text-align: left; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HG Soluciones - Dashboard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      background-color: #0b172a;
+      color: #e8ecf4;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    header {
+      background-color: #12294b;
+      padding: 1.5rem;
+      color: #fff;
+      font-size: 1.6rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+    main {
+      padding: 2rem;
+    }
+    .card {
+      background: #162a4a;
+      border-radius: 12px;
+      padding: 1rem;
+      margin: 1rem auto;
+      max-width: 600px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+    .btn {
+      background-color: #1e3a8a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: background 0.3s;
+    }
+    .btn:hover {
+      background-color: #3b82f6;
+    }
+    pre {
+      background: #0f1a33;
+      color: #9cd6ff;
+      padding: 1rem;
+      text-align: left;
+      overflow-x: auto;
+      border-radius: 8px;
+    }
+  </style>
 </head>
-
 <body>
-<header>📊 HG Dashboard Financiero</header>
-<div id="content">
-  <div class="card">
-    <h3>Saldo actual</h3>
-    <div id="saldo">Cargando...</div>
-  </div>
-  <div class="card">
-    <h3>Ingresos del mes vs anterior</h3>
-    <canvas id="chartIngresos"></canvas>
-  </div>
-  <div class="card">
-    <h3>Egresos del mes vs anterior</h3>
-    <canvas id="chartEgresos"></canvas>
-  </div>
-  <div class="card">
-    <h3>Cuentas pendientes</h3>
-    <table id="tablaCuentas">
-      <thead><tr><th>Tipo</th><th>Entidad</th><th>Monto</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
-</div>
-<div id="error" class="error" style="display:none;"></div>
+  <header>HG Soluciones - Dashboard de Datos</header>
+  <main>
+    <div class="card">
+      <h2>Conexión con Google Sheets</h2>
+      <p>Presioná el botón para obtener los datos actualizados desde el servidor GAS.</p>
+      <button class="btn" onclick="refreshAll()">Actualizar Datos</button>
+      <pre id="output">Esperando conexión...</pre>
+    </div>
+  </main>
 
-<script>
-const GAS_URL = "https://script.google.com/macros/s/AKfycbyTLrGiqes1VOp8E51Kq91P7YihPKNtN1f0f6u2JitXOteGyGrNXqiSjdXYJ8HAtfs/exec";
+  <script>
+    const gasURL = 'https://script.google.com/macros/s/AKfycbyTLrGiqes1VOp8E51Kq91P7YihPKNtN1f0f6u2JitXOteGyGrNXqiSjdXYJ8HAtfs/exec';
 
-async function fetchData(){
-  try{
-    const res = await fetch(GAS_URL);
-    if(!res.ok) throw new Error("Servidor no respondió OK");
-    const data = await res.json();
-    return data;
-  }catch(err){
-    document.getElementById("error").innerText = "❌ Error de conexión o formato: " + err.message;
-    document.getElementById("error").style.display = "block";
-    throw err;
-  }
-}
-
-function renderSaldo(finanzas){
-  const ingresos = finanzas.filter(r => r["Tipo"] === "Ingreso").reduce((a,b)=>a+Number(b["Monto"]||0),0);
-  const egresos  = finanzas.filter(r => r["Tipo"] === "Egreso").reduce((a,b)=>a+Number(b["Monto"]||0),0);
-  const saldo = ingresos - egresos;
-  document.getElementById("saldo").textContent = "$ " + saldo.toLocaleString("es-AR");
-}
-
-function renderChart(canvasId, label, dataset1, dataset2){
-  new Chart(document.getElementById(canvasId), {
-    type: 'bar',
-    data: {
-      labels: ['Mes anterior','Mes actual'],
-      datasets: [
-        {label: label, data: [dataset1, dataset2],
-         backgroundColor:['#4169e1','#4ee1a0']}
-      ]
-    },
-    options: {responsive:true, plugins:{legend:{labels:{color:"#fff"}}},
-              scales:{x:{ticks:{color:"#fff"}}, y:{ticks:{color:"#fff"}}}}
-  });
-}
-
-function renderCuentas(tabla){
-  const tbody = document.querySelector("#tablaCuentas tbody");
-  tbody.innerHTML = "";
-  tabla.forEach(r=>{
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${r["Tipo"]||""}</td><td>${r["Cliente/Proveedor"]||""}</td><td>$ ${r["Monto"]||0}</td>`;
-    tbody.appendChild(tr);
-  });
-}
-
-async function main(){
-  const datos = await fetchData();
-  if(!datos) return;
-  renderSaldo(datos["Finanzas_RegistroDiario"] || []);
-  // valores ficticios temporales
-  renderChart("chartIngresos","Ingresos", 200000, 245000);
-  renderChart("chartEgresos","Egresos", 150000, 165000);
-  renderCuentas(datos["Cuentas_Pendientes"] || []);
-}
-
-main();
-</script>
+    async function refreshAll() {
+      document.getElementById('output').textContent = 'Cargando datos...';
+      try {
+        const response = await fetch(gasURL, {
+          method: 'GET',
+          mode: 'cors',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        if (!response.ok) throw new Error(`Error HTTP ${response.status}`);
+        const data = await response.json();
+        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById('output').textContent = `Error al obtener datos: ${err.message}`;
+        console.error('Error refreshAll:', err);
+      }
+    }
+  </script>
 </body>
 </html>
