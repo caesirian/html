@@ -3,151 +3,114 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HG Dashboard Avanzado</title>
+<title>HG Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-  body { margin:0; font-family:Arial, sans-serif; background:#0d1b2a; color:#e0e1dd; }
-  header { background:#1b263b; padding:10px 20px; display:flex; align-items:center; }
-  nav { width:220px; background:#1b263b; position:fixed; top:0; bottom:0; left:0; padding-top:60px; }
-  nav a { display:block; color:#e0e1dd; padding:10px 15px; text-decoration:none; }
-  nav a:hover { background:#415a77; }
-  main { margin-left:220px; padding:20px; }
-  h1, h2 { color:#e0e1dd; }
-  table { border-collapse:collapse; width:100%; margin-top:10px; }
-  th, td { border:1px solid #415a77; padding:5px; text-align:left; }
-  th { background:#1b263b; }
-  canvas { background:#0d1b2a; }
-  .card { background:#1b263b; padding:15px; margin-bottom:20px; border-radius:5px; box-shadow:0 0 10px rgba(0,0,0,0.5); }
+  body { margin:0; font-family: Arial, sans-serif; background:#0d1b2a; color:#f0f0f0;}
+  .sidebar { width:220px; background:#1b263b; position:fixed; top:0; bottom:0; left:0; padding:20px;}
+  .sidebar h2 { color:#e0e0e0; font-size:1.5em;}
+  .menu-item { margin:15px 0; cursor:pointer; color:#c0c0c0;}
+  .menu-item:hover { color:#ffffff;}
+  .topbar { margin-left:220px; height:60px; background:#162447; display:flex; align-items:center; padding:0 20px; font-size:1.2em;}
+  .content { margin-left:220px; margin-top:60px; padding:20px;}
+  .card { background:#1f2a44; padding:15px; margin-bottom:20px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.5);}
+  table { width:100%; border-collapse:collapse;}
+  th, td { padding:8px; text-align:left; border-bottom:1px solid #33415c;}
+  th { background:#162447;}
+  canvas { background:#0d1b2a; border-radius:8px; padding:10px;}
 </style>
 </head>
 <body>
-<header>
-  <h1>HG Dashboard Avanzado</h1>
-</header>
-<nav>
-  <a href="#finanzas">Finanzas Mensuales</a>
-  <a href="#ventas">Ventas Mensuales</a>
-  <a href="#caja">Caja Movimientos</a>
-  <a href="#pendientes">Cuentas Pendientes</a>
-</nav>
-<main>
-  <div id="finanzas" class="card">
-    <h2>Finanzas Mensuales</h2>
-    <canvas id="graficoFinanzas" width="600" height="300"></canvas>
+
+<div class="sidebar">
+  <h2>HG Dashboard</h2>
+  <div class="menu-item" onclick="showSection('caja')">Caja Movimientos</div>
+  <div class="menu-item" onclick="showSection('pendientes')">Cuentas Pendientes</div>
+  <div class="menu-item" onclick="showSection('finanzas')">Finanzas Diario</div>
+</div>
+
+<div class="topbar">HG Soluciones - Dashboard</div>
+
+<div class="content">
+
+  <div id="caja" class="section card">
+    <h3>Caja Movimientos</h3>
+    <canvas id="chartCaja"></canvas>
   </div>
-  <div id="ventas" class="card">
-    <h2>Ventas Mensuales</h2>
-    <canvas id="graficoVentas" width="600" height="300"></canvas>
-  </div>
-  <div id="caja" class="card">
-    <h2>Caja Movimientos</h2>
-    <canvas id="graficoCaja" width="600" height="300"></canvas>
-  </div>
-  <div id="pendientes" class="card">
-    <h2>Cuentas Pendientes</h2>
-    <table id="tablaPendientes">
-      <thead>
-        <tr><th>Cliente/Proveedor</th><th>Monto</th><th>Vencimiento</th></tr>
-      </thead>
+
+  <div id="pendientes" class="section card">
+    <h3>Cuentas Pendientes</h3>
+    <table id="tablePendientes">
+      <thead></thead>
       <tbody></tbody>
     </table>
   </div>
-</main>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <div id="finanzas" class="section card">
+    <h3>Finanzas Registro Diario</h3>
+    <canvas id="chartFinanzas"></canvas>
+  </div>
+
+</div>
+
 <script>
-const URL_GAS = "https://script.google.com/macros/s/YOUR_DEPLOY_ID/exec";
+let datosGAS = {};
 
-function parseMonto(val){
-  if(val===null||val===undefined||val==="") return 0;
-  const n = parseFloat(String(val).replace(/[^0-9,\-\.]/g,"").replace(",","."));
-  return isNaN(n)?0:n;
+async function fetchGAS() {
+  try {
+    const res = await fetch("https://script.google.com/macros/s/AKfycbyTLrGiqes1VOp8E51Kq91P7YihPKNtN1f0f6u2JitXOteGyGrNXqiSjdXYJ8HAtfs/exec");
+    datosGAS = await res.json();
+    actualizarDashboard();
+  } catch(e) {
+    console.error("Error fetch GAS:", e);
+  }
 }
 
-async function fetchData(){
-  const res = await fetch(URL_GAS);
-  return await res.json();
-}
-
-function renderTablaPendientes(pendientes){
-  const tbody = document.querySelector("#tablaPendientes tbody");
-  tbody.innerHTML = "";
-  pendientes.forEach(p => {
-    const tr = document.createElement("tr");
-    const cliente = p["Cliente/Proveedor"] || "";
-    const monto = parseMonto(p["Monto"]).toLocaleString("es-AR",{style:"currency",currency:"ARS"});
-    const venc = p["Vencimiento"] || p["Fecha"] || "";
-    tr.innerHTML = `<td>${cliente}</td><td>${monto}</td><td>${venc}</td>`;
-    tbody.appendChild(tr);
+function actualizarDashboard() {
+  // --- Caja Movimientos ---
+  const caja = datosGAS["Caja_Movimientos"] || [];
+  const labelsCaja = caja.map(r=>r.Fecha);
+  const dataCaja = caja.map(r=>parseFloat(r.Monto || 0));
+  new Chart(document.getElementById("chartCaja"), {
+    type:'bar',
+    data:{ labels:labelsCaja, datasets:[{label:'Montos', data:dataCaja, backgroundColor:'#00bcd4'}]},
+    options:{ responsive:true, plugins:{ legend:{display:true} } }
   });
-}
 
-function renderGraficoLinea(canvasId, labels, data, labelText, color="#415a77"){
-  const ctx = document.getElementById(canvasId).getContext("2d");
-  const gradient = ctx.createLinearGradient(0,0,0,300);
-  gradient.addColorStop(0,color);
-  gradient.addColorStop(1,"rgba(0,0,0,0)");
-  new Chart(ctx,{
+  // --- Cuentas Pendientes ---
+  const pendientes = datosGAS["Cuentas_Pendientes"] || [];
+  const tablePend = document.getElementById("tablePendientes");
+  tablePend.querySelector("thead").innerHTML = "";
+  tablePend.querySelector("tbody").innerHTML = "";
+  if(pendientes.length>0){
+    // encabezados
+    const cols = Object.keys(pendientes[0]);
+    tablePend.querySelector("thead").innerHTML = "<tr>"+cols.map(c=>"<th>"+c+"</th>").join("")+"</tr>";
+    // filas
+    tablePend.querySelector("tbody").innerHTML = pendientes.map(r=>"<tr>"+cols.map(c=>"<td>"+(r[c]||"")+"</td>").join("")+"</tr>").join("");
+  }
+
+  // --- Finanzas Registro Diario ---
+  const finanzas = datosGAS["Finanzas_RegistroDiario"] || [];
+  const labelsFin = finanzas.map(r=>r.Fecha);
+  const dataFin = finanzas.map(r=>parseFloat(r.Monto || 0));
+  new Chart(document.getElementById("chartFinanzas"), {
     type:'line',
-    data:{
-      labels,
-      datasets:[{
-        label:labelText,
-        data,
-        borderColor:color,
-        backgroundColor:gradient,
-        fill:true,
-        tension:0.3,
-        pointRadius:4,
-        pointBackgroundColor:color
-      }]
-    },
-    options:{
-      responsive:true,
-      plugins:{legend:{labels:{color:'#e0e1dd'}}, tooltip:{callbacks:{label:ctx=>parseMonto(ctx.raw).toLocaleString('es-AR',{style:'currency',currency:'ARS'})}}},
-      scales:{
-        x:{ticks:{color:'#e0e1dd'}},
-        y:{ticks:{color:'#e0e1dd'}}
-      }
-    }
+    data:{ labels:labelsFin, datasets:[{label:'Montos', data:dataFin, borderColor:'#ff9800', backgroundColor:'rgba(255,152,0,0.2)', fill:true}]},
+    options:{ responsive:true, plugins:{ legend:{display:true} } }
   });
 }
 
-function calcularSaldoAcumulado(caja){
-  let saldo=0;
-  return caja.map(c=>{
-    saldo+=parseMonto(c.Monto);
-    return saldo;
-  });
+function showSection(id) {
+  document.querySelectorAll(".section").forEach(s=>s.style.display="none");
+  document.getElementById(id).style.display="block";
 }
 
-async function initDashboard(){
-  const d = await fetchData();
+// inicializa
+fetchGAS();
+showSection('caja');
 
-  // Finanzas Mensuales
-  const finanzas = d["Finanzas_Mensual"] || [];
-  const labelsFin = finanzas.map(f => f.Mes);
-  const dataFin = finanzas.map(f => parseMonto(f.Total));
-  renderGraficoLinea("graficoFinanzas", labelsFin, dataFin, "Saldo Mensual");
-
-  // Ventas Mensuales
-  const ventas = d["Ventas_Mensual"] || [];
-  const labelsVen = ventas.map(v => v.Mes);
-  const dataVen = ventas.map(v => parseMonto(v.Total));
-  renderGraficoLinea("graficoVentas", labelsVen, dataVen, "Ventas Mensuales", "#ff7f50");
-
-  // Caja Movimientos (saldo acumulado)
-  const caja = d["Caja_Movimientos"] || [];
-  const labelsCaja = caja.map(c => c.Fecha);
-  const dataCaja = calcularSaldoAcumulado(caja);
-  renderGraficoLinea("graficoCaja", labelsCaja, dataCaja, "Saldo Acumulado Caja", "#00bfff");
-
-  // Cuentas Pendientes
-  const pendientes = (d["Cuentas_Pendientes"] || []).filter(p => parseMonto(p.Monto)>0);
-  renderTablaPendientes(pendientes);
-}
-
-// Inicializar
-initDashboard();
 </script>
+
 </body>
 </html>
