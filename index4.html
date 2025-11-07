@@ -42,6 +42,48 @@
   @keyframes spin{to{transform:rotate(360deg)}}
   .kpi-trend{font-size:12px; color:var(--muted);}
 </style>
+  <script>
+    // ID de tu hoja
+    const SHEET_ID = "1ljNxLlIV7mExU3yp3g74AeDshTphT2deD4xXhlR1saU";
+    const SHEET_NAME = "Finanzas_RegistroDiario";
+    const URL = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
+
+    async function cargarDatos() {
+      const res = await fetch(URL);
+      const data = await res.json();
+
+      // Mostrar tabla
+      const headers = Object.keys(data[0]);
+      const rows = data.map(r => headers.map(h => r[h]));
+
+      const table = document.createElement("table");
+      table.innerHTML = `
+        <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+        <tbody>${rows.map(r => `<tr>${r.map(v => `<td>${v}</td>`).join('')}</tr>`).join('')}</tbody>
+      `;
+      document.getElementById("tablaFinanzas").appendChild(table);
+      new DataTable(table);
+
+      // Generar gráfico ejemplo
+      const ctx = document.getElementById("grafico1").getContext("2d");
+      const montos = data.map(d => parseFloat(d.Monto || 0));
+      const fechas = data.map(d => d.Fecha);
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: fechas,
+          datasets: [{
+            label: "Monto",
+            data: montos,
+            backgroundColor: "rgba(75,192,192,0.6)"
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+      });
+    }
+
+    cargarDatos();
+  </script>
 </head>
 <body>
 <div class="app">
