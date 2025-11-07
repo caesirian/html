@@ -6,15 +6,19 @@
 <title>HG Dashboard</title>
 <style>
 body { margin:0; font-family:Arial,sans-serif; background-color:#0d1b2a; color:#fff; }
-header { background-color:#1b2a41; padding:15px; display:flex; align-items:center; justify-content:space-between; }
-header h1 { margin:0; font-size:1.5em; color:#fff; }
-nav { width:200px; background-color:#162a44; position:fixed; top:60px; bottom:0; padding-top:20px; }
-nav a { display:block; color:#fff; text-decoration:none; padding:10px 20px; }
-nav a:hover { background-color:#1f3a5a; }
-main { margin-left:200px; padding:20px; }
-.module { background-color:#1b2a41; padding:15px; margin-bottom:20px; border-radius:8px; }
-.module h2 { margin-top:0; font-size:1.2em; color:#00bfff; }
+header { background-color:#1b2a41; padding:15px; display:flex; align-items:center; justify-content:space-between; position:fixed; width:100%; top:0; z-index:1000; }
+header h1 { margin:0; font-size:1.5em; color:#00bfff; }
+nav { width:220px; background-color:#162a44; position:fixed; top:60px; bottom:0; padding-top:20px; overflow-y:auto; }
+nav a { display:block; color:#fff; text-decoration:none; padding:12px 20px; }
+nav a:hover { background-color:#1f3a5a; cursor:pointer; }
+main { margin-left:220px; padding:80px 20px 20px 20px; }
+.module { background-color:#1b2a41; padding:20px; margin-bottom:20px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.5); }
+.module h2 { margin-top:0; font-size:1.3em; color:#00bfff; }
 canvas { background-color:#0d1b2a; border-radius:8px; }
+table { width:100%; border-collapse:collapse; }
+table th, table td { padding:10px; text-align:left; border-bottom:1px solid #334a63; }
+table th { color:#00bfff; }
+table tr:hover { background-color:#1f3a5a; }
 </style>
 </head>
 <body>
@@ -24,10 +28,10 @@ canvas { background-color:#0d1b2a; border-radius:8px; }
 </header>
 
 <nav>
-<a href="#">Saldo Actual</a>
-<a href="#">Ingresos Mensuales</a>
-<a href="#">Egresos Mensuales</a>
-<a href="#">Cuentas Pendientes</a>
+<a onclick="scrollToModule('saldo-actual')">Saldo Actual</a>
+<a onclick="scrollToModule('ingresosChart')">Ingresos Mensuales</a>
+<a onclick="scrollToModule('egresosChart')">Egresos Mensuales</a>
+<a onclick="scrollToModule('cuentasTable')">Cuentas Pendientes</a>
 </nav>
 
 <main>
@@ -38,17 +42,17 @@ canvas { background-color:#0d1b2a; border-radius:8px; }
 
 <div class="module">
 <h2>Ingresos Mensuales</h2>
-<canvas id="ingresosChart" width="400" height="200"></canvas>
+<canvas id="ingresosChart" width="600" height="300"></canvas>
 </div>
 
 <div class="module">
 <h2>Egresos Mensuales</h2>
-<canvas id="egresosChart" width="400" height="200"></canvas>
+<canvas id="egresosChart" width="600" height="300"></canvas>
 </div>
 
 <div class="module">
 <h2>Cuentas Pendientes</h2>
-<table id="cuentasTable" border="1" width="100%" style="border-collapse:collapse; color:#fff;">
+<table id="cuentasTable">
 <thead>
 <tr>
 <th>Cliente/Proveedor</th>
@@ -67,10 +71,10 @@ canvas { background-color:#0d1b2a; border-radius:8px; }
 <script>
 const GAS_URL = "https://script.google.com/macros/s/AKfycbyTLrGiqes1VOp8E51Kq91P7YihPKNtN1f0f6u2JitXOteGyGrNXqiSjdXYJ8HAtfs/exec";
 
-async function fetchData() {
+async function fetchData(){
     const res = await fetch(GAS_URL);
-    const data = await res.json();
-    return data;
+    if(!res.ok) throw new Error("Error al obtener datos");
+    return await res.json();
 }
 
 function parseNumber(val){
@@ -84,7 +88,10 @@ function parseNumber(val){
 
 function updateSaldo(datos){
     const movimientos = datos["Caja_Movimientos"];
-    const saldo = movimientos.reduce((sum,row)=>sum+parseNumber(row["Monto"]),0);
+    let saldo = 0;
+    movimientos.forEach(m=>{
+        saldo += parseNumber(m["Monto"]);
+    });
     document.getElementById("saldo").innerText = "$ "+saldo.toLocaleString("es-AR",{minimumFractionDigits:2});
 }
 
@@ -133,6 +140,11 @@ async function refreshAll(){
     }catch(e){
         console.error("Error refrescando dashboard:", e);
     }
+}
+
+// Scroll a módulo desde menú
+function scrollToModule(id){
+    document.getElementById(id).scrollIntoView({behavior:'smooth'});
 }
 
 refreshAll();
