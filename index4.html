@@ -250,25 +250,29 @@ table.display tbody td{
         <canvas id="grafico-egresos" height="180"></canvas>
       </section>
 
-      <section id="bloque-pendientes" class="card">
-        <h2>Cuentas Pendientes</h2>
-        <div class="table-wrap" style="margin-top:8px;">
-          <table id="tabla-pendientes" class="display stripe" style="width:100%">
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Tipo</th>
-                <th>Código</th>
-                <th>Nombre</th>
-                <th>Monto</th>
-                <th>Saldo</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </section>
+      
+<section id="bloque-pendientes" class="card">
+  <h2>Cuentas pendientes</h2>
+  <div style="overflow-x:auto;">
+    <table id="tabla-pendientes" class="tabla-datos">
+      <thead>
+        <tr>
+          <th>Fecha Emisión</th>
+          <th>Tipo</th>
+          <th>Cliente / Proveedor</th>
+          <th>Importe</th>
+          <th>Fecha Vto</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="5" class="text-muted">Cargando...</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <canvas id="grafico-pendientes" height="200" style="margin-top:12px;"></canvas>
+</section>
+
+      
     </div>
 
     <footer class="footer-hg">
@@ -288,6 +292,64 @@ table.display tbody td{
 <script src="https://cdn.jsdelivr.net/npm/datatables.net-buttons@2.4.1/js/buttons.html5.min.js"></script>
 
 <script>
+
+
+  async function mostrarPendientes(datos) {
+  const pendientes = (datos["Cuentas_Pendientes"] || [])
+    .filter(f => f["Estado (Pendiente/Pagado)"] === "Pendiente")
+    .sort((a, b) => new Date(a["Fecha Emisión"]) - new Date(b["Fecha Emisión"]));
+
+  const cuerpo = document.querySelector("#tabla-pendientes tbody");
+  cuerpo.innerHTML = "";
+
+  if (!pendientes.length) {
+    cuerpo.innerHTML = `<tr><td colspan="5" class="text-muted">Sin pendientes</td></tr>`;
+    return;
+  }
+
+  pendientes.forEach(p => {
+    const fila = document.createElement("tr");
+    fila.innerHTML = `
+      <td>${p["Fecha Emisión"]}</td>
+      <td>${p["Tipo (A cobrar/A pagar)"]}</td>
+      <td>${p["Cliente/Proveedor"]}</td>
+      <td style="text-align:right;">${Number(p["Importe"]).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}</td>
+      <td>${p["Fecha Vto"] || ""}</td>
+    `;
+    cuerpo.appendChild(fila);
+  });
+
+  // --- Gráfico de barras ---
+  const ctx = document.getElementById("grafico-pendientes").getContext("2d");
+  if (window.graficoPendientes) window.graficoPendientes.destroy();
+
+  window.graficoPendientes = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: pendientes.map(p => p["Cliente/Proveedor"]),
+      datasets: [{
+        label: "Importe pendiente",
+        data: pendientes.map(p => Number(p["Importe"]) || 0),
+        backgroundColor: pendientes.map(p => 
+          p["Tipo (A cobrar/A pagar)"].toLowerCase().includes("cobrar") ? "rgba(40, 180, 99, 0.7)" : "rgba(231, 76, 60, 0.7)"
+        ),
+        borderColor: "rgba(255,255,255,0.2)",
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { ticks: { color: "#ccc" }, grid: { color: "rgba(255,255,255,0.05)" } },
+        y: { ticks: { color: "#ccc" }, grid: { color: "rgba(255,255,255,0.05)" }, beginAtZero: true }
+      },
+      plugins: {
+        legend: { labels: { color: "#ddd" } }
+      }
+    }
+  });
+  }
 // ====== CONFIG ======
 const GAS_ENDPOINT = "https://script.google.com/macros/s/AKfycbyTLrGiqes1VOp8E51Kq91P7YihPKNtN1f0f6u2JitXOteGyGrNXqiSjdXYJ8HAtfs/exec";
 const CACHE_KEY = "hg_dashboard_cache_v3";
