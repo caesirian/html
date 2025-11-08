@@ -183,6 +183,25 @@ table.display tbody td{
 /* tiny loader */
 .loader{ display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,0.06); border-top-color:var(--accent); border-radius:50%; animation:spin 1s linear infinite; }
 @keyframes spin{ to{ transform:rotate(360deg); } }
+  
+/* Corrige comportamiento de expansión de Chart.js */
+.card canvas {
+  width: 100% !important;
+  height: 260px !important; /* altura estable */
+  max-height: 260px;
+  display: block;
+}
+
+.card {
+  overflow: hidden; /* evita que crezca fuera del contenedor */
+}
+
+@media (max-width: 768px) {
+  .card canvas {
+    height: 200px !important;
+  }
+}
+
 </style>
 </head>
 <body>
