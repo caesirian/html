@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Dashboard Financiero - HG Soluciones</title>
+
+<link href="https://cdn.jsdelivr.net/npm/datatables.net-dt@1.13.6/css/jquery.dataTables.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/datatables.net-buttons-dt@2.4.1/css/buttons.dataTables.min.css" rel="stylesheet"/>
+
+<style>
+:root{
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #3ea6ff;
+  --accent-2: #7b61ff;
+  --muted: #9aa8ba;
+  --glass: rgba(255,255,255,0.03);
+  --text: #e6eef8;
+  --card-contrast: rgba(255,255,255,0.02);
+  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --radius: 12px;
+}
+
+/* Page */
+html,body{
+  height:100%;
+  margin:0;
+  background: linear-gradient(180deg,#071226 0%, #081426 100%);
+  color:var(--text);
+}
+
+/* Sidebar */
+.app{display:flex; min-height:100vh;}
+aside.sidebar{width:260px; background:linear-gradient(180deg, rgba(11,18,32,0.9), rgba(6,10,18,0.85)); padding:18px;}
+aside h1{font-size:18px; margin:0 0 12px; color:var(--accent);}
+aside .nav{display:flex; flex-direction:column; gap:8px;}
+aside .nav button{background:transparent; border:0; color:var(--muted); padding:10px; border-radius:8px; cursor:pointer;}
+aside .nav button.active, aside .nav button:hover{background:var(--glass); color:#fff;}
+
+main{flex:1; padding:18px; display:flex; flex-direction:column; gap:12px;}
+
+.card, .panel{
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius: 12px;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,0.02);
+}
+
+/* GRID */
+.dashboard-grid{
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 12px;
+}
+
+#bloque-saldo{ grid-column: span 3; }
+#bloque-ingresos{ grid-column: span 5; }
+#bloque-egresos{ grid-column: span 4; }
+#bloque-pendientes{ grid-column: 1 / -1; }
+
+/* KPI */
+.kpi-grande{
+  font-size:28px;
+  font-weight:800;
+  color:#fff;
+}
+
+/* GRÁFICOS responsivos y estables */
+.card canvas{
+  width:100% !important;
+  height:260px !important;
+  max-height:260px;
+  display:block;
+}
+
+.card { overflow:hidden; }
+
+/* Responsive */
+@media (max-width:900px){
+  .dashboard-grid{ grid-template-columns: repeat(6, 1fr); }
+  #bloque-saldo{ grid-column: span 6; }
+  #bloque-ingresos{ grid-column: span 6; }
+  #bloque-egresos{ grid-column: span 6; }
+  #bloque-pendientes{ grid-column: span 6; }
+}
+@media (max-width:600px){
+  .dashboard-grid{ grid-template-columns:1fr; }
+  #bloque-saldo,#bloque-ingresos,#bloque-egresos,#bloque-pendientes{ grid-column:1; }
+}
+
+/* Data tables */
+.dataTables_wrapper .dataTables_filter input {
+  background: rgba(255,255,255,0.02);
+  border:1px solid rgba(255,255,255,0.04);
+  color:var(--text);
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <h1>HG - Dashboard Financiero</h1>
+    <div class="nav">
+      <button class="active">Resumen</button>
+      <button>Ventas</button>
+      <button>Finanzas</button>
+      <button>Simulador</button>
+      <button>Tablas</button>
+    </div>
+    <footer style="color:var(--muted); font-size:12px; margin-top:20px;">
+      Conexión: <span id="conn-status">sin iniciar</span>
+    </footer>
+  </aside>
+
+  <main>
+    <header style="display:flex; gap:12px;">
+      <div>
+        <h1 style="margin:0; color:var(--accent); font-size:20px;">Dashboard Financiero</h1>
+        <p style="margin:0; color:var(--muted); font-size:13px;">Conexión en vivo a Google Sheets</p>
+      </div>
+      <div style="margin-left:auto" id="estado" class="text-muted">Esperando datos…</div>
+    </header>
+
+    <div class="dashboard-grid">
+      
+      <!-- SALDO -->
+      <section id="bloque-saldo" class="card">
+        <h2>Saldo de caja</h2>
+        <div id="saldo-actual" class="kpi-grande">Cargando…</div>
+        <div id="saldo-fecha" class="text-muted" style="margin-top:6px;"></div>
+      </section>
+
+      <!-- INGRESOS -->
+      <section id="bloque-ingresos" class="card">
+        <h2>Ingresos: mes actual vs mes anterior</h2>
+        <canvas id="grafico-ingresos"></canvas>
+      </section>
+
+      <!-- EGRESOS -->
+      <section id="bloque-egresos" class="card">
+        <h2>Egresos: mes actual vs mes anterior</h2>
+        <canvas id="grafico-egresos"></canvas>
+      </section>
+
+    </div>
+
+  </main>
+</div>
+
+<!-- LIBRERÍAS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script>
+/* ======================= CONFIG ======================= */
+const GAS_ENDPOINT = "https://script.google.com/macros/s/AKfycbyTLrGiqes1VOp8E51Kq91P7YihPKNtN1f0f6u2JitXOteGyGrNXqiSjdXYJ8HAtfs/exec";
+
+/* ======================= CONTROL ======================= */
+let cargado = false;
+let chartIngresos = null;
+let chartEgresos = null;
+
+/* ======================= INICIO ======================= */
+window.addEventListener("load", async () => {
+  if (cargado) return;
+  cargado = true;
+  await refreshAll();
+});
+
+/* ======================= REFRESH ======================= */
+async function refreshAll() {
+  try {
+    document.getElementById('estado').innerText = "Cargando…";
+
+    const res = await fetch(GAS_ENDPOINT, { cache:"no-store" });
+    const data = await res.json();
+    const caja = data["Caja_Movimientos"] || [];
+
+    mostrarSaldo(caja);
+    graficarIngresosEgresos(caja);
+
+    document.getElementById('estado').innerText = "Datos actualizados";
+  } catch (err) {
+    console.error(err);
+    document.getElementById('estado').innerText = "Error al cargar datos";
+  }
+}
+
+/* ======================= SALDO ======================= */
+function mostrarSaldo(datos) {
+  const colSaldo = Object.keys(datos[0]).find(k => k.toLowerCase().includes("saldo"));
+  const colFecha = Object.keys(datos[0]).find(k => k.toLowerCase().includes("fecha"));
+
+  const ultimo = datos[datos.length - 1];
+  const saldo = parseFloat(ultimo[colSaldo]) || 0;
+
+  document.getElementById("saldo-actual").innerText =
+    "$ " + saldo.toLocaleString("es-AR", { minimumFractionDigits: 2 });
+
+  document.getElementById("saldo-fecha").innerText = ultimo[colFecha];
+}
+
+/* ======================= GRÁFICOS ======================= */
+function graficarIngresosEgresos(datos) {
+
+  // Detectar columnas
+  const colFecha = Object.keys(datos[0]).find(k => k.toLowerCase().includes("fecha"));
+  const colTipo = Object.keys(datos[0]).find(k => k.toLowerCase().includes("tipo"));
+  const colMonto = Object.keys(datos[0]).find(k => k.toLowerCase().includes("monto"));
+
+  const totales = {};
+
+  datos.forEach(r => {
+    const f = new Date(r[colFecha]);
+    if (isNaN(f)) return;
+    const mes = `${f.getFullYear()}-${String(f.getMonth()+1).padStart(2,"0")}`;
+    const tipo = (r[colTipo] || "").toLowerCase();
+    const monto = parseFloat(r[colMonto]) || 0;
+
+    if (!totales[mes]) totales[mes] = {ingreso:0, egreso:0};
+
+    if (tipo.includes("ingreso")) totales[mes].ingreso += monto;
+    else if (tipo.includes("egreso")) totales[mes].egreso += monto;
+  });
+
+  const meses = Object.keys(totales).sort();
+  const datosIngresos = meses.map(m => totales[m].ingreso);
+  const datosEgresos = meses.map(m => totales[m].egreso);
+
+  // Destruir previos
+  if (chartIngresos) chartIngresos.destroy();
+  if (chartEgresos) chartEgresos.destroy();
+
+  // INGRESOS
+  chartIngresos = new Chart(document.getElementById("grafico-ingresos"), {
+    type: "bar",
+    data: {
+      labels: meses,
+      datasets: [{
+        label: "Ingresos",
+        data: datosIngresos,
+        backgroundColor: "#00e676cc",
+        borderColor: "#00e676",
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive:true,
+      maintainAspectRatio:false,
+      animation:false
+    }
+  });
+
+  // EGRESOS
+  chartEgresos = new Chart(document.getElementById("grafico-egresos"), {
+    type: "bar",
+    data: {
+      labels: meses,
+      datasets: [{
+        label: "Egresos",
+        data: datosEgresos,
+        backgroundColor: "#ff1744cc",
+        borderColor: "#ff1744",
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive:true,
+      maintainAspectRatio:false,
+      animation:false
+    }
+  });
+}
+
+</script>
+</body>
+</html>
