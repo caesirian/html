@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HG Soluciones - Dashboard Financiero</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  /* === ESTILO HG AZUL OSCURO === */
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Roboto, sans-serif;
+    background: #0d1b2a;
+    color: #e0e0e0;
+  }
+
+  header {
+    background: #1b263b;
+    padding: 14px 20px;
+    color: #fff;
+    font-size: 1.4em;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 18px;
+    padding: 18px;
+  }
+
+  .card {
+    background: #1e2a47;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+    transition: transform 0.2s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+  }
+
+  .card h2 {
+    font-size: 1.1em;
+    margin-bottom: 10px;
+    color: #fff;
+    border-bottom: 1px solid #2f3b57;
+    padding-bottom: 6px;
+  }
+
+  .kpi-grande {
+    font-size: 2em;
+    font-weight: bold;
+    color: #4dd0e1;
+  }
+
+  .text-muted {
+    color: #aaa;
+    font-size: 0.85em;
+  }
+
+  table.tabla-datos {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+  }
+
+  table.tabla-datos th, table.tabla-datos td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #2f3b57;
+  }
+
+  table.tabla-datos th {
+    background: #0d1b2a;
+    color: #fff;
+    text-align: left;
+  }
+
+  table.tabla-datos tr:hover {
+    background: #24324f;
+  }
+
+  @media (max-width: 600px) {
+    .dashboard-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+  <header>
+    HG Soluciones — Dashboard Financiero
+  </header>
+
+  <main>
+    <div class="dashboard-grid">
+      <!-- === BLOQUE: SALDO === -->
+      <section id="bloque-saldo" class="card">
+        <h2>Saldo de Caja</h2>
+        <div id="saldo-actual" class="kpi-grande">Cargando...</div>
+        <div id="saldo-fecha" class="text-muted" style="margin-top:6px;">—</div>
+      </section>
+
+      <!-- === BLOQUE: INGRESOS === -->
+      <section id="bloque-ingresos" class="card">
+        <h2>Ingresos: mes actual vs anterior</h2>
+        <canvas id="grafico-ingresos" height="180"></canvas>
+      </section>
+
+      <!-- === BLOQUE: EGRESOS === -->
+      <section id="bloque-egresos" class="card">
+        <h2>Egresos: mes actual vs anterior</h2>
+        <canvas id="grafico-egresos" height="180"></canvas>
+      </section>
+
+      <!-- === BLOQUE: CUENTAS PENDIENTES === -->
+      <section id="bloque-pendientes" class="card">
+        <h2>Cuentas Pendientes</h2>
+        <canvas id="grafico-pendientes" height="200"></canvas>
+        <div class="tabla-container" style="max-height:260px; overflow-y:auto; margin-top:12px;">
+          <table id="tabla-pendientes" class="tabla-datos">
+            <thead>
+              <tr>
+                <th>Fecha Emisión</th>
+                <th>Tipo</th>
+                <th>Cliente/Proveedor</th>
+                <th>ID Relacionado</th>
+                <th>Importe</th>
+                <th>Fecha Vto</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyTLrGiqes1VOp8E51Kq91P7YihPKNtN1f0f6u2JitXOteGyGrNXqiSjdXYJ8HAtfs/exec";
+
+async function obtenerDatos(){
+  const r = await fetch(GAS_URL);
+  return await r.json();
+}
+
+async function cargarDashboard(){
+  try{
+    const data = await obtenerDatos();
+
+    // === SALDO ACTUAL ===
+    const caja = data["Caja_Movimientos"];
+    if(caja && caja.length){
+      const ultima = caja[caja.length - 1];
+      const saldo = ultima["Saldo"] || ultima["saldo"] || 0;
+      document.getElementById("saldo-actual").textContent = "$ " + Number(saldo).toLocaleString("es-AR",{minimumFractionDigits:2});
+      document.getElementById("saldo-fecha").textContent = ultima["Fecha"] || "";
+    }
+
+    // === INGRESOS / EGRESOS MENSUALES ===
+    const finanzas = data["Finanzas_RegistroDiario"];
+    if(finanzas && finanzas.length){
+      const ingresosMes = {};
+      const egresosMes = {};
+      finanzas.forEach(r=>{
+        const mes = r["Mes"] || (new Date(r["Fecha"]).getMonth()+1);
+        const tipo = (r["Tipo (Ingreso/Egreso)"] || "").toLowerCase();
+        const monto = parseFloat(r["Monto"]) || 0;
+        if(tipo.includes("ingreso")) ingresosMes[mes] = (ingresosMes[mes]||0) + monto;
+        if(tipo.includes("egreso")) egresosMes[mes] = (egresosMes[mes]||0) + monto;
+      });
+
+      const meses = Object.keys(ingresosMes).sort((a,b)=>a-b);
+      const ultMes = meses[meses.length-1];
+      const antMes = meses[meses.length-2] || ultMes;
+      const datosIngresos = [ingresosMes[antMes]||0, ingresosMes[ultMes]||0];
+      const datosEgresos = [egresosMes[antMes]||0, egresosMes[ultMes]||0];
+
+      graficarBarra("grafico-ingresos", ["Mes anterior","Mes actual"], datosIngresos, ["#4caf50","#81c784"]);
+      graficarBarra("grafico-egresos", ["Mes anterior","Mes actual"], datosEgresos, ["#f44336","#e57373"]);
+    }
+
+    // === CUENTAS PENDIENTES ===
+    const pendientes = data["Cuentas_Pendientes"];
+    if(pendientes && pendientes.length){
+      const pendientesFiltrados = pendientes.filter(r => String(r["Estado (Pendiente/Pagado)"]).toLowerCase().includes("pendiente"));
+      pendientesFiltrados.sort((a,b)=> new Date(a["Fecha Emisión"]) - new Date(b["Fecha Emisión"]));
+
+      // tabla
+      const tbody = document.querySelector("#tabla-pendientes tbody");
+      tbody.innerHTML = "";
+      pendientesFiltrados.forEach(r=>{
+        const fila = document.createElement("tr");
+        const color = r["Tipo (A cobrar/A pagar)"].includes("cobrar") ? "#28a745" : "#dc3545";
+        fila.innerHTML = `
+          <td>${r["Fecha Emisión"]||""}</td>
+          <td style="color:${color}">${r["Tipo (A cobrar/A pagar)"]||""}</td>
+          <td>${r["Cliente/Proveedor"]||""}</td>
+          <td>${r["ID Relacionado"]||""}</td>
+          <td>$ ${Number(r["Importe"]||0).toLocaleString("es-AR",{minimumFractionDigits:2})}</td>
+          <td>${r["Fecha Vto"]||""}</td>
+          <td>${r["Estado (Pendiente/Pagado)"]||""}</td>
+        `;
+        tbody.appendChild(fila);
+      });
+
+      // gráfico
+      const labels = pendientesFiltrados.map(r => r["Cliente/Proveedor"] || r["ID Relacionado"]);
+      const valores = pendientesFiltrados.map(r => Number(r["Importe"])||0);
+      const colores = pendientesFiltrados.map(r => r["Tipo (A cobrar/A pagar)"].includes("cobrar") ? "rgba(40,167,69,0.7)" : "rgba(220,53,69,0.7)");
+      graficarBarra("grafico-pendientes", labels, valores, colores);
+    }
+  }catch(err){
+    console.error("Error cargarDashboard:", err);
+  }
+}
+
+function graficarBarra(id, labels, data, colors){
+  const ctx = document.getElementById(id).getContext("2d");
+  if(window["chart_"+id]) window["chart_"+id].destroy();
+  window["chart_"+id] = new Chart(ctx, {
+    type: "bar",
+    data: { labels, datasets: [{ data, backgroundColor: colors }] },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { ticks:{color:"#ccc"}, grid:{color:"#ffffff10"} },
+        y: { ticks:{color:"#ccc"}, grid:{color:"#ffffff10"} }
+      },
+      plugins: { legend:{display:false} }
+    }
+  });
+}
+
+cargarDashboard();
+</script>
+</body>
+</html>
