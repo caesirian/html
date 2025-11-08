@@ -559,5 +559,124 @@ document.getElementById('btn-export').addEventListener('click', ()=>{
 // startup
 refreshAll(false);
 </script>
+
+  <script>
+// === CONFIGURACIÓN ===
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyTLrGiqes1VOp8E51Kq91P7YihPKNtN1f0f6u2JitXOteGyGrNXqiSjdXYJ8HAtfs/exec";
+
+// === FUNCIÓN PRINCIPAL ===
+async function cargarDashboard() {
+  try {
+    const res = await fetch(GAS_URL);
+    const data = await res.json();
+
+    const caja = data["Caja_Movimientos"] || [];
+    if (!caja.length) return alert("No se encontraron datos en Caja_Movimientos");
+
+    actualizarSaldo(caja);
+    renderizarGraficos(caja);
+
+  } catch (err) {
+    console.error("Error al cargar datos:", err);
+  }
+}
+
+// === SALDO ACTUAL ===
+function actualizarSaldo(datos) {
+  const colSaldo = Object.keys(datos[0]).find(k => k.toLowerCase().includes("saldo"));
+  const saldo = datos[datos.length - 1][colSaldo] || 0;
+  document.getElementById("saldo-actual").innerText = "$ " + Number(saldo).toLocaleString("es-AR", {minimumFractionDigits: 2});
+}
+
+// === PROCESAR DATOS Y GRAFICAR ===
+function renderizarGraficos(datos) {
+  // Detectar columnas
+  const colFecha = Object.keys(datos[0]).find(k => k.toLowerCase().includes("fecha"));
+  const colTipo = Object.keys(datos[0]).find(k => k.toLowerCase().includes("tipo"));
+  const colMonto = Object.keys(datos[0]).find(k => k.toLowerCase().includes("monto"));
+
+  // Agrupar totales por mes
+  const totales = {};
+  datos.forEach(r => {
+    const fecha = new Date(r[colFecha]);
+    if (isNaN(fecha)) return;
+    const mes = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, "0")}`;
+    const tipo = (r[colTipo] || "").toString().toLowerCase();
+    const monto = parseFloat(r[colMonto]) || 0;
+
+    if (!totales[mes]) totales[mes] = { ingreso: 0, egreso: 0 };
+    if (tipo.includes("ingreso")) totales[mes].ingreso += monto;
+    else if (tipo.includes("egreso")) totales[mes].egreso += monto;
+  });
+
+  // Ordenar meses
+  const meses = Object.keys(totales).sort();
+
+  // Preparar datos
+  const ingresos = meses.map(m => totales[m].ingreso);
+  const egresos = meses.map(m => totales[m].egreso);
+  const saldos = meses.map(m => totales[m].ingreso - totales[m].egreso);
+
+  // Destruir gráficos previos si existen
+  if (window.chartIngresos) window.chartIngresos.destroy();
+  if (window.chartEgresos) window.chartEgresos.destroy();
+  if (window.chartSaldo) window.chartSaldo.destroy();
+
+  // === GRAFICO DE INGRESOS ===
+  const ctx1 = document.getElementById("graficoIngresos").getContext("2d");
+  window.chartIngresos = new Chart(ctx1, {
+    type: "bar",
+    data: {
+      labels: meses,
+      datasets: [{
+        label: "Ingresos",
+        data: ingresos,
+        backgroundColor: "#00c853cc",
+        borderColor: "#00c853",
+        borderWidth: 1
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+
+  // === GRAFICO DE EGRESOS ===
+  const ctx2 = document.getElementById("graficoEgresos").getContext("2d");
+  window.chartEgresos = new Chart(ctx2, {
+    type: "bar",
+    data: {
+      labels: meses,
+      datasets: [{
+        label: "Egresos",
+        data: egresos,
+        backgroundColor: "#d50000cc",
+        borderColor: "#d50000",
+        borderWidth: 1
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+
+  // === GRAFICO DE SALDO ===
+  const ctx3 = document.getElementById("graficoSaldo").getContext("2d");
+  window.chartSaldo = new Chart(ctx3, {
+    type: "line",
+    data: {
+      labels: meses,
+      datasets: [{
+        label: "Saldo Mensual (Ingresos - Egresos)",
+        data: saldos,
+        fill: true,
+        backgroundColor: "#2962ff33",
+        borderColor: "#2962ff",
+        tension: 0.3
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+}
+
+// === INICIO ===
+document.addEventListener("DOMContentLoaded", cargarDashboard);
+</script>
 </body>
 </html>
