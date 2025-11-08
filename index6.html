@@ -138,27 +138,7 @@ async function cargarDashboard(){
     }
 
     // === INGRESOS / EGRESOS ===
-    const finanzas = data["Finanzas_RegistroDiario"];
-    if (finanzas && finanzas.length) {
-      const ingresosMes = {}, egresosMes = {};
-      finanzas.forEach(r=>{
-        const mes = r["Mes"] || (new Date(r["Fecha"]).getMonth()+1);
-        const tipo = (r["Tipo (Ingreso/Egreso)"] || "").toLowerCase();
-        const monto = parseFloat(r["Monto"]) || 0;
-        if (tipo.includes("ingreso")) ingresosMes[mes] = (ingresosMes[mes]||0) + monto;
-        if (tipo.includes("egreso")) egresosMes[mes] = (egresosMes[mes]||0) + monto;
-      });
-      const meses = Object.keys(ingresosMes).sort((a,b)=>a-b);
-      const ultMes = meses[meses.length-1];
-      const antMes = meses[meses.length-2] || ultMes;
-      graficarBarra("grafico-ingresos", ["Mes anterior","Mes actual"],
-        [ingresosMes[antMes]||0, ingresosMes[ultMes]||0],
-        ["#4caf50","#81c784"]);
-      graficarBarra("grafico-egresos", ["Mes anterior","Mes actual"],
-        [egresosMes[antMes]||0, egresosMes[ultMes]||0],
-        ["#f44336","#e57373"]);
-    }
-
+    
     // === CUENTAS PENDIENTES ===
     const claves = Object.keys(data);
     const clavePendientes = claves.find(k => k.toLowerCase().includes("pendiente"));
@@ -203,23 +183,7 @@ async function cargarDashboard(){
   }
 }
 
-function graficarBarra(id, labels, data, colors){
-  const ctx = document.getElementById(id).getContext("2d");
-  if(window["chart_"+id]) window["chart_"+id].destroy();
-  window["chart_"+id] = new Chart(ctx, {
-    type: "bar",
-    data: { labels, datasets: [{ data, backgroundColor: colors }] },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { ticks:{color:"#ccc"}, grid:{color:"#ffffff10"} },
-        y: { ticks:{color:"#ccc"}, grid:{color:"#ffffff10"} }
-      },
-      plugins: { legend:{display:false} }
-    }
-  });
-}
+
 
 cargarDashboard();
 </script>
