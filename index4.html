@@ -560,22 +560,26 @@ document.getElementById('btn-export').addEventListener('click', ()=>{
 refreshAll(false);
 </script>
 
-  <script>
-// === CONFIGURACIÓN ===
+<script>
 const GAS_URL = "https://script.google.com/macros/s/AKfycbyTLrGiqes1VOp8E51Kq91P7YihPKNtN1f0f6u2JitXOteGyGrNXqiSjdXYJ8HAtfs/exec";
 
+// Variable global para evitar recargas múltiples
+let dashboardInicializado = false;
+
 // === FUNCIÓN PRINCIPAL ===
-async function cargarDashboard() {
+async function cargarDashboardUnaVez() {
+  if (dashboardInicializado) return; // Previene redibujos infinitos
+  dashboardInicializado = true;
+
   try {
-    const res = await fetch(GAS_URL);
+    const res = await fetch(GAS_URL, { cache: "no-store" });
     const data = await res.json();
 
     const caja = data["Caja_Movimientos"] || [];
-    if (!caja.length) return alert("No se encontraron datos en Caja_Movimientos");
+    if (!caja.length) return console.warn("Sin datos en Caja_Movimientos");
 
     actualizarSaldo(caja);
     renderizarGraficos(caja);
-
   } catch (err) {
     console.error("Error al cargar datos:", err);
   }
@@ -584,45 +588,44 @@ async function cargarDashboard() {
 // === SALDO ACTUAL ===
 function actualizarSaldo(datos) {
   const colSaldo = Object.keys(datos[0]).find(k => k.toLowerCase().includes("saldo"));
-  const saldo = datos[datos.length - 1][colSaldo] || 0;
-  document.getElementById("saldo-actual").innerText = "$ " + Number(saldo).toLocaleString("es-AR", {minimumFractionDigits: 2});
+  const saldo = parseFloat(datos[datos.length - 1][colSaldo]) || 0;
+  document.getElementById("saldo-actual").innerText = 
+    "$ " + saldo.toLocaleString("es-AR", { minimumFractionDigits: 2 });
 }
 
-// === PROCESAR DATOS Y GRAFICAR ===
+// === PROCESAR Y GRAFICAR ===
 function renderizarGraficos(datos) {
-  // Detectar columnas
   const colFecha = Object.keys(datos[0]).find(k => k.toLowerCase().includes("fecha"));
   const colTipo = Object.keys(datos[0]).find(k => k.toLowerCase().includes("tipo"));
   const colMonto = Object.keys(datos[0]).find(k => k.toLowerCase().includes("monto"));
 
-  // Agrupar totales por mes
   const totales = {};
   datos.forEach(r => {
     const fecha = new Date(r[colFecha]);
     if (isNaN(fecha)) return;
     const mes = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, "0")}`;
-    const tipo = (r[colTipo] || "").toString().toLowerCase();
+    const tipo = (r[colTipo] || "").toLowerCase();
     const monto = parseFloat(r[colMonto]) || 0;
-
     if (!totales[mes]) totales[mes] = { ingreso: 0, egreso: 0 };
     if (tipo.includes("ingreso")) totales[mes].ingreso += monto;
     else if (tipo.includes("egreso")) totales[mes].egreso += monto;
   });
 
-  // Ordenar meses
   const meses = Object.keys(totales).sort();
-
-  // Preparar datos
   const ingresos = meses.map(m => totales[m].ingreso);
   const egresos = meses.map(m => totales[m].egreso);
   const saldos = meses.map(m => totales[m].ingreso - totales[m].egreso);
 
-  // Destruir gráficos previos si existen
-  if (window.chartIngresos) window.chartIngresos.destroy();
-  if (window.chartEgresos) window.chartEgresos.destroy();
-  if (window.chartSaldo) window.chartSaldo.destroy();
+  // Destruir si existen, evitando fugas de memoria
+  ["Ingresos", "Egresos", "Saldo"].forEach(id => {
+    const chartKey = `chart${id}`;
+    if (window[chartKey]) {
+      window[chartKey].destroy();
+      window[chartKey] = null;
+    }
+  });
 
-  // === GRAFICO DE INGRESOS ===
+  // === GRAFICO INGRESOS ===
   const ctx1 = document.getElementById("graficoIngresos").getContext("2d");
   window.chartIngresos = new Chart(ctx1, {
     type: "bar",
@@ -636,10 +639,10 @@ function renderizarGraficos(datos) {
         borderWidth: 1
       }]
     },
-    options: { responsive: true, maintainAspectRatio: false }
+    options: { responsive: true, maintainAspectRatio: false, animation: false }
   });
 
-  // === GRAFICO DE EGRESOS ===
+  // === GRAFICO EGRESOS ===
   const ctx2 = document.getElementById("graficoEgresos").getContext("2d");
   window.chartEgresos = new Chart(ctx2, {
     type: "bar",
@@ -653,10 +656,10 @@ function renderizarGraficos(datos) {
         borderWidth: 1
       }]
     },
-    options: { responsive: true, maintainAspectRatio: false }
+    options: { responsive: true, maintainAspectRatio: false, animation: false }
   });
 
-  // === GRAFICO DE SALDO ===
+  // === GRAFICO SALDO ===
   const ctx3 = document.getElementById("graficoSaldo").getContext("2d");
   window.chartSaldo = new Chart(ctx3, {
     type: "line",
@@ -671,12 +674,14 @@ function renderizarGraficos(datos) {
         tension: 0.3
       }]
     },
-    options: { responsive: true, maintainAspectRatio: false }
+    options: { responsive: true, maintainAspectRatio: false, animation: false }
   });
 }
 
 // === INICIO ===
-document.addEventListener("DOMContentLoaded", cargarDashboard);
+document.addEventListener("DOMContentLoaded", () => {
+  setTimeout(cargarDashboardUnaVez, 300); // pequeña espera para asegurar carga del DOM
+});
 </script>
 </body>
 </html>
