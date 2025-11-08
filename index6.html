@@ -6,14 +6,12 @@
 <title>HG Soluciones - Dashboard Financiero</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-  /* === ESTILO HG AZUL OSCURO === */
   body {
     margin: 0;
     font-family: "Segoe UI", Roboto, sans-serif;
     background: #0d1b2a;
     color: #e0e0e0;
   }
-
   header {
     background: #1b263b;
     padding: 14px 20px;
@@ -26,14 +24,12 @@
     justify-content: space-between;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
   }
-
   .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 18px;
     padding: 18px;
   }
-
   .card {
     background: #1e2a47;
     border-radius: 10px;
@@ -41,11 +37,7 @@
     box-shadow: 0 3px 8px rgba(0,0,0,0.25);
     transition: transform 0.2s ease;
   }
-
-  .card:hover {
-    transform: translateY(-2px);
-  }
-
+  .card:hover { transform: translateY(-2px); }
   .card h2 {
     font-size: 1.1em;
     margin-bottom: 10px;
@@ -53,73 +45,52 @@
     border-bottom: 1px solid #2f3b57;
     padding-bottom: 6px;
   }
-
   .kpi-grande {
     font-size: 2em;
     font-weight: bold;
     color: #4dd0e1;
   }
-
-  .text-muted {
-    color: #aaa;
-    font-size: 0.85em;
-  }
-
+  .text-muted { color: #aaa; font-size: 0.85em; }
   table.tabla-datos {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.9em;
+    width: 100%; border-collapse: collapse; font-size: 0.9em;
   }
-
   table.tabla-datos th, table.tabla-datos td {
     padding: 6px 8px;
     border-bottom: 1px solid #2f3b57;
   }
-
   table.tabla-datos th {
     background: #0d1b2a;
     color: #fff;
     text-align: left;
   }
-
-  table.tabla-datos tr:hover {
-    background: #24324f;
-  }
-
+  table.tabla-datos tr:hover { background: #24324f; }
   @media (max-width: 600px) {
-    .dashboard-grid {
-      grid-template-columns: 1fr;
-    }
+    .dashboard-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
 <body>
-  <header>
-    HG Soluciones — Dashboard Financiero
-  </header>
+  <header>HG Soluciones — Dashboard Financiero</header>
 
   <main>
     <div class="dashboard-grid">
-      <!-- === BLOQUE: SALDO === -->
+
       <section id="bloque-saldo" class="card">
         <h2>Saldo de Caja</h2>
         <div id="saldo-actual" class="kpi-grande">Cargando...</div>
         <div id="saldo-fecha" class="text-muted" style="margin-top:6px;">—</div>
       </section>
 
-      <!-- === BLOQUE: INGRESOS === -->
       <section id="bloque-ingresos" class="card">
         <h2>Ingresos: mes actual vs anterior</h2>
         <canvas id="grafico-ingresos" height="180"></canvas>
       </section>
 
-      <!-- === BLOQUE: EGRESOS === -->
       <section id="bloque-egresos" class="card">
         <h2>Egresos: mes actual vs anterior</h2>
         <canvas id="grafico-egresos" height="180"></canvas>
       </section>
 
-      <!-- === BLOQUE: CUENTAS PENDIENTES === -->
       <section id="bloque-pendientes" class="card">
         <h2>Cuentas Pendientes</h2>
         <canvas id="grafico-pendientes" height="200"></canvas>
@@ -140,6 +111,7 @@
           </table>
         </div>
       </section>
+
     </div>
   </main>
 
@@ -152,53 +124,57 @@ async function obtenerDatos(){
 }
 
 async function cargarDashboard(){
-  try{
+  try {
     const data = await obtenerDatos();
 
-    // === SALDO ACTUAL ===
+    // === SALDO ===
     const caja = data["Caja_Movimientos"];
-    if(caja && caja.length){
+    if (caja && caja.length) {
       const ultima = caja[caja.length - 1];
       const saldo = ultima["Saldo"] || ultima["saldo"] || 0;
-      document.getElementById("saldo-actual").textContent = "$ " + Number(saldo).toLocaleString("es-AR",{minimumFractionDigits:2});
+      document.getElementById("saldo-actual").textContent =
+        "$ " + Number(saldo).toLocaleString("es-AR",{minimumFractionDigits:2});
       document.getElementById("saldo-fecha").textContent = ultima["Fecha"] || "";
     }
 
-    // === INGRESOS / EGRESOS MENSUALES ===
+    // === INGRESOS / EGRESOS ===
     const finanzas = data["Finanzas_RegistroDiario"];
-    if(finanzas && finanzas.length){
-      const ingresosMes = {};
-      const egresosMes = {};
+    if (finanzas && finanzas.length) {
+      const ingresosMes = {}, egresosMes = {};
       finanzas.forEach(r=>{
         const mes = r["Mes"] || (new Date(r["Fecha"]).getMonth()+1);
         const tipo = (r["Tipo (Ingreso/Egreso)"] || "").toLowerCase();
         const monto = parseFloat(r["Monto"]) || 0;
-        if(tipo.includes("ingreso")) ingresosMes[mes] = (ingresosMes[mes]||0) + monto;
-        if(tipo.includes("egreso")) egresosMes[mes] = (egresosMes[mes]||0) + monto;
+        if (tipo.includes("ingreso")) ingresosMes[mes] = (ingresosMes[mes]||0) + monto;
+        if (tipo.includes("egreso")) egresosMes[mes] = (egresosMes[mes]||0) + monto;
       });
-
       const meses = Object.keys(ingresosMes).sort((a,b)=>a-b);
       const ultMes = meses[meses.length-1];
       const antMes = meses[meses.length-2] || ultMes;
-      const datosIngresos = [ingresosMes[antMes]||0, ingresosMes[ultMes]||0];
-      const datosEgresos = [egresosMes[antMes]||0, egresosMes[ultMes]||0];
-
-      graficarBarra("grafico-ingresos", ["Mes anterior","Mes actual"], datosIngresos, ["#4caf50","#81c784"]);
-      graficarBarra("grafico-egresos", ["Mes anterior","Mes actual"], datosEgresos, ["#f44336","#e57373"]);
+      graficarBarra("grafico-ingresos", ["Mes anterior","Mes actual"],
+        [ingresosMes[antMes]||0, ingresosMes[ultMes]||0],
+        ["#4caf50","#81c784"]);
+      graficarBarra("grafico-egresos", ["Mes anterior","Mes actual"],
+        [egresosMes[antMes]||0, egresosMes[ultMes]||0],
+        ["#f44336","#e57373"]);
     }
 
     // === CUENTAS PENDIENTES ===
-    const pendientes = data["Cuentas_Pendientes"];
-    if(pendientes && pendientes.length){
-      const pendientesFiltrados = pendientes.filter(r => String(r["Estado (Pendiente/Pagado)"]).toLowerCase().includes("pendiente"));
+    const claves = Object.keys(data);
+    const clavePendientes = claves.find(k => k.toLowerCase().includes("pendiente"));
+    const pendientes = data[clavePendientes] || [];
+    if (pendientes && pendientes.length) {
+      const pendientesFiltrados = pendientes.filter(r =>
+        String(r["Estado (Pendiente/Pagado)"] || "").toLowerCase().includes("pendiente")
+      );
       pendientesFiltrados.sort((a,b)=> new Date(a["Fecha Emisión"]) - new Date(b["Fecha Emisión"]));
 
-      // tabla
+      // Tabla
       const tbody = document.querySelector("#tabla-pendientes tbody");
       tbody.innerHTML = "";
       pendientesFiltrados.forEach(r=>{
+        const color = (r["Tipo (A cobrar/A pagar)"]||"").includes("cobrar") ? "#28a745" : "#dc3545";
         const fila = document.createElement("tr");
-        const color = r["Tipo (A cobrar/A pagar)"].includes("cobrar") ? "#28a745" : "#dc3545";
         fila.innerHTML = `
           <td>${r["Fecha Emisión"]||""}</td>
           <td style="color:${color}">${r["Tipo (A cobrar/A pagar)"]||""}</td>
@@ -211,13 +187,18 @@ async function cargarDashboard(){
         tbody.appendChild(fila);
       });
 
-      // gráfico
+      // Gráfico
       const labels = pendientesFiltrados.map(r => r["Cliente/Proveedor"] || r["ID Relacionado"]);
       const valores = pendientesFiltrados.map(r => Number(r["Importe"])||0);
-      const colores = pendientesFiltrados.map(r => r["Tipo (A cobrar/A pagar)"].includes("cobrar") ? "rgba(40,167,69,0.7)" : "rgba(220,53,69,0.7)");
+      const colores = pendientesFiltrados.map(r =>
+        (r["Tipo (A cobrar/A pagar)"]||"").includes("cobrar")
+          ? "rgba(40,167,69,0.7)"
+          : "rgba(220,53,69,0.7)"
+      );
       graficarBarra("grafico-pendientes", labels, valores, colores);
     }
-  }catch(err){
+
+  } catch (err) {
     console.error("Error cargarDashboard:", err);
   }
 }
