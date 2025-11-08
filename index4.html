@@ -698,8 +698,11 @@ function renderizarGraficos(datos) {
 }
 
 // === INICIO ===
-document.addEventListener("DOMContentLoaded", () => {
-  setTimeout(cargarDashboardUnaVez, 300); // pequeña espera para asegurar carga del DOM
+window.addEventListener("load", () => {
+  if (!window.hgDashboardLoaded) {
+    window.hgDashboardLoaded = true;
+    refreshAll();
+  }
 });
 </script>
 </body>
