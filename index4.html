@@ -329,6 +329,25 @@ const COMPONENTES = {
 
 // ====== UTILIDADES ======
 const UTILS = {
+  // Nueva función para formatear fecha
+  formatDate(dateString) {
+    if (!dateString) return '';
+    
+    try {
+      const date = this.parseDate(dateString);
+      if (isNaN(date.getTime())) return dateString;
+      
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      
+      return `${day}/${month}/${year}`;
+    } catch (error) {
+      console.error('Error formateando fecha:', error);
+      return dateString;
+    }
+  },
+  
   parseNumber(val) {
     if(val === null || val === undefined || val === "") return 0;
     if(typeof val === "number") return val;
@@ -713,14 +732,12 @@ ComponentSystem.registrar('cuentasPendientes', {
     pendientes.forEach(r => {
       const fila = document.createElement('tr');
       fila.innerHTML = `
-        <td>${r["Fecha Emisión"] || ""}</td>
+        <td>${UTILS.formatDate(r["Fecha Emisión"])}</td>
         <td style="color:${r["Tipo (A cobrar/A pagar)"].includes("cobrar") ? "#28a745" : "#dc3545"}">
           ${r["Tipo (A cobrar/A pagar)"]}
         </td>
         <td>${r["Cliente/Proveedor"] || ""}</td>
-       
         <td>$ ${UTILS.parseNumber(r["Importe"]).toLocaleString("es-AR",{minimumFractionDigits:2})}</td>
-       
         <td>${r["Estado (Pendiente/Pagado)"] || ""}</td>
       `;
       tbody.appendChild(fila);
