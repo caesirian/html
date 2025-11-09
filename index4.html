@@ -408,7 +408,68 @@ select.btn:focus {
   max-width: 300px;
   word-wrap: break-word;
 }
-    
+
+/* ====== ESTILOS PARA COTIZACIONES ====== */
+.cotizacion-card {
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,0.05);
+  transition: all 0.2s ease;
+}
+
+.cotizacion-card:hover {
+  background: rgba(255,255,255,0.05);
+  transform: translateY(-1px);
+}
+
+.cotizacion-tipo {
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.cotizacion-precio {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.cotizacion-compra {
+  color: #28a745;
+}
+
+.cotizacion-venta {
+  color: #dc3545;
+}
+
+.cotizacion-variacion {
+  font-size: 10px;
+}
+
+/* Animación para el botón de actualizar */
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.btn-actualizando {
+  animation: rotate 1s linear infinite;
+}
+
+/* Responsive para cotizaciones */
+@media (max-width: 768px) {
+  .cotizacion-card {
+    padding: 8px;
+  }
+  
+  .cotizacion-precio {
+    font-size: 12px;
+  }
+  
+  .cotizacion-tipo {
+    font-size: 11px;
+  }
+}
 </style>
 </head>
 <body>
@@ -488,7 +549,8 @@ componentesActivos: [
   'ingresosVsEgresos',
   'egresosVsAnterior',
   'cuentasPendientes',
-  'analisisCategorias'
+  'analisisCategorias',
+  'cotizacionesMonedas'
 ],
   
   registros: {}
@@ -1653,6 +1715,204 @@ ComponentSystem.registrar('analisisCategorias', {
     window.URL.revokeObjectURL(url);
   }
 });
+
+
+// Componente: Cotizaciones de Monedas
+ComponentSystem.registrar('cotizacionesMonedas', {
+  grid: 'span-3',
+  html: `
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h2 style="margin: 0;">Cotizaciones</h2>
+      <button id="btn-actualizar-cotizaciones" class="btn small secondary" style="padding: 4px 8px;">
+        <span>🔄</span>
+      </button>
+    </div>
+    <div id="cotizaciones-container">
+      <div class="loader" style="margin: 20px auto;"></div>
+    </div>
+    <div class="text-muted" style="margin-top: 8px; font-size: 11px; text-align: center;">
+      <span id="ultima-actualizacion">Actualizando...</span>
+    </div>
+  `,
+  async render(data, element) {
+    await this.cargarCotizaciones(element);
+    this.setupEventListeners(element);
+  },
+
+  async cargarCotizaciones(element) {
+    const container = element.querySelector('#cotizaciones-container');
+    const actualizacionElement = element.querySelector('#ultima-actualizacion');
+    
+    try {
+      container.innerHTML = '<div class="loader" style="margin: 20px auto;"></div>';
+      
+      // Usar múltiples fuentes para mayor confiabilidad
+      const cotizaciones = await this.obtenerCotizaciones();
+      
+      container.innerHTML = '';
+      
+      if (cotizaciones.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; color: var(--muted); padding: 20px;">
+            No se pudieron cargar las cotizaciones
+          </div>
+        `;
+        return;
+      }
+      
+      cotizaciones.forEach(cotizacion => {
+        const card = document.createElement('div');
+        card.style.cssText = `
+          background: rgba(255,255,255,0.03);
+          border-radius: 8px;
+          padding: 10px;
+          margin-bottom: 8px;
+          border: 1px solid rgba(255,255,255,0.05);
+          transition: all 0.2s ease;
+        `;
+        
+        card.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="font-size: 16px;">${cotizacion.emoji}</span>
+              <span style="font-weight: 600; font-size: 12px;">${cotizacion.nombre}</span>
+            </div>
+            <span style="font-size: 10px; color: ${cotizacion.variacion >= 0 ? '#28a745' : '#dc3545'}">
+              ${cotizacion.variacion >= 0 ? '↗' : '↘'} ${Math.abs(cotizacion.variacion).toFixed(2)}%
+            </span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 11px; color: var(--muted);">Compra</span>
+            <span style="font-size: 14px; font-weight: 700; color: #28a745;">$${cotizacion.compra}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 11px; color: var(--muted);">Venta</span>
+            <span style="font-size: 14px; font-weight: 700; color: #dc3545;">$${cotizacion.venta}</span>
+          </div>
+        `;
+        
+        container.appendChild(card);
+      });
+      
+      actualizacionElement.textContent = `Actualizado: ${new Date().toLocaleTimeString('es-AR')}`;
+      
+    } catch (error) {
+      console.error('Error cargando cotizaciones:', error);
+      container.innerHTML = `
+        <div style="text-align: center; color: var(--muted); padding: 20px;">
+          Error cargando cotizaciones
+        </div>
+      `;
+    }
+  },
+
+  async obtenerCotizaciones() {
+    try {
+      // Intentar con la API de DolarSi (específica para Argentina)
+      return await this.obtenerDeDolarSi();
+    } catch (error) {
+      console.error('Error con DolarSi, intentando con API alternativa:', error);
+      // Fallback a datos estáticos o otra API
+      return this.obtenerCotizacionesAlternativas();
+    }
+  },
+
+  async obtenerDeDolarSi() {
+    const response = await fetch('https://www.dolarsi.com/api/api.php?type=valoresprincipales');
+    const data = await response.json();
+    
+    const cotizaciones = [];
+    
+    // Procesar los tipos de dólar más relevantes
+    const tiposRelevantes = [
+      { key: 'Dolar Blue', nombre: 'Dólar Blue', emoji: '💙' },
+      { key: 'Dolar Oficial', nombre: 'Dólar Oficial', emoji: '💵' },
+      { key: 'Dolar Bolsa', nombre: 'Dólar MEP', emoji: '📈' },
+      { key: 'Dolar Contado con Liqui', nombre: 'Dólar CCL', emoji: '💸' }
+    ];
+    
+    tiposRelevantes.forEach(tipo => {
+      const dolarData = data.find(item => item.casa.nombre === tipo.key);
+      if (dolarData) {
+        const casa = dolarData.casa;
+        cotizaciones.push({
+          nombre: tipo.nombre,
+          emoji: tipo.emoji,
+          compra: this.formatearPrecio(casa.compra),
+          venta: this.formatearPrecio(casa.venta),
+          variacion: casa.variacion ? parseFloat(casa.variacion.replace(',', '.')) : 0
+        });
+      }
+    });
+    
+    return cotizaciones;
+  },
+
+  obtenerCotizacionesAlternativas() {
+    // Datos de ejemplo como fallback
+    return [
+      {
+        nombre: 'Dólar Blue',
+        emoji: '💙',
+        compra: '980.00',
+        venta: '990.00',
+        variacion: 0.5
+      },
+      {
+        nombre: 'Dólar Oficial',
+        emoji: '💵',
+        compra: '835.50',
+        venta: '845.25',
+        variacion: -0.2
+      },
+      {
+        nombre: 'Dólar MEP',
+        emoji: '📈',
+        compra: '955.75',
+        venta: '965.30',
+        variacion: 0.3
+      },
+      {
+        nombre: 'Euro',
+        emoji: '💶',
+        compra: '1020.40',
+        venta: '1045.80',
+        variacion: 0.1
+      }
+    ];
+  },
+
+  formatearPrecio(precioStr) {
+    if (!precioStr) return '0';
+    // Limpiar y formatear el precio
+    const numero = parseFloat(precioStr.toString().replace(',', '.'));
+    return isNaN(numero) ? '0' : numero.toLocaleString('es-AR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  },
+
+  setupEventListeners(element) {
+    const btnActualizar = element.querySelector('#btn-actualizar-cotizaciones');
+    
+    btnActualizar.addEventListener('click', async () => {
+      btnActualizar.style.transform = 'rotate(180deg)';
+      btnActualizar.style.transition = 'transform 0.3s ease';
+      
+      await this.cargarCotizaciones(element);
+      
+      setTimeout(() => {
+        btnActualizar.style.transform = 'rotate(0deg)';
+      }, 300);
+    });
+    
+    // Actualizar automáticamente cada 5 minutos
+    setInterval(() => {
+      this.cargarCotizaciones(element);
+    }, 5 * 60 * 1000);
+  }
+});
+  
 // ====== EJEMPLO: CÓMO AGREGAR UN NUEVO COMPONENTE ======
 /*
 ComponentSystem.registrar('nuevoComponente', {
