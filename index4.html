@@ -587,18 +587,29 @@ ComponentSystem.registrar('ingresosVsEgresos', {
     datasets: [{
       label: 'Ingresos',
       data: [ingPrev, ingActual],
-      backgroundColor: [
-        'rgba(58,123,213,0.8)',
-        'rgba(62,166,255,0.9)'
-      ],
+      backgroundColor: function(context) {
+        const chart = context.chart;
+        const {ctx, chartArea} = chart;
+        if (!chartArea) return 'rgba(58,123,213,0.8)';
+        
+        // Crear gradiente para efecto relieve
+        const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+        gradient.addColorStop(0, 'rgba(40,100,200,0.9)');    // Parte inferior oscura
+        gradient.addColorStop(0.6, 'rgba(62,166,255,0.9)'); // Parte media
+        gradient.addColorStop(1, 'rgba(100,180,255,1)');    // Parte superior clara (efecto luz)
+        
+        return gradient;
+      },
       borderColor: [
-        'rgba(58,123,213,1)',
-        'rgba(62,166,255,1)'
+        'rgba(40,100,200,1)',
+        'rgba(50,140,230,1)'
       ],
       borderWidth: 1,
-      // Efecto 3D con bordes redondeados
-      borderRadius: 6,
-      borderSkipped: false,
+      // Efecto de profundidad con sombra
+      shadowOffsetX: 2,
+      shadowOffsetY: 2,
+      shadowBlur: 8,
+      shadowColor: 'rgba(0,0,0,0.3)'
     }]
   },
   options: {
@@ -606,7 +617,6 @@ ComponentSystem.registrar('ingresosVsEgresos', {
     maintainAspectRatio: false,
     plugins: { 
       legend: { display: false },
-      // Tooltip mejorado
       tooltip: {
         backgroundColor: 'rgba(0,0,0,0.8)',
         titleColor: '#fff',
@@ -633,8 +643,8 @@ ComponentSystem.registrar('ingresosVsEgresos', {
       }
     },
     // Hacer las barras más angostas
-    barPercentage: 0.4,    // Barras más delgadas (40% del espacio)
-    categoryPercentage: 0.6 // Espacio entre categorías
+    barPercentage: 0.4,
+    categoryPercentage: 0.6
   }
 });
   }
