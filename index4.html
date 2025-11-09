@@ -717,9 +717,9 @@ async function refreshAll(force=false){
 
 */
 
-  
 // UI wiring
-document.getElementById('refresh-data').addEventListener('click', ()=> refreshAll(true));
+
+document.getElementById('refresh-data').addEventListener('click', ()=> cargarDashboardUnaVez());
 document.getElementById('btn-export').addEventListener('click', ()=>{
   // export current pendientes table to CSV by reading DOM
   const table = $('#tabla-pendientes').DataTable();
@@ -727,7 +727,7 @@ document.getElementById('btn-export').addEventListener('click', ()=>{
 });
 
 // startup
-refreshAll(false);
+cargarDashboardUnaVez();
 
 
 </script>
@@ -851,12 +851,12 @@ function renderizarGraficos(datos) {
     options: { responsive: true, maintainAspectRatio: false, animation: false }
   });
 }
-
+cargarDashboardUnaVez();
 // === INICIO ===
 window.addEventListener("load", () => {
   if (!window.hgDashboardLoaded) {
     window.hgDashboardLoaded = true;
-    refreshAll();
+    cargarDashboardUnaVez();
   }
 });
 </script>
