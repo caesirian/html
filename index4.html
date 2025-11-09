@@ -1717,7 +1717,7 @@ ComponentSystem.registrar('analisisCategorias', {
 });
 
 
-// Componente: Cotizaciones de Monedas
+// Componente: Cotizaciones de Monedas (VERSIÓN MEJORADA)
 ComponentSystem.registrar('cotizacionesMonedas', {
   grid: 'span-3',
   html: `
@@ -1746,8 +1746,8 @@ ComponentSystem.registrar('cotizacionesMonedas', {
     try {
       container.innerHTML = '<div class="loader" style="margin: 20px auto;"></div>';
       
-      // Usar múltiples fuentes para mayor confiabilidad
-      const cotizaciones = await this.obtenerCotizaciones();
+      // Usar DolarAPI - muy confiable para Argentina
+      const cotizaciones = await this.obtenerDeDolarAPI();
       
       container.innerHTML = '';
       
@@ -1778,7 +1778,7 @@ ComponentSystem.registrar('cotizacionesMonedas', {
               <span style="font-weight: 600; font-size: 12px;">${cotizacion.nombre}</span>
             </div>
             <span style="font-size: 10px; color: ${cotizacion.variacion >= 0 ? '#28a745' : '#dc3545'}">
-              ${cotizacion.variacion >= 0 ? '↗' : '↘'} ${Math.abs(cotizacion.variacion).toFixed(2)}%
+              ${cotizacion.variacion >= 0 ? '↗' : '↘'} ${cotizacion.variacion >= 0 ? '+' : ''}${cotizacion.variacion}%
             </span>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -1798,98 +1798,184 @@ ComponentSystem.registrar('cotizacionesMonedas', {
       
     } catch (error) {
       console.error('Error cargando cotizaciones:', error);
-      container.innerHTML = `
-        <div style="text-align: center; color: var(--muted); padding: 20px;">
-          Error cargando cotizaciones
-        </div>
-      `;
+      // Fallback a datos de ejemplo más realistas
+      this.mostrarDatosEjemplo(element);
     }
   },
 
-  async obtenerCotizaciones() {
+  async obtenerDeDolarAPI() {
     try {
-      // Intentar con la API de DolarSi (específica para Argentina)
-      return await this.obtenerDeDolarSi();
+      // API principal: DolarAPI (muy confiable)
+      const response = await fetch('https://dolarapi.com/v1/dolares');
+      
+      if (!response.ok) {
+        throw new Error('Error en la respuesta de la API');
+      }
+      
+      const data = await response.json();
+      
+      // Procesar los tipos de dólar más relevantes
+      const cotizaciones = [];
+      
+      // Mapear los tipos de la API a nuestros nombres
+      const tiposMapeo = {
+        'blue': { nombre: 'Dólar Blue', emoji: '💙' },
+        'oficial': { nombre: 'Dólar Oficial', emoji: '💵' },
+        'bolsa': { nombre: 'Dólar MEP', emoji: '📈' },
+        'contadoconliqui': { nombre: 'Dólar CCL', emoji: '💸' }
+      };
+      
+      data.forEach(dolar => {
+        const tipoInfo = tiposMapeo[dolar.casa];
+        if (tipoInfo) {
+          cotizaciones.push({
+            nombre: tipoInfo.nombre,
+            emoji: tipoInfo.emoji,
+            compra: this.formatearPrecio(dolar.compra),
+            venta: this.formatearPrecio(dolar.venta),
+            variacion: 0 // Esta API no proporciona variación
+          });
+        }
+      });
+      
+      return cotizaciones;
+      
     } catch (error) {
-      console.error('Error con DolarSi, intentando con API alternativa:', error);
-      // Fallback a datos estáticos o otra API
-      return this.obtenerCotizacionesAlternativas();
+      console.error('Error con DolarAPI:', error);
+      // Intentar con API alternativa
+      return await this.obtenerDeBluelytics();
     }
   },
 
-  async obtenerDeDolarSi() {
-    const response = await fetch('https://www.dolarsi.com/api/api.php?type=valoresprincipales');
-    const data = await response.json();
-    
-    const cotizaciones = [];
-    
-    // Procesar los tipos de dólar más relevantes
-    const tiposRelevantes = [
-      { key: 'Dolar Blue', nombre: 'Dólar Blue', emoji: '💙' },
-      { key: 'Dolar Oficial', nombre: 'Dólar Oficial', emoji: '💵' },
-      { key: 'Dolar Bolsa', nombre: 'Dólar MEP', emoji: '📈' },
-      { key: 'Dolar Contado con Liqui', nombre: 'Dólar CCL', emoji: '💸' }
-    ];
-    
-    tiposRelevantes.forEach(tipo => {
-      const dolarData = data.find(item => item.casa.nombre === tipo.key);
-      if (dolarData) {
-        const casa = dolarData.casa;
-        cotizaciones.push({
-          nombre: tipo.nombre,
-          emoji: tipo.emoji,
-          compra: this.formatearPrecio(casa.compra),
-          venta: this.formatearPrecio(casa.venta),
-          variacion: casa.variacion ? parseFloat(casa.variacion.replace(',', '.')) : 0
-        });
+  async obtenerDeBluelytics() {
+    try {
+      // API alternativa: Bluelytics
+      const response = await fetch('https://api.bluelytics.com.ar/v2/latest');
+      
+      if (!response.ok) {
+        throw new Error('Error en Bluelytics');
       }
-    });
-    
-    return cotizaciones;
+      
+      const data = await response.json();
+      
+      return [
+        {
+          nombre: 'Dólar Blue',
+          emoji: '💙',
+          compra: this.formatearPrecio(data.blue.value_buy),
+          venta: this.formatearPrecio(data.blue.value_sell),
+          variacion: 0
+        },
+        {
+          nombre: 'Dólar Oficial',
+          emoji: '💵',
+          compra: this.formatearPrecio(data.oficial.value_buy),
+          venta: this.formatearPrecio(data.oficial.value_sell),
+          variacion: 0
+        }
+      ];
+      
+    } catch (error) {
+      console.error('Error con Bluelytics:', error);
+      throw new Error('Todas las APIs fallaron');
+    }
   },
 
-  obtenerCotizacionesAlternativas() {
-    // Datos de ejemplo como fallback
-    return [
+  mostrarDatosEjemplo(element) {
+    const container = element.querySelector('#cotizaciones-container');
+    const actualizacionElement = element.querySelector('#ultima-actualizacion');
+    
+    // Datos de ejemplo realistas (actualizados aproximadamente)
+    const datosEjemplo = [
       {
         nombre: 'Dólar Blue',
         emoji: '💙',
-        compra: '980.00',
-        venta: '990.00',
-        variacion: 0.5
+        compra: '980.50',
+        venta: '990.25',
+        variacion: 0.8
       },
       {
         nombre: 'Dólar Oficial',
         emoji: '💵',
-        compra: '835.50',
-        venta: '845.25',
-        variacion: -0.2
+        compra: '835.75',
+        venta: '845.50',
+        variacion: -0.1
       },
       {
         nombre: 'Dólar MEP',
         emoji: '📈',
-        compra: '955.75',
+        compra: '955.80',
         venta: '965.30',
-        variacion: 0.3
+        variacion: 0.4
       },
       {
-        nombre: 'Euro',
-        emoji: '💶',
-        compra: '1020.40',
-        venta: '1045.80',
-        variacion: 0.1
+        nombre: 'Dólar CCL',
+        emoji: '💸',
+        compra: '972.40',
+        venta: '982.15',
+        variacion: 0.3
       }
     ];
+    
+    container.innerHTML = '';
+    
+    datosEjemplo.forEach(cotizacion => {
+      const card = document.createElement('div');
+      card.style.cssText = `
+        background: rgba(255,255,255,0.03);
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 8px;
+        border: 1px solid rgba(255,255,255,0.05);
+        opacity: 0.8;
+      `;
+      
+      card.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 16px;">${cotizacion.emoji}</span>
+            <span style="font-weight: 600; font-size: 12px;">${cotizacion.nombre}</span>
+          </div>
+          <span style="font-size: 10px; color: ${cotizacion.variacion >= 0 ? '#28a745' : '#dc3545'}">
+            ${cotizacion.variacion >= 0 ? '↗' : '↘'} ${cotizacion.variacion >= 0 ? '+' : ''}${cotizacion.variacion}%
+          </span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 11px; color: var(--muted);">Compra</span>
+          <span style="font-size: 14px; font-weight: 700; color: #28a745;">$${cotizacion.compra}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 11px; color: var(--muted);">Venta</span>
+          <span style="font-size: 14px; font-weight: 700; color: #dc3545;">$${cotizacion.venta}</span>
+        </div>
+        <div style="text-align: center; margin-top: 4px;">
+          <span style="font-size: 9px; color: var(--muted);">Datos de ejemplo</span>
+        </div>
+      `;
+      
+      container.appendChild(card);
+    });
+    
+    actualizacionElement.textContent = `Último intento: ${new Date().toLocaleTimeString('es-AR')} (modo offline)`;
   },
 
-  formatearPrecio(precioStr) {
-    if (!precioStr) return '0';
-    // Limpiar y formatear el precio
-    const numero = parseFloat(precioStr.toString().replace(',', '.'));
-    return isNaN(numero) ? '0' : numero.toLocaleString('es-AR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
+  formatearPrecio(precio) {
+    if (typeof precio === 'number') {
+      return precio.toLocaleString('es-AR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+    
+    if (typeof precio === 'string') {
+      const numero = parseFloat(precio);
+      return isNaN(numero) ? '0' : numero.toLocaleString('es-AR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+    
+    return '0';
   },
 
   setupEventListeners(element) {
@@ -1906,10 +1992,10 @@ ComponentSystem.registrar('cotizacionesMonedas', {
       }, 300);
     });
     
-    // Actualizar automáticamente cada 5 minutos
+    // Actualizar automáticamente cada 2 minutos
     setInterval(() => {
       this.cargarCotizaciones(element);
-    }, 5 * 60 * 1000);
+    }, 2 * 60 * 1000);
   }
 });
   
