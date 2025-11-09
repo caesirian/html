@@ -682,9 +682,9 @@ ComponentSystem.registrar('cuentasPendientes', {
             <th>Fecha Emisión</th>
             <th>Tipo</th>
             <th>Cliente / Proveedor</th>
-            <th>ID Relacionado</th>
+         
             <th>Importe</th>
-            <th>Fecha Vto</th>
+       
             <th>Estado</th>
           </tr>
         </thead>
@@ -718,9 +718,9 @@ ComponentSystem.registrar('cuentasPendientes', {
           ${r["Tipo (A cobrar/A pagar)"]}
         </td>
         <td>${r["Cliente/Proveedor"] || ""}</td>
-        <td>${r["ID Relacionado"] || ""}</td>
+       
         <td>$ ${UTILS.parseNumber(r["Importe"]).toLocaleString("es-AR",{minimumFractionDigits:2})}</td>
-        <td>${r["Fecha Vto"] || ""}</td>
+       
         <td>${r["Estado (Pendiente/Pagado)"] || ""}</td>
       `;
       tbody.appendChild(fila);
