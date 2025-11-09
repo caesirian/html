@@ -634,45 +634,69 @@ function renderIngresosEgresos(data){
 }
 
 // ====== RENDER tabla últimos movimientos (general: caja/finanzas) ======
+function renderRecentMovements(data){
+  // prefer Caja_Movimientos for movements if exists, else Finanzas_RegistroDiario
+  const arr = data.Caja_Movimientos || data.caja_movimientos || data['Caja_Movimientos'] || data.Finanzas_RegistroDiario || data['Finanzas_RegistroDiario'] || [];
+  if(!arr || arr.length === 0){
+    // clear table
+    const tbody = document.querySelector('#tabla-pendientes tbody');
+    tbody.innerHTML = '<tr><td colspan="7">No hay movimientos</td></tr>';
+    return;
+  }
 
-    // === CUENTAS PENDIENTES ===
-    const claves = Object.keys(data);
-    const clavePendientes = claves.find(k => k.toLowerCase().includes("pendiente"));
-    const pendientes = data[clavePendientes] || [];
-    if (pendientes && pendientes.length) {
-      const pendientesFiltrados = pendientes.filter(r =>
-        String(r["Estado (Pendiente/Pagado)"] || "").toLowerCase().includes("pendiente")
-      );
-      pendientesFiltrados.sort((a,b)=> new Date(a["Fecha Emisión"]) - new Date(b["Fecha Emisión"]));
+  // determine typical keys
+  const sample = arr.find(r => r && typeof r === 'object') || {};
+  const keys = Object.keys(sample);
+  const fechaKey = keys.find(k => /fecha|date/i.test(k)) || null;
+  const tipoKey = keys.find(k => /tipo/i.test(k)) || null;
+  const codigoKey = keys.find(k => /codigo|id/i.test(k)) || null;
+  const nombreKey = keys.find(k => /cliente|proveedor|nombre|razon|empresa/i.test(k)) || null;
+  const montoKey = keys.find(k => /monto|importe|total/i.test(k)) || null;
+  const saldoKey = keys.find(k => /saldo/i.test(k)) || null;
+  const estadoKey = keys.find(k => /estado|situación|situacion/i.test(k)) || null;
 
-      // Tabla
-      const tbody = document.querySelector("#tabla-pendientes tbody");
-      tbody.innerHTML = "";
-      pendientesFiltrados.forEach(r=>{
-        const color = (r["Tipo (A cobrar/A pagar)"]||"").includes("cobrar") ? "#28a745" : "#dc3545";
-        const fila = document.createElement("tr");
-        fila.innerHTML = `
-          <td>${r["Fecha Emisión"]||""}</td>
-          <td style="color:${color}">${r["Tipo (A cobrar/A pagar)"]||""}</td>
-          <td>${r["Cliente/Proveedor"]||""}</td>
-          <td>${r["ID Relacionado"]||""}</td>
-          <td>$ ${Number(r["Importe"]||0).toLocaleString("es-AR",{minimumFractionDigits:2})}</td>
-          <td>${r["Fecha Vto"]||""}</td>
-          <td>${r["Estado (Pendiente/Pagado)"]||""}</td>
-        `;
-        tbody.appendChild(fila);
-      });
+  // sort by date desc (where possible)
+  const withDates = arr.map(r => ({_r:r, _d: parseDate(r[fechaKey] ?? r['Fecha'] ?? r['fecha'] ?? r['Date'] ?? null)}));
+  withDates.sort((a,b)=> (isNaN(b._d)?0:b._d.getTime()) - (isNaN(a._d)?0:a._d.getTime()));
+  const recent = withDates.slice(0, 50).map(x => x._r);
 
-      // Gráfico
-      const labels = pendientesFiltrados.map(r => r["Cliente/Proveedor"] || r["ID Relacionado"]);
-      const valores = pendientesFiltrados.map(r => Number(r["Importe"])||0);
-      const colores = pendientesFiltrados.map(r =>
-        (r["Tipo (A cobrar/A pagar)"]||"").includes("cobrar")
-          ? "rgba(40,167,69,0.7)"
-          : "rgba(220,53,69,0.7)"
-      );
-      graficarBarra("grafico-pendientes", labels, valores, colores);
-    }
+  const tbody = document.querySelector('#tabla-pendientes tbody');
+  tbody.innerHTML = '';
+  for(const r of recent){
+    const fecha = r[fechaKey] ?? r['Fecha'] ?? r['fecha'] ?? r['Date'] ?? '';
+    const tipo = r[tipoKey] ?? r['Tipo'] ?? '';
+    const codigo = r[codigoKey] ?? r['Código'] ?? r['Codigo'] ?? '';
+    const nombre = r[nombreKey] ?? r['Cliente'] ?? r['Proveedor'] ?? '';
+    const monto = parseNumber(r[montoKey] ?? r['Monto'] ?? r['Importe'] ?? r['Total'] ?? 0);
+    const saldo = parseNumber(r[saldoKey] ?? r['Saldo'] ?? '');
+    const estado = r[estadoKey] ?? r['Estado'] ?? '';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${fecha ?? ''}</td>
+                    <td>${tipo ?? ''}</td>
+                    <td>${codigo ?? ''}</td>
+                    <td>${nombre ?? ''}</td>
+                    <td style="text-align:right">${formatCurrency(monto)}</td>
+                    <td style="text-align:right">${saldo ? formatCurrency(saldo) : ''}</td>
+                    <td>${estado ?? ''}</td>`;
+    tbody.appendChild(tr);
+  }
+
+  // init DataTable (or refresh)
+  const table = $('#tabla-pendientes');
+  if($.fn.dataTable.isDataTable(table)){
+    table.DataTable().destroy();
+  }
+  table.DataTable({
+    pageLength: 10,
+    dom: 'Bfrtip',
+    buttons:[ { extend: 'csv', text: 'Exportar CSV' }, { extend: 'excel', text: 'Exportar Excel' } ],
+    language: { search: "Buscar:" },
+    columnDefs: [{ targets:[4,5], className: 'dt-body-right' }],
+    order: [[0,'desc']]
+  });
+}
+
 // ====== ORQUESTADOR ======
 async function refreshAll(force=false){
   try{
