@@ -487,8 +487,8 @@ componentesActivos: [
   'saldoCaja',
   'ingresosVsEgresos',
   'egresosVsAnterior',
-  'analisisCategorias',
-  'cuentasPendientes'
+  'cuentasPendientes',
+  'analisisCategorias'
 ],
   
   registros: {}
@@ -1211,25 +1211,29 @@ ComponentSystem.registrar('cuentasPendientes', {
   }
 });
 
-  // Componente: Análisis de Categorías por Mes
+ // Componente: Análisis de Categorías por Mes (CON BOTONES)
 ComponentSystem.registrar('analisisCategorias', {
   grid: 'span-6',
   html: `
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
       <h2 style="margin: 0;">Análisis por Categorías</h2>
-      <div style="display: flex; gap: 8px; align-items: center;">
-        <select id="selector-mes" class="btn small" style="background: var(--card); border: 1px solid rgba(255,255,255,0.1);">
-          <option value="">Cargando meses...</option>
-        </select>
-        <select id="selector-tipo" class="btn small" style="background: var(--card); border: 1px solid rgba(255,255,255,0.1);">
-          <option value="egresos">Egresos</option>
-          <option value="ingresos">Ingresos</option>
-        </select>
+      <div style="display: flex; gap: 4px; align-items: center;">
+        <button class="btn tipo-btn active" data-tipo="egresos">Egresos</button>
+        <button class="btn tipo-btn secondary" data-tipo="ingresos">Ingresos</button>
       </div>
     </div>
+    
+    <div style="margin-bottom: 16px;">
+      <div class="text-muted" style="margin-bottom: 8px; font-size: 12px;">Selecciona el mes:</div>
+      <div id="botones-mes" style="display: flex; gap: 6px; flex-wrap: wrap;">
+        <div class="loader" style="margin: 0 auto;"></div>
+      </div>
+    </div>
+    
     <div class="chart-container-large">
       <canvas id="grafico-categorias"></canvas>
     </div>
+    
     <div style="margin-top: 12px; display: flex; justify-content: space-between; align-items: center;">
       <div class="text-muted" id="resumen-categorias"></div>
       <button id="btn-export-categorias" class="btn small secondary">Exportar</button>
@@ -1237,27 +1241,10 @@ ComponentSystem.registrar('analisisCategorias', {
   `,
   async render(data, element) {
     // Inicializar datos y UI
-    this.inicializarSelectores(element);
-    this.cargarDatosYRenderizar(data, element);
+    await this.cargarDatosYRenderizar(data, element);
     
     // Event listeners
     this.setupEventListeners(element, data);
-  },
-
-  inicializarSelectores(element) {
-    const selectorMes = element.querySelector('#selector-mes');
-    const selectorTipo = element.querySelector('#selector-tipo');
-    
-    // Limpiar opciones existentes
-    selectorMes.innerHTML = '';
-    
-    // Agregar opción por defecto
-    const optionDefault = document.createElement('option');
-    optionDefault.value = '';
-    optionDefault.textContent = 'Selecciona un mes';
-    selectorMes.appendChild(optionDefault);
-    
-    // Por ahora dejamos vacío, se llenará con datos
   },
 
   async cargarDatosYRenderizar(data, element) {
@@ -1274,13 +1261,13 @@ ComponentSystem.registrar('analisisCategorias', {
     // Guardar datos en el elemento para uso posterior
     element._datosMovimientos = { mesesDisponibles, datosPorMes };
     
-    // Llenar selector de meses
-    this.llenarSelectorMeses(element, mesesDisponibles);
+    // Crear botones de meses
+    this.crearBotonesMeses(element, mesesDisponibles);
     
     // Si hay meses disponibles, seleccionar el más reciente y renderizar
     if (mesesDisponibles.length > 0) {
       const mesMasReciente = mesesDisponibles[mesesDisponibles.length - 1];
-      element.querySelector('#selector-mes').value = mesMasReciente;
+      this.seleccionarMes(element, mesMasReciente);
       this.renderizarGrafico(element, mesMasReciente, 'egresos');
     }
   },
@@ -1317,7 +1304,7 @@ ComponentSystem.registrar('analisisCategorias', {
       }
       
       const tipo = String(row[tipoKey] ?? '').toLowerCase();
-      const monto = UTILS.parseNumber(row[montoKey] ?? row['Monto'] ?? row['Importe'] ?? row['Total'] ?? 0);
+      let monto = UTILS.parseNumber(row[montoKey] ?? row['Monto'] ?? row['Importe'] ?? row['Total'] ?? 0);
       const categoria = row[categoriaKey] || row['Categoría'] || row['Rubro'] || row['Concepto'] || 'Sin categoría';
       
       // Determinar si es ingreso o egreso
@@ -1346,36 +1333,50 @@ ComponentSystem.registrar('analisisCategorias', {
     };
   },
 
-  llenarSelectorMeses(element, mesesDisponibles) {
-    const selectorMes = element.querySelector('#selector-mes');
-    selectorMes.innerHTML = '';
+  crearBotonesMeses(element, mesesDisponibles) {
+    const contenedorBotones = element.querySelector('#botones-mes');
+    contenedorBotones.innerHTML = '';
     
     if (mesesDisponibles.length === 0) {
-      const option = document.createElement('option');
-      option.value = '';
-      option.textContent = 'No hay meses disponibles';
-      selectorMes.appendChild(option);
+      contenedorBotones.innerHTML = '<span class="text-muted">No hay meses disponibles</span>';
       return;
     }
     
-    // Agregar opción por defecto
-    const optionDefault = document.createElement('option');
-    optionDefault.value = '';
-    optionDefault.textContent = 'Selecciona un mes';
-    selectorMes.appendChild(optionDefault);
-    
-    // Agregar meses disponibles
-    mesesDisponibles.forEach(mesKey => {
+    // Crear botón para cada mes
+    mesesDisponibles.forEach((mesKey, index) => {
       const [year, month] = mesKey.split('-');
-      const option = document.createElement('option');
-      option.value = mesKey;
-      option.textContent = `${month}/${year}`;
-      selectorMes.appendChild(option);
+      const button = document.createElement('button');
+      button.className = 'btn small mes-btn';
+      if (index === mesesDisponibles.length - 1) {
+        button.classList.add('active');
+      } else {
+        button.classList.add('secondary');
+      }
+      button.setAttribute('data-mes', mesKey);
+      button.textContent = `${month}/${year}`;
+      contenedorBotones.appendChild(button);
+    });
+  },
+
+  seleccionarMes(element, mesKey) {
+    // Remover clase active de todos los botones de mes
+    const botonesMes = element.querySelectorAll('.mes-btn');
+    botonesMes.forEach(btn => {
+      btn.classList.remove('active');
+      btn.classList.add('secondary');
     });
     
-    // Seleccionar el mes más reciente por defecto
-    const mesMasReciente = mesesDisponibles[mesesDisponibles.length - 1];
-    selectorMes.value = mesMasReciente;
+    // Agregar clase active al botón seleccionado
+    const botonSeleccionado = element.querySelector(`.mes-btn[data-mes="${mesKey}"]`);
+    if (botonSeleccionado) {
+      botonSeleccionado.classList.remove('secondary');
+      botonSeleccionado.classList.add('active');
+    }
+  },
+
+  obtenerTipoSeleccionado(element) {
+    const botonActivo = element.querySelector('.tipo-btn.active');
+    return botonActivo ? botonActivo.getAttribute('data-tipo') : 'egresos';
   },
 
   renderizarGrafico(element, mesKey, tipo) {
@@ -1420,8 +1421,9 @@ ComponentSystem.registrar('analisisCategorias', {
     
     // Actualizar resumen
     const resumenElement = element.querySelector('#resumen-categorias');
+    const [year, month] = mesKey.split('-');
     resumenElement.innerHTML = `
-      <strong>Total ${tipo === 'ingresos' ? 'ingresos' : 'egresos'}:</strong> 
+      <strong>${tipo === 'ingresos' ? 'Ingresos' : 'Egresos'} de ${month}/${year}:</strong> 
       $ ${total.toLocaleString("es-AR",{minimumFractionDigits:2})} | 
       <strong>Categorías:</strong> ${categoriasOrdenadas.length}
     `;
@@ -1576,25 +1578,33 @@ ComponentSystem.registrar('analisisCategorias', {
   },
 
   setupEventListeners(element, data) {
-    const selectorMes = element.querySelector('#selector-mes');
-    const selectorTipo = element.querySelector('#selector-tipo');
     const btnExport = element.querySelector('#btn-export-categorias');
     
-    selectorMes.addEventListener('change', () => {
-      const mesSeleccionado = selectorMes.value;
-      const tipoSeleccionado = selectorTipo.value;
-      
-      if (mesSeleccionado) {
-        this.renderizarGrafico(element, mesSeleccionado, tipoSeleccionado);
+    // Event listeners para botones de mes
+    element.addEventListener('click', (e) => {
+      if (e.target.classList.contains('mes-btn')) {
+        const mesKey = e.target.getAttribute('data-mes');
+        this.seleccionarMes(element, mesKey);
+        const tipo = this.obtenerTipoSeleccionado(element);
+        this.renderizarGrafico(element, mesKey, tipo);
       }
-    });
-    
-    selectorTipo.addEventListener('change', () => {
-      const mesSeleccionado = selectorMes.value;
-      const tipoSeleccionado = selectorTipo.value;
       
-      if (mesSeleccionado) {
-        this.renderizarGrafico(element, mesSeleccionado, tipoSeleccionado);
+      if (e.target.classList.contains('tipo-btn')) {
+        // Cambiar tipo (ingresos/egresos)
+        const botonesTipo = element.querySelectorAll('.tipo-btn');
+        botonesTipo.forEach(btn => {
+          btn.classList.remove('active');
+          btn.classList.add('secondary');
+        });
+        e.target.classList.remove('secondary');
+        e.target.classList.add('active');
+        
+        const mesActivo = element.querySelector('.mes-btn.active');
+        if (mesActivo) {
+          const mesKey = mesActivo.getAttribute('data-mes');
+          const tipo = e.target.getAttribute('data-tipo');
+          this.renderizarGrafico(element, mesKey, tipo);
+        }
       }
     });
     
@@ -1604,23 +1614,23 @@ ComponentSystem.registrar('analisisCategorias', {
   },
 
   exportarDatosCategorias(element) {
-    const selectorMes = element.querySelector('#selector-mes');
-    const selectorTipo = element.querySelector('#selector-tipo');
+    const mesActivo = element.querySelector('.mes-btn.active');
+    const tipoActivo = element.querySelector('.tipo-btn.active');
     
-    const mesSeleccionado = selectorMes.value;
-    const tipoSeleccionado = selectorTipo.value;
-    
-    if (!mesSeleccionado || !element._datosMovimientos) {
+    if (!mesActivo || !element._datosMovimientos) {
       alert('No hay datos para exportar');
       return;
     }
     
+    const mesKey = mesActivo.getAttribute('data-mes');
+    const tipo = tipoActivo.getAttribute('data-tipo');
+    
     const { datosPorMes } = element._datosMovimientos;
-    const datosMes = datosPorMes[mesSeleccionado];
+    const datosMes = datosPorMes[mesKey];
     
     if (!datosMes) return;
     
-    const datos = datosMes[tipoSeleccionado];
+    const datos = datosMes[tipo];
     const categorias = Object.keys(datos)
       .map(cat => ({ categoria: cat, monto: datos[cat] }))
       .sort((a, b) => b.monto - a.monto);
@@ -1636,7 +1646,7 @@ ComponentSystem.registrar('analisisCategorias', {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `categorias_${tipoSeleccionado}_${mesSeleccionado}.csv`;
+    a.download = `categorias_${tipo}_${mesKey}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
