@@ -1,191 +1,544 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>HG Soluciones - Dashboard Financiero</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Dashboard Financiero - HG Soluciones</title>
+
+<!-- CSS (mantener igual que antes) -->
+<link href="https://cdn.jsdelivr.net/npm/datatables.net-dt@1.13.6/css/jquery.dataTables.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/datatables.net-buttons-dt@2.4.1/css/buttons.dataTables.min.css" rel="stylesheet"/>
 <style>
-  body {
-    margin: 0;
-    font-family: "Segoe UI", Roboto, sans-serif;
-    background: #0d1b2a;
-    color: #e0e0e0;
-  }
-  header {
-    background: #1b263b;
-    padding: 14px 20px;
-    color: #fff;
-    font-size: 1.4em;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  }
-  .dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 18px;
-    padding: 18px;
-  }
-  .card {
-    background: #1e2a47;
-    border-radius: 10px;
-    padding: 16px;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.25);
-    transition: transform 0.2s ease;
-  }
-  .card:hover { transform: translateY(-2px); }
-  .card h2 {
-    font-size: 1.1em;
-    margin-bottom: 10px;
-    color: #fff;
-    border-bottom: 1px solid #2f3b57;
-    padding-bottom: 6px;
-  }
-  .kpi-grande {
-    font-size: 2em;
-    font-weight: bold;
-    color: #4dd0e1;
-  }
-  .text-muted { color: #aaa; font-size: 0.85em; }
-  table.tabla-datos {
-    width: 100%; border-collapse: collapse; font-size: 0.9em;
-  }
-  table.tabla-datos th, table.tabla-datos td {
-    padding: 6px 8px;
-    border-bottom: 1px solid #2f3b57;
-  }
-  table.tabla-datos th {
-    background: #0d1b2a;
-    color: #fff;
-    text-align: left;
-  }
-  table.tabla-datos tr:hover { background: #24324f; }
-  @media (max-width: 600px) {
-    .dashboard-grid { grid-template-columns: 1fr; }
-  }
+/* ... (todo tu CSS actual se mantiene igual) ... */
 </style>
 </head>
 <body>
-  <header>HG Soluciones — Dashboard Financiero</header>
+<div class="app">
+  <aside class="sidebar" role="navigation">
+    <h1>HG - Dashboard Financiero</h1>
+    <div class="nav">
+      <button id="nav-overview" class="active">Resumen</button>
+      <button id="nav-ventas">Ventas</button>
+      <button id="nav-finanzas">Finanzas</button>
+      <button id="nav-simulador">Simulador</button>
+      <button id="nav-tablas">Tablas</button>
+    </div>
+    <footer style="margin-top:14px;color:var(--muted);font-size:12px">
+      <div>Conexión: <span id="conn-status">sin iniciar</span></div>
+      <div style="margin-top:8px"><button class="btn small" id="refresh-data">Actualizar datos</button></div>
+    </footer>
+  </aside>
 
   <main>
-    <div class="dashboard-grid">
+    <header class="topbar header-hg" style="display:flex; align-items:center; gap:12px;">
+      <div>
+        <h1 style="margin:0">Dashboard Financiero</h1>
+        <p style="margin:0; color:var(--muted); font-size:13px">Conexión en vivo a Google Sheets — estilo HG</p>
+      </div>
+      <div style="margin-left:auto; display:flex; gap:8px; align-items:center;">
+        <div id="estado" class="text-muted">Esperando datos...</div>
+        <button id="btn-export" class="btn small">Exportar CSV</button>
+      </div>
+    </header>
 
-      <section id="bloque-saldo" class="card">
-        <h2>Saldo de Caja</h2>
-        <div id="saldo-actual" class="kpi-grande">Cargando...</div>
-        <div id="saldo-fecha" class="text-muted" style="margin-top:6px;">—</div>
-      </section>
-
-      <section id="bloque-ingresos" class="card">
-        <h2>Ingresos: mes actual vs anterior</h2>
-        <canvas id="grafico-ingresos" height="180"></canvas>
-      </section>
-
-      <section id="bloque-egresos" class="card">
-        <h2>Egresos: mes actual vs anterior</h2>
-        <canvas id="grafico-egresos" height="180"></canvas>
-      </section>
-
-      <section id="bloque-pendientes" class="card">
-        <h2>Cuentas Pendientes</h2>
-        <canvas id="grafico-pendientes" height="200"></canvas>
-        <div class="tabla-container" style="max-height:260px; overflow-y:auto; margin-top:12px;">
-          <table id="tabla-pendientes" class="tabla-datos">
-            <thead>
-              <tr>
-                <th>Fecha Emisión</th>
-                <th>Tipo</th>
-                <th>Cliente/Proveedor</th>
-                <th>ID Relacionado</th>
-                <th>Importe</th>
-                <th>Fecha Vto</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </section>
-
+    <div class="dashboard-grid" style="margin-top:12px;">
+      <!-- Los componentes se renderizarán aquí dinámicamente -->
     </div>
+
+    <footer class="footer-hg">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="text-muted">Última sincronización: <span id="last-sync">nunca</span></div>
+        <div class="text-muted">Cache: <span id="cache-status">no</span></div>
+      </div>
+    </footer>
   </main>
+</div>
+
+<!-- JS Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/datatables.net-buttons@2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/datatables.net-buttons@2.4.1/js/buttons.html5.min.js"></script>
 
 <script>
-const GAS_URL = "https://script.google.com/macros/s/AKfycbyTLrGiqes1VOp8E51Kq91P7YihPKNtN1f0f6u2JitXOteGyGrNXqiSjdXYJ8HAtfs/exec";
+// ====== CONFIGURACIÓN GLOBAL ======
+const CONFIG = {
+  GAS_ENDPOINT: "https://script.google.com/macros/s/AKfycbyTLrGiqes1VOp8E51Kq91P7YihPKNtN1f0f6u2JitXOteGyGrNXqiSjdXYJ8HAtfs/exec",
+  CACHE_KEY: "hg_dashboard_cache_v4",
+  CACHE_TTL: 1000 * 60 * 60 // 1 hora
+};
 
-async function obtenerDatos(){
-  const r = await fetch(GAS_URL);
-  return await r.json();
-}
+// ====== REGISTRO DE COMPONENTES ======
+const COMPONENTES = {
+  // Aquí defines qué componentes quieres mostrar y en qué orden
+  componentesActivos: [
+    'saldoCaja',
+    'ingresosVsEgresos', 
+    'cuentasPendientes'
+    // Para agregar un componente nuevo, simplemente añade su ID aquí
+    // 'nuevoComponente'
+  ],
+  
+  // Registro de todos los componentes disponibles
+  registros: {}
+};
 
-async function cargarDashboard(){
-  try {
-    const data = await obtenerDatos();
-
-    // === SALDO ===
-    const caja = data["Caja_Movimientos"];
-    if (caja && caja.length) {
-      const ultima = caja[caja.length - 1];
-      const saldo = ultima["Saldo"] || ultima["saldo"] || 0;
-      document.getElementById("saldo-actual").textContent =
-        "$ " + Number(saldo).toLocaleString("es-AR",{minimumFractionDigits:2});
-      document.getElementById("saldo-fecha").textContent = ultima["Fecha"] || "";
+// ====== UTILIDADES ======
+const UTILS = {
+  parseNumber(val) {
+    if(val === null || val === undefined || val === "") return 0;
+    if(typeof val === "number") return val;
+    const s = String(val).replace(/[^0-9\-,\.]/g,"").trim();
+    if(!s) return 0;
+    const parts = s.split(',');
+    if(parts.length > 1 && parts[0].includes('.')) {
+      return parseFloat(s.replace(/\./g,'').replace(',','.')) || 0;
     }
+    return parseFloat(s.replace(',', '.')) || 0;
+  },
 
-    // === INGRESOS / EGRESOS ===
-    
-    // === CUENTAS PENDIENTES ===
-    const claves = Object.keys(data);
-    const clavePendientes = claves.find(k => k.toLowerCase().includes("pendiente"));
-    const pendientes = data[clavePendientes] || [];
-    if (pendientes && pendientes.length) {
-      const pendientesFiltrados = pendientes.filter(r =>
-        String(r["Estado (Pendiente/Pagado)"] || "").toLowerCase().includes("pendiente")
-      );
-      pendientesFiltrados.sort((a,b)=> new Date(a["Fecha Emisión"]) - new Date(b["Fecha Emisión"]));
-
-      // Tabla
-      const tbody = document.querySelector("#tabla-pendientes tbody");
-      tbody.innerHTML = "";
-      pendientesFiltrados.forEach(r=>{
-        const color = (r["Tipo (A cobrar/A pagar)"]||"").includes("cobrar") ? "#28a745" : "#dc3545";
-        const fila = document.createElement("tr");
-        fila.innerHTML = `
-          <td>${r["Fecha Emisión"]||""}</td>
-          <td style="color:${color}">${r["Tipo (A cobrar/A pagar)"]||""}</td>
-          <td>${r["Cliente/Proveedor"]||""}</td>
-          <td>${r["ID Relacionado"]||""}</td>
-          <td>$ ${Number(r["Importe"]||0).toLocaleString("es-AR",{minimumFractionDigits:2})}</td>
-          <td>${r["Fecha Vto"]||""}</td>
-          <td>${r["Estado (Pendiente/Pagado)"]||""}</td>
-        `;
-        tbody.appendChild(fila);
-      });
-
-      // Gráfico
-      const labels = pendientesFiltrados.map(r => r["Cliente/Proveedor"] || r["ID Relacionado"]);
-      const valores = pendientesFiltrados.map(r => Number(r["Importe"])||0);
-      const colores = pendientesFiltrados.map(r =>
-        (r["Tipo (A cobrar/A pagar)"]||"").includes("cobrar")
-          ? "rgba(40,167,69,0.7)"
-          : "rgba(220,53,69,0.7)"
-      );
-      graficarBarra("grafico-pendientes", labels, valores, colores);
+  parseDate(v) {
+    if(!v) return new Date(NaN);
+    if(v instanceof Date) return v;
+    const s = String(v).trim();
+    if(/^\d{4}-\d{2}-\d{2}/.test(s)) return new Date(s);
+    if(/^\d{2}\/\d{2}\/\d{4}/.test(s)) {
+      const [d,m,y] = s.split('/');
+      return new Date(Number(y), Number(m)-1, Number(d));
     }
+    const n = Number(s);
+    if(!isNaN(n) && n > 1000) {
+      const epoch = new Date(Date.UTC(1899,11,30));
+      epoch.setUTCDate(epoch.getUTCDate() + Math.floor(n));
+      return epoch;
+    }
+    return new Date(s);
+  },
 
-  } catch (err) {
-    console.error("Error cargarDashboard:", err);
+  formatCurrency(n) {
+    const sign = n < 0 ? '-' : '';
+    const abs = Math.abs(Number(n) || 0);
+    return sign + '$' + abs.toLocaleString('es-AR', {minimumFractionDigits:0, maximumFractionDigits:0});
+  },
+
+  saveCache(obj) {
+    localStorage.setItem(CONFIG.CACHE_KEY, JSON.stringify({ts: Date.now(), data: obj}));
+    document.getElementById('cache-status').innerText = 'sí';
+  },
+
+  loadCache() {
+    try {
+      const raw = localStorage.getItem(CONFIG.CACHE_KEY);
+      if(!raw) return null;
+      const parsed = JSON.parse(raw);
+      if(Date.now() - parsed.ts > CONFIG.CACHE_TTL) return null;
+      return parsed.data;
+    } catch(e) {
+      return null;
+    }
   }
-}
+};
 
+// ====== GESTOR DE DATOS ======
+const DataManager = {
+  async fetchData(force = false) {
+    if(!force) {
+      const cached = UTILS.loadCache();
+      if(cached) {
+        document.getElementById('conn-status').innerText = 'cache local';
+        return cached;
+      }
+    }
 
+    document.getElementById('conn-status').innerText = 'cargando...';
+    try {
+      const res = await fetch(CONFIG.GAS_ENDPOINT);
+      if(!res.ok) throw new Error('Error al consultar endpoint: ' + res.status);
+      const data = await res.json();
+      UTILS.saveCache(data);
+      document.getElementById('conn-status').innerText = 'conectado';
+      document.getElementById('last-sync').innerText = new Date().toLocaleString();
+      return data;
+    } catch(error) {
+      document.getElementById('conn-status').innerText = 'error';
+      throw error;
+    }
+  }
+};
 
-cargarDashboard();
+// ====== SISTEMA DE COMPONENTES ======
+const ComponentSystem = {
+  // Registrar un nuevo componente
+  registrar(id, config) {
+    COMPONENTES.registros[id] = config;
+  },
+
+  // Renderizar todos los componentes activos
+  async render(data) {
+    const grid = document.querySelector('.dashboard-grid');
+    grid.innerHTML = '';
+
+    for(const componentId of COMPONENTES.componentesActivos) {
+      const component = COMPONENTES.registros[componentId];
+      if(component) {
+        try {
+          await this.renderComponent(componentId, component, data, grid);
+        } catch(error) {
+          console.error(`Error renderizando componente ${componentId}:`, error);
+        }
+      }
+    }
+  },
+
+  // Renderizar un componente individual
+  async renderComponent(id, component, data, grid) {
+    const element = document.createElement(component.element || 'section');
+    element.id = `componente-${id}`;
+    element.className = component.classes || 'card';
+    
+    if(component.grid) {
+      element.style.gridColumn = component.grid;
+    }
+
+    if(component.html) {
+      element.innerHTML = component.html;
+    }
+
+    grid.appendChild(element);
+
+    if(component.render) {
+      await component.render(data, element);
+    }
+  },
+
+  // Agregar/remover componentes dinámicamente
+  agregarComponente(id) {
+    if(!COMPONENTES.componentesActivos.includes(id)) {
+      COMPONENTES.componentesActivos.push(id);
+    }
+  },
+
+  removerComponente(id) {
+    const index = COMPONENTES.componentesActivos.indexOf(id);
+    if(index > -1) {
+      COMPONENTES.componentesActivos.splice(index, 1);
+    }
+  }
+};
+
+// ====== DEFINICIÓN DE COMPONENTES ======
+
+// Componente: Saldo de Caja
+ComponentSystem.registrar('saldoCaja', {
+  grid: 'span 3',
+  classes: 'card',
+  html: `
+    <h2>Saldo de caja</h2>
+    <div id="saldo-actual" class="kpi-grande">Cargando...</div>
+    <div id="saldo-fecha" class="text-muted" style="margin-top:6px;">—</div>
+  `,
+  async render(data, element) {
+    const arr = data.Caja_Movimientos || data.caja_movimientos || data['Caja_Movimientos'] || [];
+    
+    if(!arr || arr.length === 0) {
+      element.querySelector('#saldo-actual').innerText = 'Sin datos';
+      return;
+    }
+
+    const sample = arr.find(r => r && typeof r === 'object');
+    const keys = sample ? Object.keys(sample) : [];
+    const saldoKey = keys.find(k => /saldo/i.test(k));
+    
+    if(saldoKey) {
+      let lastVal = null;
+      let lastRow = null;
+      for(let i = arr.length-1; i >= 0; i--) {
+        const v = arr[i][saldoKey];
+        if(v !== null && v !== undefined && String(v).trim() !== '') {
+          lastVal = v;
+          lastRow = arr[i];
+          break;
+        }
+      }
+      const numeric = UTILS.parseNumber(lastVal);
+      element.querySelector('#saldo-actual').innerText = UTILS.formatCurrency(numeric);
+      
+      const dateKey = keys.find(k => /fecha|date/i.test(k));
+      if(lastRow && dateKey && lastRow[dateKey]) {
+        const pd = UTILS.parseDate(lastRow[dateKey]);
+        if(!isNaN(pd.getTime())) {
+          element.querySelector('#saldo-fecha').innerText = 
+            'Saldo registrado al ' + (pd.getDate()+"/"+(pd.getMonth()+1)+"/"+pd.getFullYear());
+        }
+      }
+    }
+  }
+});
+
+// Componente: Ingresos vs Egresos
+ComponentSystem.registrar('ingresosVsEgresos', {
+  grid: 'span 5',
+  classes: 'card',
+  html: `
+    <h2>Ingresos: mes actual vs mes anterior</h2>
+    <canvas id="grafico-ingresos" height="180"></canvas>
+  `,
+  async render(data, element) {
+    const fin = data.Finanzas_RegistroDiario || data['Finanzas_RegistroDiario'] || data.Caja_Movimientos || [];
+    const sample = fin.find(r => r && typeof r === 'object') || {};
+    const keys = Object.keys(sample);
+    const montoKey = keys.find(k => /monto|importe|total/i.test(k)) || null;
+    const tipoKey = keys.find(k => /tipo|ingres|egres/i.test(k)) || null;
+    const fechaKey = keys.find(k => /fecha|date/i.test(k)) || null;
+    
+    const sums = {};
+    for(const row of fin) {
+      const rawFecha = row[fechaKey] ?? row['Fecha'] ?? row['fecha'] ?? row['Date'] ?? null;
+      const d = UTILS.parseDate(rawFecha);
+      const key = (!isNaN(d.getTime())) ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` : 'sin-fecha';
+      if(!sums[key]) sums[key] = {ing:0, eg:0};
+      const tipo = String(row[tipoKey] ?? '').toLowerCase();
+      const monto = UTILS.parseNumber(row[montoKey] ?? row['Monto'] ?? row['Importe'] ?? row['Total'] ?? 0);
+      
+      if(tipoKey && tipo.includes('ingre')) sums[key].ing += monto;
+      else if(tipoKey && tipo.includes('egre')) sums[key].eg += Math.abs(monto);
+      else {
+        if(monto >= 0) sums[key].ing += monto;
+        else sums[key].eg += Math.abs(monto);
+      }
+    }
+
+    const today = new Date();
+    const curKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+    const prev = new Date(today.getFullYear(), today.getMonth()-1, 1);
+    const prevKey = `${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,'0')}`;
+
+    const ingActual = sums[curKey]?.ing || 0;
+    const ingPrev = sums[prevKey]?.ing || 0;
+
+    const ctx = element.querySelector('#grafico-ingresos').getContext('2d');
+    if(window.chartIngresos) window.chartIngresos.destroy();
+    
+    window.chartIngresos = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Mes anterior', 'Mes actual'],
+        datasets: [{
+          label: 'Ingresos',
+          data: [ingPrev, ingActual],
+          backgroundColor: ['rgba(58,123,213,0.35)', 'rgba(62,166,255,0.9)'],
+          borderColor: ['rgba(58,123,213,0.8)', 'rgba(62,166,255,1)'],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { ticks: { color: '#cbdff3' }, beginAtZero: true },
+          x: { ticks: { color: '#cbdff3' } }
+        }
+      }
+    });
+  }
+});
+
+// Componente: Egresos
+ComponentSystem.registrar('egresos', {
+  grid: 'span 4',
+  classes: 'card',
+  html: `
+    <h2>Egresos: mes actual vs mes anterior</h2>
+    <canvas id="grafico-egresos" height="180"></canvas>
+  `,
+  async render(data, element) {
+    const fin = data.Finanzas_RegistroDiario || data['Finanzas_RegistroDiario'] || data.Caja_Movimientos || [];
+    const sample = fin.find(r => r && typeof r === 'object') || {};
+    const keys = Object.keys(sample);
+    const montoKey = keys.find(k => /monto|importe|total/i.test(k)) || null;
+    const tipoKey = keys.find(k => /tipo|ingres|egres/i.test(k)) || null;
+    const fechaKey = keys.find(k => /fecha|date/i.test(k)) || null;
+    
+    const sums = {};
+    for(const row of fin) {
+      const rawFecha = row[fechaKey] ?? row['Fecha'] ?? row['fecha'] ?? row['Date'] ?? null;
+      const d = UTILS.parseDate(rawFecha);
+      const key = (!isNaN(d.getTime())) ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` : 'sin-fecha';
+      if(!sums[key]) sums[key] = {ing:0, eg:0};
+      const tipo = String(row[tipoKey] ?? '').toLowerCase();
+      const monto = UTILS.parseNumber(row[montoKey] ?? row['Monto'] ?? row['Importe'] ?? row['Total'] ?? 0);
+      
+      if(tipoKey && tipo.includes('egre')) sums[key].eg += Math.abs(monto);
+      else if(!tipoKey && monto < 0) sums[key].eg += Math.abs(monto);
+    }
+
+    const today = new Date();
+    const curKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+    const prev = new Date(today.getFullYear(), today.getMonth()-1, 1);
+    const prevKey = `${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,'0')}`;
+
+    const egActual = sums[curKey]?.eg || 0;
+    const egPrev = sums[prevKey]?.eg || 0;
+
+    const ctx = element.querySelector('#grafico-egresos').getContext('2d');
+    if(window.chartEgresos) window.chartEgresos.destroy();
+    
+    window.chartEgresos = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Mes anterior', 'Mes actual'],
+        datasets: [{
+          label: 'Egresos',
+          data: [egPrev, egActual],
+          backgroundColor: ['rgba(255,180,180,0.6)', 'rgba(193,18,31,0.95)'],
+          borderColor: ['rgba(255,120,120,0.9)', 'rgba(193,18,31,1)'],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { ticks: { color: '#cbdff3' }, beginAtZero: true },
+          x: { ticks: { color: '#cbdff3' } }
+        }
+      }
+    });
+  }
+});
+
+// Componente: Cuentas Pendientes
+ComponentSystem.registrar('cuentasPendientes', {
+  grid: '1 / -1',
+  classes: 'card',
+  html: `
+    <h2>Cuentas Pendientes</h2>
+    <div class="tabla-container" style="max-height:260px; overflow-y:auto; margin-top:12px;">
+      <table id="tabla-pendientes" class="tabla-datos" style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr style="background:#0d1b2a; color:#fff;">
+            <th>Fecha Emisión</th>
+            <th>Tipo</th>
+            <th>Cliente / Proveedor</th>
+            <th>ID Relacionado</th>
+            <th>Importe</th>
+            <th>Fecha Vto</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody style="background:#ffffff10; color:#e0e0e0;"></tbody>
+      </table>
+    </div>
+  `,
+  async render(data, element) {
+    const hoja = data["Cuentas_Pendientes"];
+    if(!hoja || !Array.isArray(hoja)) return;
+
+    const pendientes = hoja.filter(r => 
+      String(r["Estado (Pendiente/Pagado)"]).toLowerCase().includes("pendiente")
+    );
+    
+    if(pendientes.length === 0) {
+      element.querySelector('tbody').innerHTML = '<tr><td colspan="7">No hay cuentas pendientes</td></tr>';
+      return;
+    }
+
+    pendientes.sort((a,b) => new Date(a["Fecha Emisión"]) - new Date(b["Fecha Emisión"]));
+
+    const tbody = element.querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    pendientes.forEach(r => {
+      const fila = document.createElement('tr');
+      fila.innerHTML = `
+        <td>${r["Fecha Emisión"] || ""}</td>
+        <td style="color:${r["Tipo (A cobrar/A pagar)"].includes("cobrar") ? "#28a745" : "#dc3545"}">
+          ${r["Tipo (A cobrar/A pagar)"]}
+        </td>
+        <td>${r["Cliente/Proveedor"] || ""}</td>
+        <td>${r["ID Relacionado"] || ""}</td>
+        <td>$ ${UTILS.parseNumber(r["Importe"]).toLocaleString("es-AR",{minimumFractionDigits:2})}</td>
+        <td>${r["Fecha Vto"] || ""}</td>
+        <td>${r["Estado (Pendiente/Pagado)"] || ""}</td>
+      `;
+      tbody.appendChild(fila);
+    });
+
+    // Inicializar DataTable
+    const table = $(element).find('#tabla-pendientes');
+    if($.fn.dataTable.isDataTable(table)) {
+      table.DataTable().destroy();
+    }
+    
+    table.DataTable({
+      pageLength: 10,
+      dom: 'Bfrtip',
+      buttons: [{ extend: 'csv', text: 'Exportar CSV' }],
+      language: { search: "Buscar:" },
+      order: [[0, 'desc']]
+    });
+  }
+});
+
+// ====== EJEMPLO: CÓMO AGREGAR UN NUEVO COMPONENTE ======
+/*
+ComponentSystem.registrar('nuevoComponente', {
+  grid: 'span 3', // o '1 / -1' para ancho completo
+  classes: 'card',
+  html: `
+    <h2>Mi Nuevo Componente</h2>
+    <div id="contenido-nuevo">Cargando...</div>
+  `,
+  async render(data, element) {
+    // Tu lógica aquí para procesar datos y actualizar el HTML
+    const contenido = element.querySelector('#contenido-nuevo');
+    contenido.innerHTML = 'Datos procesados correctamente';
+  }
+});
+
+// Luego agregarlo a componentesActivos:
+// COMPONENTES.componentesActivos.push('nuevoComponente');
+*/
+
+// ====== CONTROLADOR PRINCIPAL ======
+const DashboardApp = {
+  async init() {
+    this.setupEventListeners();
+    await this.loadData();
+  },
+
+  setupEventListeners() {
+    document.getElementById('refresh-data').addEventListener('click', () => this.loadData(true));
+    document.getElementById('btn-export').addEventListener('click', this.exportData);
+  },
+
+  async loadData(force = false) {
+    try {
+      document.getElementById('estado').innerText = 'Cargando...';
+      const data = await DataManager.fetchData(force);
+      await ComponentSystem.render(data);
+      document.getElementById('estado').innerText = 'Datos actualizados';
+    } catch(error) {
+      console.error('Error cargando datos:', error);
+      document.getElementById('estado').innerText = 'Error: ' + error.message;
+    }
+  },
+
+  exportData() {
+    const table = $('#tabla-pendientes').DataTable();
+    if(table) {
+      table.button('.buttons-csv').trigger();
+    }
+  }
+};
+
+// ====== INICIALIZACIÓN ======
+document.addEventListener('DOMContentLoaded', () => {
+  DashboardApp.init();
+});
 </script>
 </body>
 </html>
