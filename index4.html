@@ -256,6 +256,181 @@ table.display tbody td{
 .card {
   overflow: hidden;
 }
+  /* ====== MENÚ HAMBURGUESA ====== */
+.menu-toggle {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.menu-toggle:hover {
+  background: var(--glass);
+}
+
+.menu-toggle svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Overlay para móviles */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 998;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+/* Sidebar responsivo */
+@media (max-width: 900px) {
+  .menu-toggle {
+    display: block;
+  }
+  
+  aside.sidebar {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    bottom: 0;
+    z-index: 999;
+    transition: left 0.3s ease;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+  }
+  
+  aside.sidebar.active {
+    left: 0;
+  }
+  
+  main {
+    margin-left: 0;
+    width: 100%;
+  }
+  
+  .app {
+    position: relative;
+  }
+}
+
+/* Ajustes adicionales para móviles más pequeños */
+@media (max-width: 600px) {
+  aside.sidebar {
+    width: 280px;
+  }
+  
+  .header-hg {
+    padding: 8px 0;
+  }
+  
+  .header-hg h1 {
+    font-size: 16px;
+  }
+  
+  .header-hg p {
+    font-size: 12px;
+  }
+  }/* ====== MENÚ HAMBURGUESA ====== */
+.menu-toggle {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.menu-toggle:hover {
+  background: var(--glass);
+}
+
+.menu-toggle svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Overlay para móviles */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 998;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+/* Sidebar responsivo */
+@media (max-width: 900px) {
+  .menu-toggle {
+    display: block;
+  }
+  
+  aside.sidebar {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    bottom: 0;
+    z-index: 999;
+    transition: left 0.3s ease;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+  }
+  
+  aside.sidebar.active {
+    left: 0;
+  }
+  
+  main {
+    margin-left: 0;
+    width: 100%;
+  }
+  
+  .app {
+    position: relative;
+  }
+}
+
+/* Ajustes adicionales para móviles más pequeños */
+@media (max-width: 600px) {
+  aside.sidebar {
+    width: 280px;
+  }
+  
+  .header-hg {
+    padding: 8px 0;
+  }
+  
+  .header-hg h1 {
+    font-size: 16px;
+  }
+  
+  .header-hg p {
+    font-size: 12px;
+  }
+}
 </style>
 </head>
 <body>
