@@ -343,94 +343,10 @@ table.display tbody td{
   .header-hg p {
     font-size: 12px;
   }
-  }/* ====== MENÚ HAMBURGUESA ====== */
-.menu-toggle {
-  display: none;
-  background: transparent;
-  border: none;
-  color: var(--text);
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-}
+  }
 
-.menu-toggle:hover {
-  background: var(--glass);
-}
-
-.menu-toggle svg {
-  width: 24px;
-  height: 24px;
-}
-
-/* Overlay para móviles */
-.sidebar-overlay {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  z-index: 998;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.sidebar-overlay.active {
-  display: block;
-  opacity: 1;
-}
-
-/* Sidebar responsivo */
-@media (max-width: 900px) {
-  .menu-toggle {
-    display: block;
-  }
   
-  aside.sidebar {
-    position: fixed;
-    left: -280px;
-    top: 0;
-    bottom: 0;
-    z-index: 999;
-    transition: left 0.3s ease;
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
-  }
-  
-  aside.sidebar.active {
-    left: 0;
-  }
-  
-  main {
-    margin-left: 0;
-    width: 100%;
-  }
-  
-  .app {
-    position: relative;
-  }
-}
-
-/* Ajustes adicionales para móviles más pequeños */
-@media (max-width: 600px) {
-  aside.sidebar {
-    width: 280px;
-  }
-  
-  .header-hg {
-    padding: 8px 0;
-  }
-  
-  .header-hg h1 {
-    font-size: 16px;
-  }
-  
-  .header-hg p {
-    font-size: 12px;
-  }
-}
+    
 </style>
 </head>
 <body>
@@ -452,15 +368,28 @@ table.display tbody td{
 
   <main>
     <header class="topbar header-hg" style="display:flex; align-items:center; gap:12px;">
-  <div>
+  <!-- Botón hamburguesa -->
+  <button id="menu-toggle" class="menu-toggle">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M3 12H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <path d="M3 6H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <path d="M3 18H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </button>
+  
+  <div style="flex: 1;">
     <h1 style="margin:0">Dashboard Financiero</h1>
     <p style="margin:0; color:var(--muted); font-size:13px">Conexión en vivo a Google Sheets — estilo HG</p>
   </div>
-  <div style="margin-left:auto; display:flex; gap:8px; align-items:center;">
+  
+  <div style="display:flex; gap:8px; align-items:center;">
     <div id="estado" class="text-muted">Esperando datos...</div>
     <button id="btn-export" class="btn small">Exportar CSV</button>
   </div>
 </header>
+
+<!-- Overlay para cerrar el menú al hacer clic fuera -->
+<div id="sidebar-overlay" class="sidebar-overlay"></div>
 
     <div class="dashboard-grid" style="margin-top:12px;">
       <!-- Los componentes se renderizarán aquí dinámicamente -->
@@ -1063,10 +992,46 @@ const DashboardApp = {
     }
   }
 };
-
+// ====== MENÚ HAMBURGUESA ======
+function initMobileMenu() {
+  const menuToggle = document.getElementById('menu-toggle');
+  const sidebar = document.querySelector('aside.sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  
+  if (!menuToggle || !sidebar) return;
+  
+  function toggleSidebar() {
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
+    document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+  }
+  
+  function closeSidebar() {
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+  
+  menuToggle.addEventListener('click', toggleSidebar);
+  overlay.addEventListener('click', closeSidebar);
+  
+  // Cerrar menú al hacer clic en un enlace del menú
+  const navLinks = sidebar.querySelectorAll('.nav button');
+  navLinks.forEach(link => {
+    link.addEventListener('click', closeSidebar);
+  });
+  
+  // Cerrar menú al redimensionar la ventana si pasa al modo escritorio
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 900) {
+      closeSidebar();
+    }
+  });
+}
 // ====== INICIALIZACIÓN ======
 document.addEventListener('DOMContentLoaded', () => {
   DashboardApp.init();
+  initMobileMenu();
 });
 </script>
 </body>
