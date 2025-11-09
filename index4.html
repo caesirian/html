@@ -77,10 +77,11 @@ main{flex:1; padding:18px; display:flex; flex-direction:column; gap:12px;}
 }
 
 /* Grid placements */
-#bloque-saldo{ grid-column: span 3; min-height:110px; display:flex; flex-direction:column; justify-content:center; }
-#bloque-ingresos{ grid-column: span 5; min-height:220px; }
-#bloque-egresos{ grid-column: span 4; min-height:220px; }
-#bloque-pendientes{ grid-column: 1 / -1; } /* wide full width */
+.card[data-grid="span-3"] { grid-column: span 3; min-height:110px; display:flex; flex-direction:column; justify-content:center; }
+.card[data-grid="span-4"] { grid-column: span 4; min-height:220px; }
+.card[data-grid="span-5"] { grid-column: span 5; min-height:220px; }
+.card[data-grid="span-6"] { grid-column: span 6; min-height:220px; }
+.card[data-grid="full"] { grid-column: 1 / -1; }
 
 /* KPI grande */
 .kpi-grande{
@@ -100,8 +101,20 @@ main{flex:1; padding:18px; display:flex; flex-direction:column; gap:12px;}
   margin-bottom:8px;
 }
 
-/* Canvas full width */
-canvas{ width:100% !important; height: auto !important; }
+/* Canvas container - FIX para gráficos que no se expandan */
+.chart-container {
+  position: relative;
+  height: 180px;
+  width: 100%;
+}
+
+.chart-container-medium {
+  height: 200px;
+}
+
+.chart-container-large {
+  height: 260px;
+}
 
 /* Table styles */
 table.display{
@@ -134,6 +147,10 @@ table.display tbody td{
   cursor:pointer;
   font-weight:600;
 }
+.btn.small {
+  padding: 6px 10px;
+  font-size: 12px;
+}
 .btn.secondary{
   background:transparent;
   color:var(--muted);
@@ -151,21 +168,26 @@ table.display tbody td{
 
 /* Responsive */
 @media (max-width:1200px){
-  #bloque-saldo{ grid-column: span 4; }
-  #bloque-ingresos{ grid-column: span 8; }
-  #bloque-egresos{ grid-column: span 8; }
-  #bloque-pendientes{ grid-column: 1 / -1; }
+  .card[data-grid="span-3"] { grid-column: span 4; }
+  .card[data-grid="span-5"] { grid-column: span 8; }
+  .card[data-grid="span-4"] { grid-column: span 8; }
+  .card[data-grid="full"] { grid-column: 1 / -1; }
 }
 @media (max-width:900px){
   .dashboard-grid{ grid-template-columns: repeat(6, 1fr); padding:12px; }
-  #bloque-saldo{ grid-column: span 6; order:0; }
-  #bloque-ingresos{ grid-column: span 6; order:1; }
-  #bloque-egresos{ grid-column: span 6; order:2; }
-  #bloque-pendientes{ grid-column: span 6; order:3; }
+  .card[data-grid="span-3"],
+  .card[data-grid="span-4"],
+  .card[data-grid="span-5"],
+  .card[data-grid="span-6"] { grid-column: span 6; }
+  .card[data-grid="full"] { grid-column: span 6; }
 }
 @media (max-width:600px){
   .dashboard-grid{ grid-template-columns: repeat(1, 1fr); }
-  #bloque-saldo,#bloque-ingresos,#bloque-egresos,#bloque-pendientes{ grid-column: span 1; }
+  .card[data-grid="span-3"],
+  .card[data-grid="span-4"],
+  .card[data-grid="span-5"],
+  .card[data-grid="span-6"],
+  .card[data-grid="full"] { grid-column: span 1; }
 }
 
 /* Small helpers */
@@ -173,35 +195,67 @@ table.display tbody td{
 .kpi-small{ font-size:13px; color:var(--muted); }
 
 /* DataTables override for dark theme */
-.dataTables_wrapper .dataTables_filter input { background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04); color:var(--text); padding:6px; border-radius:6px; }
-.dataTables_wrapper .dataTables_length select { background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04); color:var(--text); padding:6px; border-radius:6px; }
-.dataTables_wrapper .dt-buttons .dt-button { background: transparent; color:var(--muted); border:1px solid rgba(255,255,255,0.03); border-radius:8px; padding:6px 8px; margin-right:6px; }
+.dataTables_wrapper .dataTables_filter input { 
+  background: rgba(255,255,255,0.02); 
+  border:1px solid rgba(255,255,255,0.04); 
+  color:var(--text); 
+  padding:6px; 
+  border-radius:6px; 
+}
+.dataTables_wrapper .dataTables_length select { 
+  background: rgba(255,255,255,0.02); 
+  border:1px solid rgba(255,255,255,0.04); 
+  color:var(--text); 
+  padding:6px; 
+  border-radius:6px; 
+}
+.dataTables_wrapper .dt-buttons .dt-button { 
+  background: transparent; 
+  color:var(--muted); 
+  border:1px solid rgba(255,255,255,0.03); 
+  border-radius:8px; 
+  padding:6px 8px; 
+  margin-right:6px; 
+}
 
 /* subtle hover */
-.card:hover{ transform: translateY(-4px); transition: all 220ms ease; box-shadow: 0 12px 28px rgba(2,6,12,0.6); }
+.card:hover{ 
+  transform: translateY(-2px); 
+  transition: all 220ms ease; 
+  box-shadow: 0 8px 24px rgba(2,6,12,0.7); 
+}
 
 /* tiny loader */
-.loader{ display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,0.06); border-top-color:var(--accent); border-radius:50%; animation:spin 1s linear infinite; }
-@keyframes spin{ to{ transform:rotate(360deg); } }
-  
-/* Corrige comportamiento de expansión de Chart.js */
-.card canvas {
-  width: 100% !important;
-  height: 260px !important; /* altura estable */
-  max-height: 260px;
-  display: block;
+.loader{ 
+  display:inline-block; 
+  width:16px; 
+  height:16px; 
+  border:2px solid rgba(255,255,255,0.06); 
+  border-top-color:var(--accent); 
+  border-radius:50%; 
+  animation:spin 1s linear infinite; 
+}
+@keyframes spin{ 
+  to{ transform:rotate(360deg); } 
 }
 
-.card {
-  overflow: hidden; /* evita que crezca fuera del contenedor */
-}
-
+/* Responsive chart containers */
 @media (max-width: 768px) {
-  .card canvas {
-    height: 200px !important;
+  .chart-container {
+    height: 160px;
+  }
+  .chart-container-medium {
+    height: 180px;
+  }
+  .chart-container-large {
+    height: 220px;
   }
 }
 
+/* Ensure cards don't overflow */
+.card {
+  overflow: hidden;
+}
 </style>
 </head>
 <body>
@@ -234,129 +288,7 @@ table.display tbody td{
     </header>
 
     <div class="dashboard-grid" style="margin-top:12px;">
-      <section id="bloque-saldo" class="card">
-        <h2>Saldo de caja</h2>
-        <div id="saldo-actual" class="kpi-grande">Cargando...</div>
-        <div id="saldo-fecha" class="text-muted" style="margin-top:6px;">—</div>
-      </section>
-
-      <section id="bloque-ingresos" class="card">
-        <h2>Ingresos: mes actual vs mes anterior</h2>
-        <canvas id="grafico-ingresos" height="180"></canvas>
-      </section>
-
-      <section id="bloque-egresos" class="card">
-        <h2>Egresos: mes actual vs mes anterior</h2>
-        <canvas id="grafico-egresos" height="180"></canvas>
-      </section>
-
-      
-<!-- === BLOQUE: CUENTAS PENDIENTES === -->
-<section id="bloque-pendientes" class="card">
-  <h2>Cuentas Pendientes</h2>
-  <!--  <canvas id="grafico-pendientes" height="200"></canvas>  -->
-  <div class="tabla-container" style="max-height:260px; overflow-y:auto; margin-top:12px;">
-    <table id="tabla-pendientes" class="tabla-datos" style="width:100%; border-collapse:collapse;">
-      <thead>
-        <tr style="background:#0d1b2a; color:#fff;">
-          <th>Fecha Emisión</th>
-          <th>Tipo</th>
-          <th>Cliente / Proveedor</th>
-          <th>ID Relacionado</th>
-          <th>Importe</th>
-          <th>Fecha Vto</th>
-          <th>Estado</th>
-        </tr>
-      </thead>
-      <tbody style="background:#ffffff10; color:#e0e0e0;"></tbody>
-    </table>
-  </div>
-</section>
-
-<script>
-// === DATOS DE CUENTAS PENDIENTES ===
-async function cargarPendientes(data){
-  try {
-    const hoja = data["Cuentas_Pendientes"];
-    if(!hoja || !Array.isArray(hoja)) return;
-
-    const pendientes = hoja.filter(r => String(r["Estado (Pendiente/Pagado)"]).toLowerCase().includes("pendiente"));
-    if(pendientes.length === 0) return;
-
-    // ordenar por fecha de emisión (ascendente)
-    pendientes.sort((a,b)=> new Date(a["Fecha Emisión"]) - new Date(b["Fecha Emisión"]));
-
-    // construir tabla
-    const tbody = document.querySelector("#tabla-pendientes tbody");
-    tbody.innerHTML = "";
-    pendientes.forEach(r => {
-      const fila = document.createElement("tr");
-      fila.innerHTML = `
-        <td>${r["Fecha Emisión"] || ""}</td>
-        <td style="color:${r["Tipo (A cobrar/A pagar)"].includes("cobrar") ? "#28a745" : "#dc3545"}">
-          ${r["Tipo (A cobrar/A pagar)"]}
-        </td>
-        <td>${r["Cliente/Proveedor"] || ""}</td>
-        <td>${r["ID Relacionado"] || ""}</td>
-        <td>$ ${Number(r["Importe"]).toLocaleString("es-AR",{minimumFractionDigits:2})}</td>
-        <td>${r["Fecha Vto"] || ""}</td>
-        <td>${r["Estado (Pendiente/Pagado)"] || ""}</td>
-      `;
-      tbody.appendChild(fila);
-    });
-
-    // preparar datos del gráfico
-    const labels = pendientes.map(r => r["Cliente/Proveedor"] || r["ID Relacionado"]);
-    const valores = pendientes.map(r => Number(r["Importe"]) || 0);
-    const colores = pendientes.map(r =>
-      r["Tipo (A cobrar/A pagar)"].includes("cobrar") ? "rgba(40,167,69,0.7)" : "rgba(220,53,69,0.7)"
-    );
-
-    // destruir gráfico previo si existe
-    if(window.graficoPendientes) window.graficoPendientes.destroy();
-
-    const ctx = document.getElementById("grafico-pendientes").getContext("2d");
-    window.graficoPendientes = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels,
-        datasets: [{
-          label: "Importe pendiente",
-          data: valores,
-          backgroundColor: colores,
-          borderColor: colores.map(c => c.replace("0.7","1")),
-          borderWidth: 1
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display:false },
-          tooltip: {
-            callbacks: {
-              label: ctx => "$ " + ctx.parsed.y.toLocaleString("es-AR",{minimumFractionDigits:2})
-            }
-          }
-        },
-        scales: {
-          x: {
-            ticks: { color: "#ccc", maxRotation: 60, minRotation: 30 },
-            grid: { color: "#ffffff20" }
-          },
-          y: {
-            ticks: { color: "#ccc" },
-            grid: { color: "#ffffff10" }
-          }
-        }
-      }
-    });
-  } catch(err){
-    console.error("Error en cargarPendientes:", err);
-  }
-}
-</script>
-      
+      <!-- Los componentes se renderizarán aquí dinámicamente -->
     </div>
 
     <footer class="footer-hg">
@@ -376,488 +308,496 @@ async function cargarPendientes(data){
 <script src="https://cdn.jsdelivr.net/npm/datatables.net-buttons@2.4.1/js/buttons.html5.min.js"></script>
 
 <script>
+// ====== CONFIGURACIÓN GLOBAL ======
+const CONFIG = {
+  GAS_ENDPOINT: "https://script.google.com/macros/s/AKfycbyTLrGiqes1VOp8E51Kq91P7YihPKNtN1f0f6u2JitXOteGyGrNXqiSjdXYJ8HAtfs/exec",
+  CACHE_KEY: "hg_dashboard_cache_v4",
+  CACHE_TTL: 1000 * 60 * 60 // 1 hora
+};
 
+// ====== REGISTRO DE COMPONENTES ======
+const COMPONENTES = {
+  componentesActivos: [
+    'saldoCaja',
+    'ingresosVsEgresos',
+    'egresosVsAnterior', 
+    'cuentasPendientes'
+  ],
+  
+  registros: {}
+};
 
-  async function mostrarPendientes(datos) {
-  const pendientes = (datos["Cuentas_Pendientes"] || [])
-    .filter(f => f["Estado (Pendiente/Pagado)"] === "Pendiente")
-    .sort((a, b) => new Date(a["Fecha Emisión"]) - new Date(b["Fecha Emisión"]));
-
-  const cuerpo = document.querySelector("#tabla-pendientes tbody");
-  cuerpo.innerHTML = "";
-
-  if (!pendientes.length) {
-    cuerpo.innerHTML = `<tr><td colspan="5" class="text-muted">Sin pendientes</td></tr>`;
-    return;
-  }
-
-  pendientes.forEach(p => {
-    const fila = document.createElement("tr");
-    fila.innerHTML = `
-      <td>${p["Fecha Emisión"]}</td>
-      <td>${p["Tipo (A cobrar/A pagar)"]}</td>
-      <td>${p["Cliente/Proveedor"]}</td>
-      <td style="text-align:right;">${Number(p["Importe"]).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}</td>
-      <td>${p["Fecha Vto"] || ""}</td>
-    `;
-    cuerpo.appendChild(fila);
-  });
-
-  // --- Gráfico de barras ---
-  const ctx = document.getElementById("grafico-pendientes").getContext("2d");
-  if (window.graficoPendientes) window.graficoPendientes.destroy();
-
-  window.graficoPendientes = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: pendientes.map(p => p["Cliente/Proveedor"]),
-      datasets: [{
-        label: "Importe pendiente",
-        data: pendientes.map(p => Number(p["Importe"]) || 0),
-        backgroundColor: pendientes.map(p => 
-          p["Tipo (A cobrar/A pagar)"].toLowerCase().includes("cobrar") ? "rgba(40, 180, 99, 0.7)" : "rgba(231, 76, 60, 0.7)"
-        ),
-        borderColor: "rgba(255,255,255,0.2)",
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { ticks: { color: "#ccc" }, grid: { color: "rgba(255,255,255,0.05)" } },
-        y: { ticks: { color: "#ccc" }, grid: { color: "rgba(255,255,255,0.05)" }, beginAtZero: true }
-      },
-      plugins: {
-        legend: { labels: { color: "#ddd" } }
-      }
+// ====== UTILIDADES ======
+const UTILS = {
+  parseNumber(val) {
+    if(val === null || val === undefined || val === "") return 0;
+    if(typeof val === "number") return val;
+    const s = String(val).replace(/[^0-9\-,\.]/g,"").trim();
+    if(!s) return 0;
+    const parts = s.split(',');
+    if(parts.length > 1 && parts[0].includes('.')) {
+      return parseFloat(s.replace(/\./g,'').replace(',','.')) || 0;
     }
-  });
-  }
-// ====== CONFIG ======
-const GAS_ENDPOINT = "https://script.google.com/macros/s/AKfycbyTLrGiqes1VOp8E51Kq91P7YihPKNtN1f0f6u2JitXOteGyGrNXqiSjdXYJ8HAtfs/exec";
-const CACHE_KEY = "hg_dashboard_cache_v3";
-const CACHE_TTL = 1000 * 60 * 60; // 1h
-
-// ====== UTIL ======
-function saveCache(obj){ localStorage.setItem(CACHE_KEY, JSON.stringify({ts:Date.now(), data:obj})); document.getElementById('cache-status').innerText='sí'; }
-function loadCache(){ try{ const raw=localStorage.getItem(CACHE_KEY); if(!raw) return null; const parsed=JSON.parse(raw); if(Date.now()-parsed.ts > CACHE_TTL) return null; return parsed.data;}catch(e){return null;} }
-function parseNumber(val){
-  if(val === null || val === undefined || val === "") return 0;
-  if(typeof val === "number") return val;
-  const s = String(val).replace(/[^0-9\-,\.]/g,"").trim();
-  if(!s) return 0;
-  // handle formats like "1.234,56" or "1234.56"
-  const parts = s.split(',');
-  if(parts.length > 1 && parts[0].includes('.')) {
-    // "1.234,56" -> remove dots, replace comma with dot
-    return parseFloat(s.replace(/\./g,'').replace(',','.')) || 0;
-  } else {
     return parseFloat(s.replace(',', '.')) || 0;
-  }
-}
-function parseDate(v){
-  if(!v) return new Date(NaN);
-  if(v instanceof Date) return v;
-  const s = String(v).trim();
-  if(/^\d{4}-\d{2}-\d{2}/.test(s)) return new Date(s);
-  if(/^\d{2}\/\d{2}\/\d{4}/.test(s)){ const [d,m,y]=s.split('/'); return new Date(Number(y),Number(m)-1,Number(d)); }
-  const n = Number(s);
-  if(!isNaN(n) && n > 1000){ // serial
-    const epoch = new Date(Date.UTC(1899,11,30));
-    epoch.setUTCDate(epoch.getUTCDate() + Math.floor(n));
-    return epoch;
-  }
-  const d = new Date(s);
-  return d;
-}
-function formatCurrency(n){
-  const sign = n < 0 ? '-' : '';
-  const abs = Math.abs(Number(n) || 0);
-  return sign + '$' + abs.toLocaleString('es-AR', {minimumFractionDigits:0, maximumFractionDigits:0});
-}
+  },
 
-// ====== FETCH ======
-async function fetchAllFromGAS(force=false){
-  if(!force){
-    const cached = loadCache();
-    if(cached){ document.getElementById('conn-status').innerText='cache local'; return cached; }
-  }
-  document.getElementById('conn-status').innerText='cargando...';
-  const res = await fetch(GAS_ENDPOINT);
-  if(!res.ok) throw new Error('Error al consultar endpoint: ' + res.status);
-  const data = await res.json();
-  saveCache(data);
-  document.getElementById('conn-status').innerText='conectado';
-  document.getElementById('last-sync').innerText = new Date().toLocaleString();
-  return data;
-}
+  parseDate(v) {
+    if(!v) return new Date(NaN);
+    if(v instanceof Date) return v;
+    const s = String(v).trim();
+    if(/^\d{4}-\d{2}-\d{2}/.test(s)) return new Date(s);
+    if(/^\d{2}\/\d{2}\/\d{4}/.test(s)) {
+      const [d,m,y] = s.split('/');
+      return new Date(Number(y), Number(m)-1, Number(d));
+    }
+    const n = Number(s);
+    if(!isNaN(n) && n > 1000) {
+      const epoch = new Date(Date.UTC(1899,11,30));
+      epoch.setUTCDate(epoch.getUTCDate() + Math.floor(n));
+      return epoch;
+    }
+    return new Date(s);
+  },
 
-// ====== RENDER SALDO (detect 'saldo' column) ======
-function renderSaldoCaja(data){
-  const arr = data.Caja_Movimientos || data.caja_movimientos || data['Caja_Movimientos'] || [];
-  if(!arr || arr.length === 0){
-    document.getElementById('saldo-actual').innerText = 'Sin datos';
-    document.getElementById('saldo-fecha').innerText = '';
-    return;
-  }
+  formatCurrency(n) {
+    const sign = n < 0 ? '-' : '';
+    const abs = Math.abs(Number(n) || 0);
+    return sign + '$' + abs.toLocaleString('es-AR', {minimumFractionDigits:0, maximumFractionDigits:0});
+  },
 
-  // detect saldo column (case-insensitive)
-  const sample = arr.find(r => r && typeof r === 'object');
-  const keys = sample ? Object.keys(sample) : [];
-  const saldoKey = keys.find(k => /saldo/i.test(k));
-  if(saldoKey){
-    // find last non-empty saldo reading from bottom
-    let lastVal = null;
-    let lastRow = null;
-    for(let i=arr.length-1;i>=0;i--){
-      const v = arr[i][saldoKey];
-      if(v !== null && v !== undefined && String(v).trim() !== ''){
-        lastVal = v;
-        lastRow = arr[i];
-        break;
+  saveCache(obj) {
+    localStorage.setItem(CONFIG.CACHE_KEY, JSON.stringify({ts: Date.now(), data: obj}));
+    document.getElementById('cache-status').innerText = 'sí';
+  },
+
+  loadCache() {
+    try {
+      const raw = localStorage.getItem(CONFIG.CACHE_KEY);
+      if(!raw) return null;
+      const parsed = JSON.parse(raw);
+      if(Date.now() - parsed.ts > CONFIG.CACHE_TTL) return null;
+      return parsed.data;
+    } catch(e) {
+      return null;
+    }
+  }
+};
+
+// ====== GESTOR DE DATOS ======
+const DataManager = {
+  async fetchData(force = false) {
+    if(!force) {
+      const cached = UTILS.loadCache();
+      if(cached) {
+        document.getElementById('conn-status').innerText = 'cache local';
+        return cached;
       }
     }
-    const numeric = parseNumber(lastVal);
-    document.getElementById('saldo-actual').innerText = formatCurrency(numeric);
-    // date if available
-    const dateKey = keys.find(k => /fecha|date/i.test(k));
-    if(lastRow && dateKey && lastRow[dateKey]){
-      const pd = parseDate(lastRow[dateKey]);
-      if(!isNaN(pd.getTime())) document.getElementById('saldo-fecha').innerText = 'Saldo registrado al ' + (pd.getDate()+"/"+(pd.getMonth()+1)+"/"+pd.getFullYear());
-    } else {
-      document.getElementById('saldo-fecha').innerText = '';
-    }
-    return;
-  }
 
-  // fallback: compute running balance from ingreso/egreso or monto and tipo
-  let saldo=0, lastDate=null;
-  const ingestionKeys = keys.filter(k => /ingres/i.test(k) || /monto/i.test(k) || /importe/i.test(k));
-  const egKeys = keys.filter(k => /egres/i.test(k) || /monto/i.test(k) || /importe/i.test(k));
-  const tipoKey = keys.find(k => /tipo/i.test(k) || /ingre/i.test(k) || /egre/i.test(k));
-  for(const row of arr){
-    lastDate = row['Fecha'] || row['fecha'] || row['Date'] || lastDate;
-    // if there's explicit 'Tipo' column, use it
-    if(tipoKey && row[tipoKey]){
-      const tipo = String(row[tipoKey]).toLowerCase();
-      // get any numeric from ingestionKeys
-      const monto = parseNumber((ingestionKeys.map(k=>row[k]).find(v=>v!==undefined) || 0));
-      if(tipo.includes('ingre')) saldo += monto;
-      else if(tipo.includes('egre')) saldo -= monto;
-      else saldo += monto; // fallback
-    } else {
-      // try interpret amounts: positive -> ingreso, negative -> egreso
-      const val = parseNumber((ingestionKeys.map(k=>row[k]).find(v=>v!==undefined) || 0));
-      saldo += val;
+    document.getElementById('conn-status').innerText = 'cargando...';
+    try {
+      const res = await fetch(CONFIG.GAS_ENDPOINT);
+      if(!res.ok) throw new Error('Error al consultar endpoint: ' + res.status);
+      const data = await res.json();
+      UTILS.saveCache(data);
+      document.getElementById('conn-status').innerText = 'conectado';
+      document.getElementById('last-sync').innerText = new Date().toLocaleString();
+      return data;
+    } catch(error) {
+      document.getElementById('conn-status').innerText = 'error';
+      throw error;
     }
   }
-  document.getElementById('saldo-actual').innerText = formatCurrency(saldo);
-  if(lastDate){
-    const pd = parseDate(lastDate);
-    if(!isNaN(pd.getTime())) document.getElementById('saldo-fecha').innerText = 'Saldo calculado al ' + (pd.getDate()+"/"+(pd.getMonth()+1)+"/"+pd.getFullYear());
-  }
-}
+};
 
-// ====== RENDER Ingresos/Egresos (mes actual vs mes anterior) ======
-function renderIngresosEgresos(data){
-  const fin = data.Finanzas_RegistroDiario || data['Finanzas_RegistroDiario'] || data.finanzas_registrodiario || data['finanzas_registrodiario'] || data.Caja_Movimientos || [];
-  // detect keys
-  const sample = fin.find(r => r && typeof r === 'object') || {};
-  const keys = Object.keys(sample);
-  const montoKey = keys.find(k => /monto|importe|total/i.test(k)) || null;
-  const tipoKey = keys.find(k => /tipo|ingres|egres/i.test(k)) || null;
-  const fechaKey = keys.find(k => /fecha|date/i.test(k)) || null;
-  // accumulate sums by YYYY-MM
-  const sums = {};
-  for(const row of fin){
-    const rawFecha = row[fechaKey] ?? row['Fecha'] ?? row['fecha'] ?? row['Date'] ?? null;
-    const d = parseDate(rawFecha);
-    const key = (!isNaN(d.getTime())) ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` : 'sin-fecha';
-    if(!sums[key]) sums[key] = {ing:0, eg:0};
-    const tipo = String(row[tipoKey] ?? '').toLowerCase();
-    const monto = parseNumber(row[montoKey] ?? row['Monto'] ?? row['Importe'] ?? row['Total'] ?? 0);
-    if(tipoKey && tipo.includes('ingre')) sums[key].ing += monto;
-    else if(tipoKey && tipo.includes('egre')) sums[key].eg += Math.abs(monto);
-    else {
-      // heuristic: positive -> ingreso, negative -> egreso
-      if(monto >= 0) sums[key].ing += monto;
-      else sums[key].eg += Math.abs(monto);
+// ====== SISTEMA DE COMPONENTES ======
+const ComponentSystem = {
+  registrar(id, config) {
+    COMPONENTES.registros[id] = config;
+  },
+
+  async render(data) {
+    const grid = document.querySelector('.dashboard-grid');
+    grid.innerHTML = '';
+
+    for(const componentId of COMPONENTES.componentesActivos) {
+      const component = COMPONENTES.registros[componentId];
+      if(component) {
+        try {
+          await this.renderComponent(componentId, component, data, grid);
+        } catch(error) {
+          console.error(`Error renderizando componente ${componentId}:`, error);
+        }
+      }
+    }
+  },
+
+  async renderComponent(id, component, data, grid) {
+    const element = document.createElement(component.element || 'section');
+    element.id = `componente-${id}`;
+    element.className = component.classes || 'card';
+    element.setAttribute('data-grid', component.grid);
+    
+    if(component.html) {
+      element.innerHTML = component.html;
+    }
+
+    grid.appendChild(element);
+
+    if(component.render) {
+      await component.render(data, element);
+    }
+  },
+
+  agregarComponente(id) {
+    if(!COMPONENTES.componentesActivos.includes(id)) {
+      COMPONENTES.componentesActivos.push(id);
+    }
+  },
+
+  removerComponente(id) {
+    const index = COMPONENTES.componentesActivos.indexOf(id);
+    if(index > -1) {
+      COMPONENTES.componentesActivos.splice(index, 1);
     }
   }
+};
 
-  const today = new Date();
-  const curKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
-  const prev = new Date(today.getFullYear(), today.getMonth()-1, 1);
-  const prevKey = `${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,'0')}`;
+// ====== DEFINICIÓN DE COMPONENTES ======
 
-  const ingActual = sums[curKey]?.ing || 0;
-  const ingPrev = sums[prevKey]?.ing || 0;
-  const egActual = sums[curKey]?.eg || 0;
-  const egPrev = sums[prevKey]?.eg || 0;
+// Componente: Saldo de Caja
+ComponentSystem.registrar('saldoCaja', {
+  grid: 'span-3',
+  html: `
+    <h2>Saldo de caja</h2>
+    <div id="saldo-actual" class="kpi-grande">Cargando...</div>
+    <div id="saldo-fecha" class="text-muted" style="margin-top:6px;">—</div>
+  `,
+  async render(data, element) {
+    const arr = data.Caja_Movimientos || data.caja_movimientos || data['Caja_Movimientos'] || [];
+    
+    if(!arr || arr.length === 0) {
+      element.querySelector('#saldo-actual').innerText = 'Sin datos';
+      return;
+    }
 
-  // Ingresos chart
-  const ctxI = document.getElementById('grafico-ingresos').getContext('2d');
-  if(window.chartIngresos) window.chartIngresos.destroy();
-  window.chartIngresos = new Chart(ctxI, {
-    type:'bar',
-    data:{
-      labels:['Mes anterior','Mes actual'],
-      datasets:[{
-        label:'Ingresos',
-        data:[ingPrev, ingActual],
-        backgroundColor:['rgba(58,123,213,0.35)','rgba(62,166,255,0.9)'],
-        borderColor:['rgba(58,123,213,0.8)','rgba(62,166,255,1)'],
-        borderWidth:1
-      }]
-    },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{ticks:{color:'#cbdff3'}, beginAtZero:true}, x:{ticks:{color:'#cbdff3'}}} }
-  });
-
-  // Egresos chart
-  const ctxE = document.getElementById('grafico-egresos').getContext('2d');
-  if(window.chartEgresos) window.chartEgresos.destroy();
-  window.chartEgresos = new Chart(ctxE, {
-    type:'bar',
-    data:{
-      labels:['Mes anterior','Mes actual'],
-      datasets:[{
-        label:'Egresos',
-        data:[egPrev, egActual],
-        backgroundColor:['rgba(255,180,180,0.6)','rgba(193,18,31,0.95)'],
-        borderColor:['rgba(255,120,120,0.9)','rgba(193,18,31,1)'],
-        borderWidth:1
-      }]
-    },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{ticks:{color:'#cbdff3'}, beginAtZero:true}, x:{ticks:{color:'#cbdff3'}}} }
-  });
-}
-
-// ====== RENDER tabla últimos movimientos (general: caja/finanzas) ======
-function renderRecentMovements(data){
-  // prefer Caja_Movimientos for movements if exists, else Finanzas_RegistroDiario
-  const arr = data.Caja_Movimientos || data.caja_movimientos || data['Caja_Movimientos'] || data.Finanzas_RegistroDiario || data['Finanzas_RegistroDiario'] || [];
-  if(!arr || arr.length === 0){
-    // clear table
-    const tbody = document.querySelector('#tabla-pendientes tbody');
-    tbody.innerHTML = '<tr><td colspan="7">No hay movimientos</td></tr>';
-    return;
+    const sample = arr.find(r => r && typeof r === 'object');
+    const keys = sample ? Object.keys(sample) : [];
+    const saldoKey = keys.find(k => /saldo/i.test(k));
+    
+    if(saldoKey) {
+      let lastVal = null;
+      let lastRow = null;
+      for(let i = arr.length-1; i >= 0; i--) {
+        const v = arr[i][saldoKey];
+        if(v !== null && v !== undefined && String(v).trim() !== '') {
+          lastVal = v;
+          lastRow = arr[i];
+          break;
+        }
+      }
+      const numeric = UTILS.parseNumber(lastVal);
+      element.querySelector('#saldo-actual').innerText = UTILS.formatCurrency(numeric);
+      
+      const dateKey = keys.find(k => /fecha|date/i.test(k));
+      if(lastRow && dateKey && lastRow[dateKey]) {
+        const pd = UTILS.parseDate(lastRow[dateKey]);
+        if(!isNaN(pd.getTime())) {
+          element.querySelector('#saldo-fecha').innerText = 
+            'Saldo registrado al ' + (pd.getDate()+"/"+(pd.getMonth()+1)+"/"+pd.getFullYear());
+        }
+      }
+    }
   }
-
-  // determine typical keys
-  const sample = arr.find(r => r && typeof r === 'object') || {};
-  const keys = Object.keys(sample);
-  const fechaKey = keys.find(k => /fecha|date/i.test(k)) || null;
-  const tipoKey = keys.find(k => /tipo/i.test(k)) || null;
-  const codigoKey = keys.find(k => /codigo|id/i.test(k)) || null;
-  const nombreKey = keys.find(k => /cliente|proveedor|nombre|razon|empresa/i.test(k)) || null;
-  const montoKey = keys.find(k => /monto|importe|total/i.test(k)) || null;
-  const saldoKey = keys.find(k => /saldo/i.test(k)) || null;
-  const estadoKey = keys.find(k => /estado|situación|situacion/i.test(k)) || null;
-
-  // sort by date desc (where possible)
-  const withDates = arr.map(r => ({_r:r, _d: parseDate(r[fechaKey] ?? r['Fecha'] ?? r['fecha'] ?? r['Date'] ?? null)}));
-  withDates.sort((a,b)=> (isNaN(b._d)?0:b._d.getTime()) - (isNaN(a._d)?0:a._d.getTime()));
-  const recent = withDates.slice(0, 50).map(x => x._r);
-
-  const tbody = document.querySelector('#tabla-pendientes tbody');
-  tbody.innerHTML = '';
-  for(const r of recent){
-    const fecha = r[fechaKey] ?? r['Fecha'] ?? r['fecha'] ?? r['Date'] ?? '';
-    const tipo = r[tipoKey] ?? r['Tipo'] ?? '';
-    const codigo = r[codigoKey] ?? r['Código'] ?? r['Codigo'] ?? '';
-    const nombre = r[nombreKey] ?? r['Cliente'] ?? r['Proveedor'] ?? '';
-    const monto = parseNumber(r[montoKey] ?? r['Monto'] ?? r['Importe'] ?? r['Total'] ?? 0);
-    const saldo = parseNumber(r[saldoKey] ?? r['Saldo'] ?? '');
-    const estado = r[estadoKey] ?? r['Estado'] ?? '';
-
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${fecha ?? ''}</td>
-                    <td>${tipo ?? ''}</td>
-                    <td>${codigo ?? ''}</td>
-                    <td>${nombre ?? ''}</td>
-                    <td style="text-align:right">${formatCurrency(monto)}</td>
-                    <td style="text-align:right">${saldo ? formatCurrency(saldo) : ''}</td>
-                    <td>${estado ?? ''}</td>`;
-    tbody.appendChild(tr);
-  }
-
-  // init DataTable (or refresh)
-  const table = $('#tabla-pendientes');
-  if($.fn.dataTable.isDataTable(table)){
-    table.DataTable().destroy();
-  }
-  table.DataTable({
-    pageLength: 10,
-    dom: 'Bfrtip',
-    buttons:[ { extend: 'csv', text: 'Exportar CSV' }, { extend: 'excel', text: 'Exportar Excel' } ],
-    language: { search: "Buscar:" },
-    columnDefs: [{ targets:[4,5], className: 'dt-body-right' }],
-    order: [[0,'desc']]
-  });
-}
-
-// ====== ORQUESTADOR ======
-/*
-
-async function refreshAll(force=false){
-  try{
-    document.getElementById('estado').innerText = 'Cargando...';
-    const data = await fetchAllFromGAS(force);
-    window.DATA = data;
-    renderSaldoCaja(data);
-    renderIngresosEgresos(data);
-    renderRecentMovements(data);
-    document.getElementById('estado').innerText = 'Datos actualizados';
-  }catch(err){
-    console.error('Error refreshAll:', err);
-    document.getElementById('estado').innerText = 'Error: ' + (err.message || err);
-  }
-}
-
-*/
-
-// UI wiring
-
-document.getElementById('refresh-data').addEventListener('click', ()=> cargarDashboardUnaVez());
-document.getElementById('btn-export').addEventListener('click', ()=>{
-  // export current pendientes table to CSV by reading DOM
-  const table = $('#tabla-pendientes').DataTable();
-  table.button('.buttons-csv').trigger();
 });
 
-// startup
-cargarDashboardUnaVez();
-
-
-</script>
-
-  
-
-<script>
-const GAS_URL = "https://script.google.com/macros/s/AKfycbyTLrGiqes1VOp8E51Kq91P7YihPKNtN1f0f6u2JitXOteGyGrNXqiSjdXYJ8HAtfs/exec";
-
-// Variable global para evitar recargas múltiples
-let dashboardInicializado = false;
-
-// === FUNCIÓN PRINCIPAL ===
-async function cargarDashboardUnaVez() {
-  if (dashboardInicializado) return; // Previene redibujos infinitos
-  dashboardInicializado = true;
-
-  try {
-    const res = await fetch(GAS_URL, { cache: "no-store" });
-    const data = await res.json();
-
-    const caja = data["Caja_Movimientos"] || [];
-    if (!caja.length) return console.warn("Sin datos en Caja_Movimientos");
-
-    actualizarSaldo(caja);
-    renderizarGraficos(caja);
-  } catch (err) {
-    console.error("Error al cargar datos:", err);
-  }
-}
-
-// === SALDO ACTUAL ===
-function actualizarSaldo(datos) {
-  const colSaldo = Object.keys(datos[0]).find(k => k.toLowerCase().includes("saldo"));
-  const saldo = parseFloat(datos[datos.length - 1][colSaldo]) || 0;
-  document.getElementById("saldo-actual").innerText = 
-    "$ " + saldo.toLocaleString("es-AR", { minimumFractionDigits: 2 });
-}
-
-// === PROCESAR Y GRAFICAR ===
-function renderizarGraficos(datos) {
-  const colFecha = Object.keys(datos[0]).find(k => k.toLowerCase().includes("fecha"));
-  const colTipo = Object.keys(datos[0]).find(k => k.toLowerCase().includes("tipo"));
-  const colMonto = Object.keys(datos[0]).find(k => k.toLowerCase().includes("monto"));
-
-  const totales = {};
-  datos.forEach(r => {
-    const fecha = new Date(r[colFecha]);
-    if (isNaN(fecha)) return;
-    const mes = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, "0")}`;
-    const tipo = (r[colTipo] || "").toLowerCase();
-    const monto = parseFloat(r[colMonto]) || 0;
-    if (!totales[mes]) totales[mes] = { ingreso: 0, egreso: 0 };
-    if (tipo.includes("ingreso")) totales[mes].ingreso += monto;
-    else if (tipo.includes("egreso")) totales[mes].egreso += monto;
-  });
-
-  const meses = Object.keys(totales).sort();
-  const ingresos = meses.map(m => totales[m].ingreso);
-  const egresos = meses.map(m => totales[m].egreso);
-  const saldos = meses.map(m => totales[m].ingreso - totales[m].egreso);
-
-  // Destruir si existen, evitando fugas de memoria
-  ["Ingresos", "Egresos", "Saldo"].forEach(id => {
-    const chartKey = `chart${id}`;
-    if (window[chartKey]) {
-      window[chartKey].destroy();
-      window[chartKey] = null;
+// Componente: Ingresos vs Egresos
+ComponentSystem.registrar('ingresosVsEgresos', {
+  grid: 'span-5',
+  html: `
+    <h2>Ingresos: mes actual vs mes anterior</h2>
+    <div class="chart-container">
+      <canvas id="grafico-ingresos"></canvas>
+    </div>
+  `,
+  async render(data, element) {
+    const fin = data.Finanzas_RegistroDiario || data['Finanzas_RegistroDiario'] || data.Caja_Movimientos || [];
+    const sample = fin.find(r => r && typeof r === 'object') || {};
+    const keys = Object.keys(sample);
+    const montoKey = keys.find(k => /monto|importe|total/i.test(k)) || null;
+    const tipoKey = keys.find(k => /tipo|ingres|egres/i.test(k)) || null;
+    const fechaKey = keys.find(k => /fecha|date/i.test(k)) || null;
+    
+    const sums = {};
+    for(const row of fin) {
+      const rawFecha = row[fechaKey] ?? row['Fecha'] ?? row['fecha'] ?? row['Date'] ?? null;
+      const d = UTILS.parseDate(rawFecha);
+      const key = (!isNaN(d.getTime())) ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` : 'sin-fecha';
+      if(!sums[key]) sums[key] = {ing:0, eg:0};
+      const tipo = String(row[tipoKey] ?? '').toLowerCase();
+      const monto = UTILS.parseNumber(row[montoKey] ?? row['Monto'] ?? row['Importe'] ?? row['Total'] ?? 0);
+      
+      if(tipoKey && tipo.includes('ingre')) sums[key].ing += monto;
+      else if(tipoKey && tipo.includes('egre')) sums[key].eg += Math.abs(monto);
+      else {
+        if(monto >= 0) sums[key].ing += monto;
+        else sums[key].eg += Math.abs(monto);
+      }
     }
-  });
 
-  // === GRAFICO INGRESOS ===
-  const ctx1 = document.getElementById("graficoIngresos").getContext("2d");
-  window.chartIngresos = new Chart(ctx1, {
-    type: "bar",
-    data: {
-      labels: meses,
-      datasets: [{
-        label: "Ingresos",
-        data: ingresos,
-        backgroundColor: "#00c853cc",
-        borderColor: "#00c853",
-        borderWidth: 1
-      }]
-    },
-    options: { responsive: true, maintainAspectRatio: false, animation: false }
-  });
+    const today = new Date();
+    const curKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+    const prev = new Date(today.getFullYear(), today.getMonth()-1, 1);
+    const prevKey = `${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,'0')}`;
 
-  // === GRAFICO EGRESOS ===
-  const ctx2 = document.getElementById("graficoEgresos").getContext("2d");
-  window.chartEgresos = new Chart(ctx2, {
-    type: "bar",
-    data: {
-      labels: meses,
-      datasets: [{
-        label: "Egresos",
-        data: egresos,
-        backgroundColor: "#d50000cc",
-        borderColor: "#d50000",
-        borderWidth: 1
-      }]
-    },
-    options: { responsive: true, maintainAspectRatio: false, animation: false }
-  });
+    const ingActual = sums[curKey]?.ing || 0;
+    const ingPrev = sums[prevKey]?.ing || 0;
 
-  // === GRAFICO SALDO ===
-  const ctx3 = document.getElementById("graficoSaldo").getContext("2d");
-  window.chartSaldo = new Chart(ctx3, {
-    type: "line",
-    data: {
-      labels: meses,
-      datasets: [{
-        label: "Saldo Mensual (Ingresos - Egresos)",
-        data: saldos,
-        fill: true,
-        backgroundColor: "#2962ff33",
-        borderColor: "#2962ff",
-        tension: 0.3
-      }]
-    },
-    options: { responsive: true, maintainAspectRatio: false, animation: false }
-  });
-}
-cargarDashboardUnaVez();
-// === INICIO ===
-window.addEventListener("load", () => {
-  if (!window.hgDashboardLoaded) {
-    window.hgDashboardLoaded = true;
-    cargarDashboardUnaVez();
+    const canvas = element.querySelector('#grafico-ingresos');
+    const ctx = canvas.getContext('2d');
+    
+    // Destruir gráfico anterior si existe
+    if(window.chartIngresos) {
+      window.chartIngresos.destroy();
+    }
+    
+    window.chartIngresos = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Mes anterior', 'Mes actual'],
+        datasets: [{
+          label: 'Ingresos',
+          data: [ingPrev, ingActual],
+          backgroundColor: ['rgba(58,123,213,0.35)', 'rgba(62,166,255,0.9)'],
+          borderColor: ['rgba(58,123,213,0.8)', 'rgba(62,166,255,1)'],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { 
+          legend: { display: false } 
+        },
+        scales: {
+          y: { 
+            ticks: { color: '#cbdff3' }, 
+            beginAtZero: true 
+          },
+          x: { 
+            ticks: { color: '#cbdff3' } 
+          }
+        }
+      }
+    });
   }
+});
+
+// Componente: Egresos vs Anterior
+ComponentSystem.registrar('egresosVsAnterior', {
+  grid: 'span-4',
+  html: `
+    <h2>Egresos: mes actual vs mes anterior</h2>
+    <div class="chart-container">
+      <canvas id="grafico-egresos"></canvas>
+    </div>
+  `,
+  async render(data, element) {
+    const fin = data.Finanzas_RegistroDiario || data['Finanzas_RegistroDiario'] || data.Caja_Movimientos || [];
+    const sample = fin.find(r => r && typeof r === 'object') || {};
+    const keys = Object.keys(sample);
+    const montoKey = keys.find(k => /monto|importe|total/i.test(k)) || null;
+    const tipoKey = keys.find(k => /tipo|ingres|egres/i.test(k)) || null;
+    const fechaKey = keys.find(k => /fecha|date/i.test(k)) || null;
+    
+    const sums = {};
+    for(const row of fin) {
+      const rawFecha = row[fechaKey] ?? row['Fecha'] ?? row['fecha'] ?? row['Date'] ?? null;
+      const d = UTILS.parseDate(rawFecha);
+      const key = (!isNaN(d.getTime())) ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` : 'sin-fecha';
+      if(!sums[key]) sums[key] = {ing:0, eg:0};
+      const tipo = String(row[tipoKey] ?? '').toLowerCase();
+      const monto = UTILS.parseNumber(row[montoKey] ?? row['Monto'] ?? row['Importe'] ?? row['Total'] ?? 0);
+      
+      if(tipoKey && tipo.includes('egre')) sums[key].eg += Math.abs(monto);
+      else if(!tipoKey && monto < 0) sums[key].eg += Math.abs(monto);
+    }
+
+    const today = new Date();
+    const curKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+    const prev = new Date(today.getFullYear(), today.getMonth()-1, 1);
+    const prevKey = `${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,'0')}`;
+
+    const egActual = sums[curKey]?.eg || 0;
+    const egPrev = sums[prevKey]?.eg || 0;
+
+    const canvas = element.querySelector('#grafico-egresos');
+    const ctx = canvas.getContext('2d');
+    
+    if(window.chartEgresos) {
+      window.chartEgresos.destroy();
+    }
+    
+    window.chartEgresos = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Mes anterior', 'Mes actual'],
+        datasets: [{
+          label: 'Egresos',
+          data: [egPrev, egActual],
+          backgroundColor: ['rgba(255,180,180,0.6)', 'rgba(193,18,31,0.95)'],
+          borderColor: ['rgba(255,120,120,0.9)', 'rgba(193,18,31,1)'],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { 
+          legend: { display: false } 
+        },
+        scales: {
+          y: { 
+            ticks: { color: '#cbdff3' }, 
+            beginAtZero: true 
+          },
+          x: { 
+            ticks: { color: '#cbdff3' } 
+          }
+        }
+      }
+    });
+  }
+});
+
+// Componente: Cuentas Pendientes
+ComponentSystem.registrar('cuentasPendientes', {
+  grid: 'full',
+  html: `
+    <h2>Cuentas Pendientes</h2>
+    <div class="tabla-container" style="max-height:260px; overflow-y:auto; margin-top:12px;">
+      <table id="tabla-pendientes" class="tabla-datos" style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr style="background:#0d1b2a; color:#fff;">
+            <th>Fecha Emisión</th>
+            <th>Tipo</th>
+            <th>Cliente / Proveedor</th>
+            <th>ID Relacionado</th>
+            <th>Importe</th>
+            <th>Fecha Vto</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody style="background:#ffffff10; color:#e0e0e0;"></tbody>
+      </table>
+    </div>
+  `,
+  async render(data, element) {
+    const hoja = data["Cuentas_Pendientes"];
+    if(!hoja || !Array.isArray(hoja)) return;
+
+    const pendientes = hoja.filter(r => 
+      String(r["Estado (Pendiente/Pagado)"]).toLowerCase().includes("pendiente")
+    );
+    
+    if(pendientes.length === 0) {
+      element.querySelector('tbody').innerHTML = '<tr><td colspan="7">No hay cuentas pendientes</td></tr>';
+      return;
+    }
+
+    pendientes.sort((a,b) => new Date(a["Fecha Emisión"]) - new Date(b["Fecha Emisión"]));
+
+    const tbody = element.querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    pendientes.forEach(r => {
+      const fila = document.createElement('tr');
+      fila.innerHTML = `
+        <td>${r["Fecha Emisión"] || ""}</td>
+        <td style="color:${r["Tipo (A cobrar/A pagar)"].includes("cobrar") ? "#28a745" : "#dc3545"}">
+          ${r["Tipo (A cobrar/A pagar)"]}
+        </td>
+        <td>${r["Cliente/Proveedor"] || ""}</td>
+        <td>${r["ID Relacionado"] || ""}</td>
+        <td>$ ${UTILS.parseNumber(r["Importe"]).toLocaleString("es-AR",{minimumFractionDigits:2})}</td>
+        <td>${r["Fecha Vto"] || ""}</td>
+        <td>${r["Estado (Pendiente/Pagado)"] || ""}</td>
+      `;
+      tbody.appendChild(fila);
+    });
+
+    // Inicializar DataTable
+    const table = $(element).find('#tabla-pendientes');
+    if($.fn.dataTable.isDataTable(table)) {
+      table.DataTable().destroy();
+    }
+    
+    table.DataTable({
+      pageLength: 10,
+      dom: 'Bfrtip',
+      buttons: [{ extend: 'csv', text: 'Exportar CSV' }],
+      language: { search: "Buscar:" },
+      order: [[0, 'desc']]
+    });
+  }
+});
+
+// ====== EJEMPLO: CÓMO AGREGAR UN NUEVO COMPONENTE ======
+/*
+ComponentSystem.registrar('nuevoComponente', {
+  grid: 'span-3', // Opciones: span-3, span-4, span-5, span-6, full
+  html: `
+    <h2>Mi Nuevo Componente</h2>
+    <div class="chart-container">
+      <canvas id="grafico-nuevo"></canvas>
+    </div>
+  `,
+  async render(data, element) {
+    // Tu lógica aquí para procesar datos y actualizar el HTML
+    const contenido = element.querySelector('#contenido-nuevo');
+    contenido.innerHTML = 'Datos procesados correctamente';
+  }
+});
+
+// Luego agregarlo a componentesActivos:
+// COMPONENTES.componentesActivos.push('nuevoComponente');
+*/
+
+// ====== CONTROLADOR PRINCIPAL ======
+const DashboardApp = {
+  async init() {
+    this.setupEventListeners();
+    await this.loadData();
+  },
+
+  setupEventListeners() {
+    document.getElementById('refresh-data').addEventListener('click', () => this.loadData(true));
+    document.getElementById('btn-export').addEventListener('click', this.exportData);
+  },
+
+  async loadData(force = false) {
+    try {
+      document.getElementById('estado').innerText = 'Cargando...';
+      const data = await DataManager.fetchData(force);
+      await ComponentSystem.render(data);
+      document.getElementById('estado').innerText = 'Datos actualizados';
+    } catch(error) {
+      console.error('Error cargando datos:', error);
+      document.getElementById('estado').innerText = 'Error: ' + error.message;
+    }
+  },
+
+  exportData() {
+    const table = $('#tabla-pendientes').DataTable();
+    if(table) {
+      table.button('.buttons-csv').trigger();
+    }
+  }
+};
+
+// ====== INICIALIZACIÓN ======
+document.addEventListener('DOMContentLoaded', () => {
+  DashboardApp.init();
 });
 </script>
 </body>
