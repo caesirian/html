@@ -1,4 +1,4 @@
-<!doctype html>
+⅘<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8" />
@@ -469,6 +469,120 @@ select.btn:focus {
   .cotizacion-tipo {
     font-size: 11px;
   }
+}
+  /* ====== EFECTOS DE CARGA Y ANIMACIONES ====== */
+/* Skeleton loading para cards */
+.skeleton-loader {
+  background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Pulse animation para elementos clave */
+.pulse-loader {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Spinner moderno */
+.modern-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(62, 166, 255, 0.3);
+  border-top: 3px solid var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+}
+
+/* Progress bar animada */
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10000;
+}
+
+.progress-bar-inner {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  border-radius: 2px;
+  animation: progress-animation 2s ease-in-out infinite;
+  transform-origin: left;
+}
+
+@keyframes progress-animation {
+  0% { transform: scaleX(0); opacity: 1; }
+  50% { transform: scaleX(0.7); opacity: 0.8; }
+  100% { transform: scaleX(1); opacity: 0; }
+}
+
+/* Fade-in animations */
+.fade-in {
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Stagger animation para elementos en secuencia */
+.stagger-item {
+  opacity: 0;
+  animation: staggerFade 0.5s ease forwards;
+}
+
+@keyframes staggerFade {
+  to { opacity: 1; }
+}
+
+/* Loading states para botones */
+.btn.loading {
+  position: relative;
+  color: transparent;
+}
+
+.btn.loading::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  left: 50%;
+  margin-left: -8px;
+  margin-top: -8px;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Shimmer effect */
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 </style>
 </head>
@@ -2083,9 +2197,11 @@ ComponentSystem.registrar('nuevoComponente', {
 */
 
 // ====== CONTROLADOR PRINCIPAL ======
+// ====== CONTROLADOR PRINCIPAL ======
 const DashboardApp = {
   async init() {
     this.setupEventListeners();
+    this.showInitialLoading();
     await this.loadData();
   },
 
@@ -2094,16 +2210,84 @@ const DashboardApp = {
     document.getElementById('btn-export').addEventListener('click', this.exportData);
   },
 
+  showInitialLoading() {
+    // Mostrar skeleton de la estructura principal
+    const grid = document.querySelector('.dashboard-grid');
+    grid.innerHTML = this.getSkeletonHTML();
+    
+    // Mostrar barra de progreso
+    this.showProgressBar();
+    
+    // Actualizar estado
+    document.getElementById('estado').innerHTML = 
+      '<span class="modern-spinner" style="width: 16px; height: 16px; display: inline-block; margin-right: 8px;"></span> Cargando datos financieros...';
+  },
+
+  getSkeletonHTML() {
+    return `
+      <section class="card skeleton-loader" data-grid="span-3" style="min-height: 110px; border: none;"></section>
+      <section class="card skeleton-loader" data-grid="span-5" style="min-height: 220px; border: none;"></section>
+      <section class="card skeleton-loader" data-grid="span-4" style="min-height: 220px; border: none;"></section>
+      <section class="card skeleton-loader" data-grid="span-6" style="min-height: 220px; border: none;"></section>
+      <section class="card skeleton-loader" data-grid="full" style="min-height: 300px; border: none;"></section>
+    `;
+  },
+
+  showProgressBar() {
+    // Crear barra de progreso
+    const progressBar = document.createElement('div');
+    progressBar.className = 'progress-bar';
+    progressBar.innerHTML = '<div class="progress-bar-inner"></div>';
+    document.body.appendChild(progressBar);
+    
+    // Remover después de un tiempo
+    setTimeout(() => {
+      if (progressBar.parentNode) {
+        progressBar.parentNode.removeChild(progressBar);
+      }
+    }, 3000);
+  },
+
   async loadData(force = false) {
     try {
-      document.getElementById('estado').innerText = 'Cargando...';
+      // Mostrar estado de carga en botón si es recarga
+      if (force) {
+        const refreshBtn = document.getElementById('refresh-data');
+        const originalText = refreshBtn.textContent;
+        refreshBtn.classList.add('loading');
+        
+        // Restaurar botón después de 3 segundos máximo
+        setTimeout(() => {
+          refreshBtn.classList.remove('loading');
+          refreshBtn.textContent = originalText;
+        }, 3000);
+      }
+      
+      document.getElementById('estado').innerHTML = 
+        '<span class="modern-spinner" style="width: 16px; height: 16px; display: inline-block; margin-right: 8px;"></span> Actualizando datos...';
+      
       const data = await DataManager.fetchData(force);
       await ComponentSystem.render(data);
-      document.getElementById('estado').innerText = 'Datos actualizados';
+      
+      // Añadir animación de entrada a los componentes
+      this.animateComponents();
+      
+      document.getElementById('estado').innerHTML = 
+        '<span style="color: #28a745;">✓</span> Datos actualizados';
+        
     } catch(error) {
       console.error('Error cargando datos:', error);
-      document.getElementById('estado').innerText = 'Error: ' + error.message;
+      document.getElementById('estado').innerHTML = 
+        '<span style="color: #dc3545;">✗</span> Error: ' + error.message;
     }
+  },
+
+  animateComponents() {
+    const components = document.querySelectorAll('.card');
+    components.forEach((component, index) => {
+      component.classList.add('fade-in');
+      component.style.animationDelay = `${index * 0.1}s`;
+    });
   },
 
   exportData() {
