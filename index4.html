@@ -654,6 +654,25 @@ const UTILS = {
     localStorage.setItem(CONFIG.CACHE_KEY, JSON.stringify({ts: Date.now(), data: obj}));
     document.getElementById('cache-status').innerText = 'sí';
   },
+  getMonthName(monthNumber, short = false) {
+    const months = [
+      'ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO',
+      'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'
+    ];
+    const monthsShort = [
+      'ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN',
+      'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'
+    ];
+    
+    return short ? monthsShort[monthNumber - 1] : months[monthNumber - 1];
+  },
+
+  formatMonthKey(mesKey, short = false) {
+    if (!mesKey || !mesKey.includes('-')) return mesKey;
+    const [year, month] = mesKey.split('-');
+    const monthName = this.getMonthName(parseInt(month), short);
+    return short ? `${monthName} ${year}` : `${monthName} ${year}`;
+  },
 
   loadCache() {
     try {
@@ -838,18 +857,22 @@ ComponentSystem.registrar('ingresosVsEgresos', {
     const ingActual = sums[curKey]?.ing || 0;
     const ingPrev = sums[prevKey]?.ing || 0;
 
-    const canvas = element.querySelector('#grafico-ingresos');
-  const ctx = canvas.getContext('2d');
+     // Obtener nombres reales de los meses
+    const mesAnteriorLabel = UTILS.formatMonthKey(prevKey, true);
+    const mesActualLabel = UTILS.formatMonthKey(curKey, true);
+
+    const canvasIngresos = element.querySelector('#grafico-ingresos');
+    const ctxIngresos = canvasIngresos.getContext('2d');
     
     // Destruir gráfico anterior si existe
     if(window.chartIngresos) {
       window.chartIngresos.destroy();
     }
     
-    window.chartIngresos = new Chart(ctx, {
-  type: 'bar',
-  data: {
-    labels: ['Mes anterior', 'Mes actual'],
+    window.chartIngresos = new Chart(ctxIngresos, {
+      type: 'bar',
+      data: {
+        labels: [mesAnteriorLabel, mesActualLabel],
     datasets: [{
       label: 'Ingresos',
       data: [ingPrev, ingActual],
@@ -954,18 +977,21 @@ ComponentSystem.registrar('egresosVsAnterior', {
     const egActual = sums[curKey]?.eg || 0;
     const egPrev = sums[prevKey]?.eg || 0;
 
-    const canvas = element.querySelector('#grafico-egresos');
-    const ctx = canvas.getContext('2d');
+   // Obtener nombres reales de los meses
+    const mesAnteriorLabel = UTILS.formatMonthKey(prevKey, true);
+    const mesActualLabel = UTILS.formatMonthKey(curKey, true);
+
+    const canvasEgresos = element.querySelector('#grafico-egresos');
+    const ctxEgresos = canvasEgresos.getContext('2d');
     
     if(window.chartEgresos) {
       window.chartEgresos.destroy();
     }
     
-    
-    window.chartEgresos = new Chart(ctx, {
-  type: 'bar',
-  data: {
-    labels: ['Mes anterior', 'Mes actual'],
+    window.chartEgresos = new Chart(ctxEgresos, {
+      type: 'bar',
+      data: {
+        labels: [mesAnteriorLabel, mesActualLabel],
     datasets: [{
       label: 'Egresos',
       data: [egPrev, egActual],
