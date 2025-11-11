@@ -7,22 +7,15 @@ const ComponentSystem = {
 
   async render(data) {
     const grid = document.querySelector('.dashboard-grid');
-    if (!grid) {
-      console.error('No se encontró .dashboard-grid');
-      return;
-    }
+    if (!grid) return;
     
     grid.innerHTML = '';
 
-    // USAR CONFIG en lugar de COMPONENTES
+    // CAMBIAR ESTA LÍNEA - usar CONFIG en lugar de COMPONENTES
     for(const componentId of CONFIG.COMPONENTES_ACTIVOS) {
       const component = this.registros[componentId];
       if(component) {
-        try {
-          await this.renderComponent(componentId, component, data, grid);
-        } catch(error) {
-          console.error(`Error renderizando ${componentId}:`, error);
-        }
+        await this.renderComponent(componentId, component, data, grid);
       }
     }
   },
