@@ -9,31 +9,33 @@ const ComponentSystem = {
     const grid = document.querySelector('.dashboard-grid');
     if (!grid) return;
     
-    grid.innerHTML = '';
-
-    // CAMBIAR ESTA LÍNEA - usar CONFIG en lugar de COMPONENTES
-    for(const componentId of CONFIG.COMPONENTES_ACTIVOS) {
-      const component = this.registros[componentId];
-      if(component) {
-        await this.renderComponent(componentId, component, data, grid);
-      }
-    }
+    // No limpiar el grid aquí - ya lo hace renderizarProgresivamente
+    console.log('🎨 Renderizando componentes...');
   },
 
   async renderComponent(id, component, data, grid) {
-    const element = document.createElement(component.element || 'section');
-    element.id = `componente-${id}`;
-    element.className = component.classes || 'card';
-    element.setAttribute('data-grid', component.grid);
-    
-    if(component.html) {
-      element.innerHTML = component.html;
-    }
+    try {
+      console.time(`⏱️ Componente ${id}`);
+      
+      const element = document.createElement(component.element || 'section');
+      element.id = `componente-${id}`;
+      element.className = component.classes || 'card fade-in';
+      element.setAttribute('data-grid', component.grid);
+      
+      if (component.html) {
+        element.innerHTML = component.html;
+      }
 
-    grid.appendChild(element);
+      grid.appendChild(element);
 
-    if(component.render) {
-      await component.render(data, element);
+      if (component.render) {
+        await component.render(data, element);
+      }
+      
+      console.timeEnd(`⏱️ Componente ${id}`);
+      
+    } catch (error) {
+      console.error(`❌ Error en componente ${id}:`, error);
     }
   }
 };
