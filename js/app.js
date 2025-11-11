@@ -74,34 +74,47 @@ const DashboardApp = {
     }
   },
 
-  async renderizarProgresivamente(data) {
-    const grid = document.querySelector('.dashboard-grid');
-    if (!grid) return;
-    
-    // Limpiar skeletons
-    grid.innerHTML = '';
-    
-    // Componentes en orden de prioridad
-    const componentesPrioritarios = [
-      'saldoCaja', 
-      'ingresosVsEgresos', 
-      'egresosVsAnterior',
-      'cotizacionesMonedas'
-    ];
-    
-    const componentesSecundarios = [
-      'analisisCategorias',
-      'controlStock',
-      'cuentasPendientes'
-    ];
-    
-    // Renderizar componentes prioritarios primero
-    for (const componentId of componentesPrioritarios) {
-      const component = ComponentSystem.registros[componentId];
-      if (component) {
-        await this.renderizarComponenteConDelay(componentId, component, data, grid, 100);
-      }
+  // En app.js - SOLO modificar esta función:
+async renderizarProgresivamente(data) {
+  const grid = document.querySelector('.dashboard-grid');
+  if (!grid) return;
+  
+  // Limpiar skeletons
+  grid.innerHTML = '';
+  
+  // Obtener componentes activos del ComponentManager
+  let componentesActivos = [];
+  if (typeof ComponentManager !== 'undefined') {
+    ComponentManager.init();
+    componentesActivos = ComponentManager.getActiveComponents();
+  } else {
+    // Fallback a componentes por defecto
+    componentesActivos = ['saldoCaja', 'ingresosVsEgresos', 'egresosVsAnterior', 'cotizacionesMonedas'];
+  }
+  
+  console.log('🎨 Renderizando componentes activos:', componentesActivos);
+  
+  if (componentesActivos.length === 0) {
+    grid.innerHTML = `
+      <div class="card" data-grid="full" style="text-align: center; padding: 40px;">
+        <h3>No hay componentes activos</h3>
+        <p>Usa el gestor de componentes para activar algunos componentes.</p>
+        <button class="btn" onclick="DashboardApp.mostrarGestorComponentes()">Abrir Gestor de Componentes</button>
+      </div>
+    `;
+    return;
+  }
+  
+  // Renderizar componentes activos
+  for (const componentId of componentesActivos) {
+    const component = ComponentSystem.registros[componentId];
+    if (component) {
+      await this.renderizarComponenteConDelay(componentId, component, data, grid, 100);
+    } else {
+      console.warn(`⚠️ Componente ${componentId} no encontrado`);
     }
+  }
+},
     
     // Pequeña pausa para que el usuario vea que está cargando
     await new Promise(resolve => setTimeout(resolve, 300));
