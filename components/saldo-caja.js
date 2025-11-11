@@ -1,6 +1,6 @@
 // Componente: Saldo de Caja
 ComponentSystem.registrar('saldoCaja', {
-  grid: 'span-3',
+  grid: 'span-6',
   html: `
     <h2>Saldo de caja</h2>
     <div id="saldo-actual" class="kpi-grande">Cargando...</div>
