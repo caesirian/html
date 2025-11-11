@@ -1,4 +1,3 @@
-
 const UTILS = {
 
   // Función para obtener nombre del mes en mayúsculas
