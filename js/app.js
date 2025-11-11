@@ -1,10 +1,84 @@
-// app.js - VERSIÓN COMPLETA Y CORREGIDA
+// app.js - VERSIÓN COMPLETA ACTUALIZADA
 const DashboardApp = {
+  loadingStartTime: null,
+  loadingInterval: null,
+  currentStep: 0,
+
   async init() {
     console.log('🚀 Iniciando dashboard...');
-    this.mostrarLoading();
+    this.loadingStartTime = Date.now();
+    this.mostrarPantallaCarga();
     this.setupEventListeners();
     await this.loadData();
+  },
+
+  mostrarPantallaCarga() {
+    const loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen) {
+      loadingScreen.classList.add('active');
+    }
+    
+    // Iniciar contador de tiempo
+    this.actualizarTiempoCarga();
+    this.loadingInterval = setInterval(() => {
+      this.actualizarTiempoCarga();
+    }, 1000);
+    
+    // Simular progreso de pasos
+    this.simularProgreso();
+  },
+
+  actualizarTiempoCarga() {
+    const timeElement = document.getElementById('loading-time');
+    if (timeElement && this.loadingStartTime) {
+      const seconds = Math.floor((Date.now() - this.loadingStartTime) / 1000);
+      timeElement.textContent = `${seconds}s`;
+    }
+  },
+
+  simularProgreso() {
+    const steps = [
+      "Conectando con los datos...",
+      "Analizando información financiera...",
+      "Procesando movimientos...",
+      "Generando visualizaciones...",
+      "Aplicando configuraciones..."
+    ];
+    
+    let stepIndex = 0;
+    const stepInterval = setInterval(() => {
+      if (stepIndex < steps.length) {
+        this.actualizarPaso(steps[stepIndex]);
+        stepIndex++;
+      } else {
+        clearInterval(stepInterval);
+      }
+    }, 800);
+  },
+
+  actualizarPaso(mensaje) {
+    const stepElement = document.getElementById('loading-step');
+    if (stepElement) {
+      stepElement.style.opacity = '0';
+      setTimeout(() => {
+        stepElement.textContent = mensaje;
+        stepElement.style.opacity = '1';
+      }, 200);
+    }
+  },
+
+  ocultarPantallaCarga() {
+    const loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen) {
+      // Pequeña animación de despedida
+      loadingScreen.style.opacity = '0';
+      setTimeout(() => {
+        loadingScreen.classList.remove('active');
+        if (this.loadingInterval) {
+          clearInterval(this.loadingInterval);
+        }
+      }, 500);
+    }
   },
 
   mostrarLoading() {
@@ -50,27 +124,57 @@ const DashboardApp = {
 
   async loadData(force = false) {
     try {
+      this.actualizarPaso("Conectando con Google Sheets...");
+      
       console.log('📡 Cargando datos...');
       const estadoElement = document.getElementById('estado');
       if (estadoElement) estadoElement.innerHTML = '<span class="loader"></span> Cargando datos...';
       
+      this.actualizarPaso("Descargando datos financieros...");
+      
       // Cargar datos críticos primero
       const data = await DataManager.fetchData(force);
       console.log('✅ Datos recibidos, renderizando...');
+      
+      this.actualizarPaso("Renderizando componentes...");
       
       if (estadoElement) estadoElement.innerHTML = '<span style="color: #28a745;">✓</span> Datos actualizados';
       
       // Renderizar componentes progresivamente
       await this.renderizarProgresivamente(data);
       
-      // Ocultar barra de progreso
+      // Ocultar barra de progreso y pantalla de carga
       this.ocultarBarraProgreso();
+      this.ocultarPantallaCarga();
       
     } catch(error) {
       console.error('❌ Error cargando datos:', error);
       const estadoElement = document.getElementById('estado');
       if (estadoElement) estadoElement.innerHTML = '<span style="color: #dc3545;">✗</span> Error: ' + error.message;
-      this.ocultarBarraProgreso();
+      
+      // Mostrar error en pantalla de carga también
+      this.mostrarErrorEnCarga(error);
+    }
+  },
+
+  mostrarErrorEnCarga(error) {
+    const loadingContent = document.querySelector('.loading-content');
+    if (loadingContent) {
+      loadingContent.innerHTML = `
+        <div style="text-align: center; color: #dc3545;">
+          <div style="font-size: 48px; margin-bottom: 20px;">⚠️</div>
+          <h2 style="color: #dc3545; margin-bottom: 15px;">Error al cargar los datos</h2>
+          <p style="color: var(--muted); margin-bottom: 25px;">${error.message}</p>
+          <button class="btn" onclick="window.location.reload()" style="background: #dc3545;">
+            Reintentar
+          </button>
+        </div>
+      `;
+    }
+    
+    // Detener intervalos
+    if (this.loadingInterval) {
+      clearInterval(this.loadingInterval);
     }
   },
 
@@ -104,8 +208,14 @@ const DashboardApp = {
       return;
     }
     
+    // Actualizar mensaje de carga
+    this.actualizarPaso(`Cargando ${componentesActivos.length} componentes...`);
+    
     // Renderizar componentes activos
-    for (const componentId of componentesActivos) {
+    for (let i = 0; i < componentesActivos.length; i++) {
+      const componentId = componentesActivos[i];
+      this.actualizarPaso(`Cargando ${this.obtenerNombreComponente(componentId)}...`);
+      
       const component = ComponentSystem.registros[componentId];
       if (component) {
         await this.renderizarComponenteConDelay(componentId, component, data, grid, 100);
@@ -113,6 +223,19 @@ const DashboardApp = {
         console.warn(`⚠️ Componente ${componentId} no encontrado`);
       }
     }
+  },
+
+  obtenerNombreComponente(id) {
+    const nombres = {
+      saldoCaja: 'Saldo de Caja',
+      ingresosVsEgresos: 'Ingresos vs Egresos',
+      egresosVsAnterior: 'Comparación Mensual',
+      cotizacionesMonedas: 'Cotizaciones',
+      analisisCategorias: 'Análisis por Categorías',
+      cuentasPendientes: 'Cuentas Pendientes',
+      controlStock: 'Control de Stock'
+    };
+    return nombres[id] || id;
   },
 
   async renderizarComponenteConDelay(id, component, data, grid, delay) {
@@ -133,6 +256,12 @@ const DashboardApp = {
       refreshBtn.addEventListener('click', () => this.loadData(true));
     }
 
+    // Botón de gestión de componentes
+    const btnGestion = document.getElementById('btn-gestion-componentes');
+    if (btnGestion) {
+      btnGestion.addEventListener('click', () => this.mostrarGestorComponentes());
+    }
+
     // Menú hamburguesa para móviles
     const menuToggle = document.getElementById('menu-toggle');
     const sidebar = document.querySelector('.sidebar');
@@ -148,12 +277,6 @@ const DashboardApp = {
         sidebar.classList.remove('active');
         overlay.classList.remove('active');
       });
-    }
-
-    // Botón de gestión de componentes
-    const btnGestion = document.getElementById('btn-gestion-componentes');
-    if (btnGestion) {
-      btnGestion.addEventListener('click', () => this.mostrarGestorComponentes());
     }
   },
 
