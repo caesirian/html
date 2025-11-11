@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard Financiero - HG Soluciones</title>
+  
+  <!-- CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/datatables.net-dt@1.13.6/css/jquery.dataTables.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/datatables.net-buttons-dt@2.4.1/css/buttons.dataTables.min.css" rel="stylesheet"/>
+  <link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+  <!-- Estructura HTML actual se mantiene igual -->
+  <div class="app">
+    <aside class="sidebar">...</aside>
+    <main>...</main>
+  </div>
+
+  <!-- JS Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/datatables.net-buttons@2.4.1/js/dataTables.buttons.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/datatables.net-buttons@2.4.1/js/buttons.html5.min.js"></script>
+
+  <!-- Nuestra aplicación modular -->
+  <script src="js/core/config.js"></script>
+  <script src="js/core/utils.js"></script>
+  <script src="js/core/data-manager.js"></script>
+  <script src="js/core/component-system.js"></script>
+  
+  <!-- Componentes -->
+  <script src="js/components/saldo-caja.js"></script>
+  <script src="js/components/ingresos-egresos.js"></script>
+  <script src="js/components/egresos-anterior.js"></script>
+  <script src="js/components/cuentas-pendientes.js"></script>
+  <script src="js/components/analisis-categorias.js"></script>
+  <script src="js/components/cotizaciones-monedas.js"></script>
+  <script src="js/components/control-stock.js"></script>
+  
+  <!-- App principal -->
+  <script src="js/app.js"></script>
+</body>
+</html>
