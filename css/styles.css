@@ -155,29 +155,7 @@ table.display tbody td{
   margin-top:18px;
 }
 
-/* Responsive */
-@media (max-width:1200px){
-  .card[data-grid="span-3"] { grid-column: span 4; }
-  .card[data-grid="span-5"] { grid-column: span 8; }
-  .card[data-grid="span-4"] { grid-column: span 8; }
-  .card[data-grid="full"] { grid-column: 1 / -1; }
-}
-@media (max-width:900px){
-  .dashboard-grid{ grid-template-columns: repeat(6, 1fr); padding:12px; }
-  .card[data-grid="span-3"],
-  .card[data-grid="span-4"],
-  .card[data-grid="span-5"],
-  .card[data-grid="span-6"] { grid-column: span 6; }
-  .card[data-grid="full"] { grid-column: span 6; }
-}
-@media (max-width:600px){
-  .dashboard-grid{ grid-template-columns: repeat(1, 1fr); }
-  .card[data-grid="span-3"],
-  .card[data-grid="span-4"],
-  .card[data-grid="span-5"],
-  .card[data-grid="span-6"],
-  .card[data-grid="full"] { grid-column: span 1; }
-}
+/* Responsive - REEMPLAZADO CON NUEVAS REGLAS MÁS ABAJO */
 
 /* Small helpers */
 .text-muted{ color:var(--muted); font-size:13px; }
@@ -228,24 +206,12 @@ table.display tbody td{
   to{ transform:rotate(360deg); } 
 }
 
-/* Responsive chart containers */
-@media (max-width: 768px) {
-  .chart-container {
-    height: 160px;
-  }
-  .chart-container-medium {
-    height: 180px;
-  }
-  .chart-container-large {
-    height: 220px;
-  }
-}
-
 /* Ensure cards don't overflow */
 .card {
   overflow: hidden;
 }
-  /* ====== MENÚ HAMBURGUESA ====== */
+
+/* ====== MENÚ HAMBURGUESA ====== */
 .menu-toggle {
   display: none;
   background: transparent;
@@ -315,24 +281,6 @@ table.display tbody td{
   }
 }
 
-/* Ajustes adicionales para móviles más pequeños */
-@media (max-width: 600px) {
-  aside.sidebar {
-    width: 280px;
-  }
-  
-  .header-hg {
-    padding: 8px 0;
-  }
-  
-  .header-hg h1 {
-    font-size: 16px;
-  }
-  
-  .header-hg p {
-    font-size: 12px;
-  }
-  }
 /* ====== MEJORAS PARA TABLA DE RESUMEN ====== */
 .tabla-datos th {
   position: sticky;
@@ -376,7 +324,8 @@ table.display tbody td{
   overflow: auto;
   box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
-  /* ====== ESTILOS PARA SELECTORES ====== */
+
+/* ====== ESTILOS PARA SELECTORES ====== */
 select.btn {
   appearance: none;
   background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%239aa8ba' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
@@ -445,21 +394,7 @@ select.btn:focus {
   animation: rotate 1s linear infinite;
 }
 
-/* Responsive para cotizaciones */
-@media (max-width: 768px) {
-  .cotizacion-card {
-    padding: 8px;
-  }
-  
-  .cotizacion-precio {
-    font-size: 12px;
-  }
-  
-  .cotizacion-tipo {
-    font-size: 11px;
-  }
-}
-  /* ====== EFECTOS DE CARGA Y ANIMACIONES ====== */
+/* ====== EFECTOS DE CARGA Y ANIMACIONES ====== */
 /* Skeleton loading para cards */
 .skeleton-loader {
   background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
@@ -569,170 +504,301 @@ select.btn:focus {
   animation: shimmer 2s infinite;
 }
 
-/* ====== MEJORAS RESPONSIVE PARA CONTROL DE STOCK ====== */
-
-/* Métricas principales en móviles */
-@media (max-width: 768px) {
-  .dashboard-grid .metric-card[data-grid="span-3"] {
-    grid-column: span 6 !important;
-    min-height: 130px !important;
-    padding: 16px !important;
-  }
-  
-  .metric-card .kpi-grande {
-    font-size: 22px !important;
-    line-height: 1.3 !important;
-    margin: 8px 0 !important;
-  }
-  
-  .metric-card h2 {
-    font-size: 13px !important;
-    margin-bottom: 8px !important;
-    line-height: 1.2;
-  }
-  
-  .metric-card .text-muted {
-    font-size: 11px !important;
-    line-height: 1.3;
-  }
-  
-  /* Asegurar que las métricas no sean demasiado angostas */
-  .dashboard-grid {
-    gap: 10px !important;
-  }
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
-/* Móviles muy pequeños */
-@media (max-width: 480px) {
-  .dashboard-grid .metric-card[data-grid="span-3"] {
-    grid-column: span 12 !important;
+/* ====== MÓVILES - COMPONENTES AL 100% ANCHO ====== */
+
+/* Para todos los móviles */
+@media (max-width: 768px) {
+  /* Grid de una sola columna */
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    padding: 0 8px !important;
+  }
+  
+  /* Todos los componentes al 100% */
+  .card[data-grid] {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    min-height: auto !important;
+    margin: 0 !important;
+    box-sizing: border-box;
+  }
+  
+  /* Alturas mínimas legibles para cada tipo de componente */
+  .card {
+    min-height: 140px !important;
+    padding: 20px !important;
+  }
+  
+  /* Componentes de métricas (KPIs) */
+  .card[data-grid="span-3"] {
     min-height: 120px !important;
-    padding: 14px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    text-align: center !important;
   }
   
-  .metric-card .kpi-grande {
-    font-size: 24px !important;
-    font-weight: 700;
+  /* KPIs grandes y legibles */
+  .kpi-grande {
+    font-size: 28px !important;
+    font-weight: 800 !important;
+    margin: 10px 0 !important;
+    line-height: 1.2 !important;
   }
   
-  /* Mejorar botones de filtro en móviles */
-  [data-filter] {
-    padding: 10px 12px !important;
-    font-size: 13px !important;
-    flex: 1;
-    min-width: 0;
-    text-align: center;
-  }
-  
-  /* Ajustar header del control de stock */
+  /* Títulos legibles */
   .card h2 {
     font-size: 16px !important;
+    margin-bottom: 12px !important;
+    color: var(--muted) !important;
   }
-}
-
-/* Gráficos en móviles */
-@media (max-width: 768px) {
-  .card[data-grid="span-6"] {
-    grid-column: span 12 !important;
+  
+  .text-muted {
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+  }
+  
+  /* Responsive chart containers */
+  .chart-container {
+    height: 200px !important;
   }
   
   .chart-container-medium {
-    height: 250px !important;
+    height: 240px !important;
   }
   
   .chart-container-large {
     height: 280px !important;
   }
+  
+  /* Ajustes adicionales para móviles más pequeños */
+  .header-hg {
+    padding: 12px 0 !important;
+    flex-wrap: wrap;
+    gap: 12px !important;
+  }
+  
+  .header-hg h1 {
+    font-size: 18px !important;
+    line-height: 1.2 !important;
+  }
+  
+  .header-hg p {
+    font-size: 13px !important;
+    line-height: 1.3 !important;
+  }
+  
+  #estado {
+    font-size: 14px !important;
+    font-weight: 600;
+  }
+  
+  aside.sidebar {
+    width: 280px;
+  }
 }
 
-/* Tabla de stock en móviles */
+/* Gráficos - mantener proporción pero ser legibles */
+@media (max-width: 768px) {
+  canvas {
+    min-height: 180px !important;
+  }
+}
+
+/* Tablas - scroll horizontal pero contenido legible */
 @media (max-width: 768px) {
   .tabla-container {
     max-height: 400px !important;
-    font-size: 12px;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    font-size: 14px !important;
+    margin: 0 -20px !important;
+    width: calc(100% + 40px) !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  #tabla-stock {
+    min-width: 600px !important; /* Forzar scroll horizontal */
   }
   
   #tabla-stock th,
   #tabla-stock td {
-    padding: 8px 6px !important;
-    font-size: 11px !important;
-  }
-  
-  /* Ocultar columnas menos importantes en móviles */
-  #tabla-stock th:nth-child(2), /* Categoría */
-  #tabla-stock td:nth-child(2),
-  #tabla-stock th:nth-child(9), /* Último movimiento */
-  #tabla-stock td:nth-child(9) {
-    display: none;
-  }
-  
-  /* Ajustar barras de progreso */
-  #tabla-stock td:nth-child(7) {
-    min-width: 80px;
+    padding: 12px 8px !important;
+    font-size: 13px !important;
+    white-space: nowrap !important;
   }
 }
 
-/* Móviles muy pequeños - ajustes adicionales */
-@media (max-width: 360px) {
-  .metric-card .kpi-grande {
-    font-size: 20px !important;
+/* Móviles muy pequeños (Samsung A10S - 360px) */
+@media (max-width: 400px) {
+  .dashboard-grid {
+    gap: 14px !important;
+    padding: 0 6px !important;
   }
   
-  .metric-card {
+  .card {
+    padding: 18px !important;
+    min-height: 130px !important;
+    border-radius: 12px !important;
+  }
+  
+  .card[data-grid="span-3"] {
+    min-height: 110px !important;
+  }
+  
+  .kpi-grande {
+    font-size: 26px !important;
+  }
+  
+  .card h2 {
+    font-size: 15px !important;
+  }
+  
+  /* Gráficos un poco más pequeños pero legibles */
+  .chart-container {
+    height: 180px !important;
+  }
+  
+  .chart-container-medium {
+    height: 220px !important;
+  }
+  
+  .chart-container-large {
+    height: 260px !important;
+  }
+  
+  /* Responsive para cotizaciones */
+  .cotizacion-card {
+    padding: 10px !important;
+  }
+  
+  .cotizacion-precio {
+    font-size: 16px !important;
+  }
+  
+  .cotizacion-tipo {
+    font-size: 13px !important;
+  }
+}
+
+/* Botones y controles táctiles */
+@media (max-width: 768px) {
+  .btn {
+    padding: 14px 20px !important;
+    font-size: 16px !important;
+    min-height: 50px !important;
+    border-radius: 10px !important;
+  }
+  
+  .btn.small {
+    padding: 12px 16px !important;
+    font-size: 14px !important;
+    min-height: 44px !important;
+  }
+  
+  /* Filtros del stock - ocupar toda la fila */
+  [data-filter] {
+    flex: 1;
+    min-width: 0;
+    padding: 14px 12px !important;
+    font-size: 14px !important;
+    margin: 2px !important;
+    text-align: center;
+  }
+  
+  /* Inputs de búsqueda */
+  input[type="text"] {
+    min-height: 44px !important;
+    font-size: 16px !important;
     padding: 12px !important;
   }
   
-  /* Botones más compactos */
-  .btn.small {
-    padding: 8px 10px !important;
-    font-size: 12px !important;
+  select {
+    min-height: 44px !important;
+    font-size: 16px !important;
+    padding: 12px 32px 12px 12px !important;
   }
 }
 
-/* Mejoras específicas para las métricas de stock */
-.metric-card {
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255,255,255,0.05) !important;
+/* Mejoras específicas para el control de stock en móviles */
+@media (max-width: 768px) {
+  /* Contenedor de métricas del stock - una por fila */
+  .metric-card {
+    width: 100% !important;
+    min-height: 120px !important;
+    margin-bottom: 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+  
+  .metric-card .kpi-grande {
+    font-size: 32px !important;
+    margin: 8px 0 !important;
+    font-weight: 800 !important;
+  }
+  
+  .metric-card h2 {
+    font-size: 15px !important;
+    margin-bottom: 8px !important;
+    font-weight: 600 !important;
+  }
+  
+  .metric-card .text-muted {
+    font-size: 12px !important;
+    opacity: 0.8;
+  }
 }
 
-.metric-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(255,255,255,0.1) !important;
+/* Asegurar que no haya elementos ocultos o cortados */
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden !important;
+    -webkit-text-size-adjust: 100%;
+  }
+  
+  .app {
+    min-width: 320px !important;
+  }
+  
+  main {
+    min-width: 320px !important;
+    overflow-x: hidden !important;
+  }
+  
+  /* Prevenir que los textos se salgan */
+  * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Estados de hover desactivados en móviles para mejor rendimiento */
+  .card:hover {
+    transform: none !important;
+  }
+  
+  .btn:hover {
+    transform: none !important;
+  }
 }
 
-/* Asegurar contraste en las métricas */
-.metric-card h2 {
-  color: var(--muted);
-  font-weight: 600;
-  margin-bottom: 12px;
-}
-
-/* Mejorar legibilidad de los KPIs */
-.kpi-grande {
-  font-weight: 800;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-  letter-spacing: 0.5px;
-}
-
-/* Contenedor de métricas más robusto */
-.dashboard-grid .metric-card {
-  background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)) !important;
-  backdrop-filter: blur(10px);
-  border-radius: 12px;
-  position: relative;
-  overflow: hidden;
-}
-
-.metric-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-}
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+/* Mejorar contraste para legibilidad en móviles */
+@media (max-width: 768px) {
+  .card {
+    background: rgba(11, 18, 32, 0.95) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(10px);
+  }
+  
+  .kpi-grande {
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  }
 }
