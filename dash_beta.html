@@ -10,7 +10,25 @@
   <link href="https://cdn.jsdelivr.net/npm/datatables.net-buttons-dt@2.4.1/css/buttons.dataTables.min.css" rel="stylesheet"/>
   <link href="css/styles.css" rel="stylesheet">
 </head>
-<body>
+<body><!-- Agregar esto justo después de <body> -->
+<div id="loading-screen" class="loading-screen active">
+  <div class="loading-content">
+    <div class="loading-spinner">
+      <div class="spinner-circle"></div>
+      <div class="spinner-circle"></div>
+      <div class="spinner-circle"></div>
+    </div>
+    <h2 class="loading-title">Por favor espere</h2>
+    <p class="loading-message">Estamos cargando la información de su empresa...</p>
+    <div class="loading-progress">
+      <div class="progress-bar"></div>
+    </div>
+    <div class="loading-details">
+      <span id="loading-step">Conectando con la base de datos...</span>
+      <span id="loading-time">0s</span>
+    </div>
+  </div>
+</div>
   <div class="app">
     <aside class="sidebar" role="navigation">
       <h1>HG - Dashboard Financiero</h1>
