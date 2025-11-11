@@ -1,6 +1,6 @@
   // ====== COMPONENTE DE CONTROL DE STOCK ======
 ComponentSystem.registrar('controlStock', {
-  grid: 'full',
+  grid: 'span-6,
   html: `
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
       <h2 style="margin: 0;">Control de Stock</h2>
