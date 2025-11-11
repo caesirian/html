@@ -4,12 +4,26 @@ const ComponentManager = {
   
   init() {
     this.loadConfig();
-    console.log('📋 Component Manager iniciado:', this.config);
   },
   
   loadConfig() {
     const saved = localStorage.getItem('dashboard_components_config');
-    this.config = saved ? JSON.parse(saved) : {...CONFIG.COMPONENTES_POR_DEFECTO};
+    if (saved) {
+      this.config = JSON.parse(saved);
+    } else {
+      // Por defecto, solo componentes livianos
+      this.config = {
+        saldoCaja: true,
+        ingresosVsEgresos: true,
+        egresosVsAnterior: true,
+        cotizacionesMonedas: true,
+        analisisCategorias: false,
+        cuentasPendientes: false,
+        controlStock: false
+      };
+      this.saveConfig();
+    }
+    console.log('📋 Configuración de componentes cargada:', this.config);
   },
   
   saveConfig() {
@@ -17,29 +31,6 @@ const ComponentManager = {
   },
   
   getActiveComponents() {
-    return Object.keys(this.config).filter(componentId => this.config[componentId]);
-  },
-  
-  isComponentActive(componentId) {
-    return this.config[componentId] === true;
-  },
-  
-  setComponentActive(componentId, active) {
-    this.config[componentId] = active;
-    this.saveConfig();
-  },
-  
-  // Para el gestor de componentes
-  getComponentInfo(componentId) {
-    const info = {
-      saldoCaja: { name: 'Saldo de Caja', category: 'liviano', grid: 'span-3' },
-      ingresosVsEgresos: { name: 'Ingresos vs Egresos', category: 'liviano', grid: 'span-5' },
-      egresosVsAnterior: { name: 'Comparación Mes Anterior', category: 'liviano', grid: 'span-4' },
-      cotizacionesMonedas: { name: 'Cotizaciones', category: 'liviano', grid: 'span-6' },
-      analisisCategorias: { name: 'Análisis por Categorías', category: 'mediano', grid: 'span-6' },
-      cuentasPendientes: { name: 'Cuentas Pendientes', category: 'mediano', grid: 'span-6' },
-      controlStock: { name: 'Control de Stock', category: 'pesado', grid: 'span-6' }
-    };
-    return info[componentId] || { name: componentId, category: 'liviano', grid: 'span-6' };
+    return Object.keys(this.config).filter(id => this.config[id]);
   }
 };
