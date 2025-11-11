@@ -802,3 +802,186 @@ select.btn:focus {
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
   }
 }
+/* ====== OPTIMIZACIONES DE RENDIMIENTO ====== */
+
+/* Prevenir destello blanco durante el scroll */
+.app, .dashboard-grid, .card, main, aside {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Forzar hardware acceleration en elementos críticos */
+.card, .sidebar, .header-hg {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Mejorar rendimiento de scroll */
+.dashboard-grid {
+  contain: layout style paint;
+}
+
+/* Eliminar flickering en iOS */
+body {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Permitir selección de texto donde sea necesario */
+.card, .tabla-container {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* ====== ANIMACIONES DE CARGA MEJORADAS ====== */
+
+/* Barra de progreso global */
+.progress-bar-global {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: rgba(255,255,255,0.1);
+  z-index: 10000;
+  overflow: hidden;
+}
+
+.progress-bar-inner-global {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  border-radius: 0 2px 2px 0;
+  animation: progress-global 2s ease-in-out infinite;
+  transform-origin: left;
+}
+
+@keyframes progress-global {
+  0% { transform: scaleX(0); opacity: 1; }
+  50% { transform: scaleX(0.7); opacity: 0.8; }
+  100% { transform: scaleX(1); opacity: 0; }
+}
+
+/* Skeleton loading mejorado */
+.skeleton-loader {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-pulse 2s ease-in-out infinite;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}
+
+@keyframes skeleton-pulse {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Animación de entrada escalonada para componentes */
+.card {
+  animation: cardEntrance 0.6s ease-out;
+  animation-fill-mode: both;
+}
+
+/* Retrasos escalonados para la animación de entrada */
+.card:nth-child(1) { animation-delay: 0.1s; }
+.card:nth-child(2) { animation-delay: 0.2s; }
+.card:nth-child(3) { animation-delay: 0.3s; }
+.card:nth-child(4) { animation-delay: 0.4s; }
+.card:nth-child(5) { animation-delay: 0.5s; }
+.card:nth-child(6) { animation-delay: 0.6s; }
+
+@keyframes cardEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ====== OPTIMIZACIONES ESPECÍFICAS PARA MÓVILES ====== */
+
+/* Prevenir scroll jerk en iOS */
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
+  
+  .app {
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  
+  main {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Mejorar rendimiento de gráficos en móviles */
+  canvas {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* ====== ESTADOS DE CARGA MEJORADOS ====== */
+
+/* Estado de carga para botones */
+.btn.loading {
+  position: relative;
+  color: transparent !important;
+  pointer-events: none;
+}
+
+.btn.loading::after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  top: 50%;
+  left: 50%;
+  margin-left: -10px;
+  margin-top: -10px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Mejorar contraste del loader */
+.loader {
+  border: 2px solid rgba(255,255,255,0.1);
+  border-top: 2px solid var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* ====== OPTIMIZACIONES DE MEMORIA ====== */
+
+/* Limitar el uso de transformaciones 3D en elementos que no lo necesitan */
+.tabla-container, .text-muted, .kpi-grande {
+  transform: none;
+  will-change: auto;
+}
+
+/* Prevenir composición excesiva */
+@media (max-width: 768px) {
+  .card:hover {
+    transform: none;
+    transition: none;
+  }
+}
