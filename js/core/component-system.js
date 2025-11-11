@@ -1,20 +1,27 @@
-// ====== SISTEMA DE COMPONENTES ======
 const ComponentSystem = {
+  registros: {},
+  
   registrar(id, config) {
-    COMPONENTES.registros[id] = config;
+    this.registros[id] = config;
   },
 
   async render(data) {
     const grid = document.querySelector('.dashboard-grid');
+    if (!grid) {
+      console.error('No se encontró .dashboard-grid');
+      return;
+    }
+    
     grid.innerHTML = '';
 
-    for(const componentId of COMPONENTES.componentesActivos) {
-      const component = COMPONENTES.registros[componentId];
+    // USAR CONFIG en lugar de COMPONENTES
+    for(const componentId of CONFIG.COMPONENTES_ACTIVOS) {
+      const component = this.registros[componentId];
       if(component) {
         try {
           await this.renderComponent(componentId, component, data, grid);
         } catch(error) {
-          console.error(`Error renderizando componente ${componentId}:`, error);
+          console.error(`Error renderizando ${componentId}:`, error);
         }
       }
     }
@@ -34,19 +41,6 @@ const ComponentSystem = {
 
     if(component.render) {
       await component.render(data, element);
-    }
-  },
-
-  agregarComponente(id) {
-    if(!COMPONENTES.componentesActivos.includes(id)) {
-      COMPONENTES.componentesActivos.push(id);
-    }
-  },
-
-  removerComponente(id) {
-    const index = COMPONENTES.componentesActivos.indexOf(id);
-    if(index > -1) {
-      COMPONENTES.componentesActivos.splice(index, 1);
     }
   }
 };
