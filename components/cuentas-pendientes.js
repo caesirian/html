@@ -1,6 +1,6 @@
 // Componente: Resumen de Pendientes (MEJORADO)
 ComponentSystem.registrar('cuentasPendientes', {
-  grid: 'full',
+  grid: 'span-6',
   html: `
     <h2>Resumen de Compromisos Pendientes</h2>
     <div style="display: flex; gap: 12px; margin-bottom: 16px;">
