@@ -58,3 +58,31 @@ cargarConfiguracionComponentes() {
   const guardado = localStorage.getItem('dashboard_config_componentes');
   return guardado ? JSON.parse(guardado) : {...CONFIG.COMPONENTES_POR_DEFECTO};
 },
+
+setupEventListeners() {
+  const refreshBtn = document.getElementById('refresh-data');
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', () => this.loadData(true));
+  }
+  
+  // Nuevo: Botón de gestión de componentes
+  const btnGestionComponentes = document.getElementById('btn-gestion-componentes');
+  if (btnGestionComponentes) {
+    btnGestionComponentes.addEventListener('click', () => {
+      this.mostrarGestorComponentes();
+    });
+  }
+},
+
+async mostrarGestorComponentes() {
+  const grid = document.querySelector('.dashboard-grid');
+  if (!grid) return;
+  
+  // Limpiar grid y mostrar solo el gestor
+  grid.innerHTML = '';
+  
+  const gestorComponent = ComponentSystem.registros['gestorComponentes'];
+  if (gestorComponent) {
+    await ComponentSystem.renderComponent('gestorComponentes', gestorComponent, {}, grid);
+  }
+},
