@@ -1,6 +1,6 @@
 // Componente: Egresos vs Anterior
 ComponentSystem.registrar('egresosVsAnterior', {
-  grid: 'span-4',
+  grid: 'span-6',
   html: `
     <h2>Egresos: mes actual vs mes anterior</h2>
     <div class="chart-container">
