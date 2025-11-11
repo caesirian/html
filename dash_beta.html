@@ -11,10 +11,58 @@
   <link href="css/styles.css" rel="stylesheet">
 </head>
 <body>
-  <!-- Estructura HTML actual se mantiene igual -->
   <div class="app">
-    <aside class="sidebar">...</aside>
-    <main>...</main>
+    <aside class="sidebar" role="navigation">
+      <h1>HG - Dashboard Financiero</h1>
+      <div class="nav">
+        <button id="nav-overview" class="active">Resumen</button>
+        <button id="nav-ventas">Ventas</button>
+        <button id="nav-finanzas">Finanzas</button>
+        <button id="nav-simulador">Simulador</button>
+        <button id="nav-tablas">Tablas</button>
+      </div>
+      <footer style="margin-top:14px;color:var(--muted);font-size:12px">
+        <div>Conexión: <span id="conn-status">sin iniciar</span></div>
+        <div style="margin-top:8px"><button class="btn small" id="refresh-data">Actualizar datos</button></div>
+      </footer>
+    </aside>
+
+    <main>
+      <header class="topbar header-hg" style="display:flex; align-items:center; gap:12px;">
+        <button id="menu-toggle" class="menu-toggle">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 12H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M3 6H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M3 18H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        
+        <div style="flex: 1;">
+          <h1 style="margin:0">Dashboard Financiero</h1>
+          <p style="margin:0; color:var(--muted); font-size:13px">Conexión en vivo a Google Sheets — estilo HG</p>
+        </div>
+        
+        <div style="display:flex; gap:8px; align-items:center;">
+          <div id="estado" class="text-muted">Esperando datos...</div>
+          <button id="btn-export" class="btn small">Exportar CSV</button>
+        </div>
+      </header>
+
+      <!-- Overlay para móviles -->
+      <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+      <!-- CONTENEDOR PRINCIPAL DONDE SE RENDERIZAN LOS COMPONENTES -->
+      <div class="dashboard-grid" style="margin-top:12px;">
+        <!-- Los componentes se renderizarán aquí dinámicamente -->
+      </div>
+
+      <footer class="footer-hg">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div class="text-muted">Última sincronización: <span id="last-sync">nunca</span></div>
+          <div class="text-muted">Cache: <span id="cache-status">no</span></div>
+        </div>
+      </footer>
+    </main>
   </div>
 
   <!-- JS Libraries -->
