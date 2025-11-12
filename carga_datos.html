@@ -9,6 +9,70 @@
   <link href="https://cdn.jsdelivr.net/npm/datatables.net-dt@1.13.6/css/jquery.dataTables.min.css" rel="stylesheet"/>
   <link href="https://cdn.jsdelivr.net/npm/datatables.net-buttons-dt@2.4.1/css/buttons.dataTables.min.css" rel="stylesheet"/>
   <link href="css/styles.css" rel="stylesheet">
+  
+  <style>
+    .form-section {
+      margin-bottom: 24px;
+    }
+    .form-section h3 {
+      color: var(--accent);
+      margin-bottom: 12px;
+      font-size: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 8px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .form-field {
+      display: flex;
+      flex-direction: column;
+    }
+    .form-field label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-size: 14px;
+    }
+    .form-field input:focus,
+    .form-field select:focus,
+    .form-field textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .required label::after {
+      content: " *";
+      color: #dc3545;
+    }
+    .checkbox-field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .checkbox-field input {
+      margin: 0;
+    }
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+  </style>
 </head>
 <body>
   <div class="app">
@@ -39,7 +103,7 @@
         </button>
         
         <div style="flex: 1;">
-          <h1 style="margin:0">Carga de Datos Financieros</h1>
+          <h1 style="margin:0;">Carga de Datos Financieros</h1>
           <p style="margin:0; color:var(--muted); font-size:13px">Formulario para cargar nuevos registros en Finanzas_RegistroDiario</p>
         </div>
         
@@ -53,58 +117,185 @@
 
       <!-- FORMULARIO DE CARGA -->
       <div class="card" data-grid="full" style="margin-bottom: 20px;">
-        <h2 style="margin-top: 0;">Nuevo Registro Financiero</h2>
+        <h2 style="margin-top: 0; margin-bottom: 20px;">Nuevo Registro Financiero</h2>
+        
         <form id="form-carga">
-          <div class="dashboard-grid" style="grid-template-columns: repeat(12, 1fr); gap: 12px;">
-            <!-- Fecha -->
-            <div class="card" data-grid="span-3">
-              <label for="fecha" style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--muted);">Fecha *</label>
-              <input type="date" id="fecha" name="fecha" required 
-                     style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); color: var(--text);">
-            </div>
-
-            <!-- Monto -->
-            <div class="card" data-grid="span-3">
-              <label for="monto" style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--muted);">Monto *</label>
-              <input type="number" id="monto" name="monto" step="0.01" required 
-                     style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); color: var(--text);">
-            </div>
-
-            <!-- Tipo -->
-            <div class="card" data-grid="span-3">
-              <label for="tipo" style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--muted);">Tipo *</label>
-              <select id="tipo" name="tipo" required 
-                      style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); color: var(--text);">
-                <option value="">Seleccionar...</option>
-                <option value="Ingreso">Ingreso</option>
-                <option value="Egreso">Egreso</option>
-              </select>
-            </div>
-
-            <!-- Categoría -->
-            <div class="card" data-grid="span-3">
-              <label for="categoria" style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--muted);">Categoría *</label>
-              <input type="text" id="categoria" name="categoria" required 
-                     style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); color: var(--text);">
-            </div>
-
-            <!-- Descripción -->
-            <div class="card" data-grid="span-6">
-              <label for="descripcion" style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--muted);">Descripción</label>
-              <input type="text" id="descripcion" name="descripcion" 
-                     style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); color: var(--text);">
-            </div>
-
-            <!-- Reflejar en Caja -->
-            <div class="card" data-grid="span-6" style="display: flex; align-items: center;">
-              <input type="checkbox" id="reflejarEnCaja" name="reflejarEnCaja" style="margin-right: 8px;">
-              <label for="reflejarEnCaja" style="font-size: 14px; color: var(--muted);">Reflejar en Caja_Movimientos</label>
+          <!-- Sección: Información Básica -->
+          <div class="form-section">
+            <h3>Información Básica</h3>
+            <div class="form-grid">
+              <div class="form-field required">
+                <label for="fecha">Fecha</label>
+                <input type="date" id="fecha" name="fecha" required>
+              </div>
+              
+              <div class="form-field required">
+                <label for="tipo">Tipo</label>
+                <select id="tipo" name="tipo" required>
+                  <option value="">Seleccionar...</option>
+                  <option value="Ingreso">Ingreso</option>
+                  <option value="Egreso">Egreso</option>
+                </select>
+              </div>
+              
+              <div class="form-field required">
+                <label for="categoria">Categoría</label>
+                <input type="text" id="categoria" name="categoria" list="categorias-sugeridas" required>
+              </div>
+              
+              <div class="form-field">
+                <label for="subcategoria">Subcategoría</label>
+                <input type="text" id="subcategoria" name="subcategoria" list="subcategorias-sugeridas">
+              </div>
             </div>
           </div>
 
-          <div style="margin-top: 16px; display: flex; gap: 12px;">
+          <!-- Sección: Monto y Medio de Pago -->
+          <div class="form-section">
+            <h3>Monto y Medio de Pago</h3>
+            <div class="form-grid">
+              <div class="form-field required">
+                <label for="monto">Monto</label>
+                <input type="number" id="monto" name="monto" step="0.01" min="0" required placeholder="0.00">
+              </div>
+              
+              <div class="form-field">
+                <label for="medioPago">Medio de Pago</label>
+                <select id="medioPago" name="medioPago">
+                  <option value="">Seleccionar...</option>
+                  <option value="Efectivo">Efectivo</option>
+                  <option value="Transferencia">Transferencia</option>
+                  <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
+                  <option value="Tarjeta de Débito">Tarjeta de Débito</option>
+                  <option value="Cheque">Cheque</option>
+                  <option value="Mercado Pago">Mercado Pago</option>
+                  <option value="Otro">Otro</option>
+                </select>
+              </div>
+              
+              <div class="form-field">
+                <label for="comprobante">Comprobante</label>
+                <input type="text" id="comprobante" name="comprobante" placeholder="Número de comprobante">
+              </div>
+            </div>
+          </div>
+
+          <!-- Sección: Descripción y Proyecto -->
+          <div class="form-section">
+            <h3>Descripción y Proyecto</h3>
+            <div class="form-grid">
+              <div class="form-field" style="grid-column: span 2;">
+                <label for="descripcion">Descripción</label>
+                <textarea id="descripcion" name="descripcion" rows="3" placeholder="Descripción detallada del movimiento"></textarea>
+              </div>
+              
+              <div class="form-field">
+                <label for="proyecto">Proyecto</label>
+                <input type="text" id="proyecto" name="proyecto" list="proyectos-sugeridos" placeholder="Proyecto asociado">
+              </div>
+            </div>
+          </div>
+
+          <!-- Sección: Responsable y Relaciones -->
+          <div class="form-section">
+            <h3>Responsable y Relaciones</h3>
+            <div class="form-grid">
+              <div class="form-field">
+                <label for="responsable">Responsable</label>
+                <input type="text" id="responsable" name="responsable" list="responsables-sugeridos">
+              </div>
+              
+              <div class="form-field">
+                <label for="clienteProveedor">Cliente/Proveedor</label>
+                <input type="text" id="clienteProveedor" name="clienteProveedor" list="clientes-proveedores-sugeridos">
+              </div>
+              
+              <div class="form-field">
+                <label for="idRelacionado">ID Relacionado</label>
+                <input type="text" id="idRelacionado" name="idRelacionado" placeholder="ID de registro relacionado">
+              </div>
+            </div>
+          </div>
+
+          <!-- Sección: Observaciones y Configuración -->
+          <div class="form-section">
+            <h3>Observaciones y Configuración</h3>
+            <div class="form-grid">
+              <div class="form-field" style="grid-column: span 2;">
+                <label for="observaciones">Observaciones</label>
+                <textarea id="observaciones" name="observaciones" rows="2" placeholder="Observaciones adicionales"></textarea>
+              </div>
+              
+              <div class="form-field checkbox-field">
+                <input type="checkbox" id="reflejarEnCaja" name="reflejarEnCaja" checked>
+                <label for="reflejarEnCaja">Reflejar en Caja_Movimientos</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Datalists para autocompletar -->
+          <datalist id="categorias-sugeridas">
+            <option value="Ventas">
+            <option value="Compras">
+            <option value="Sueldos">
+            <option value="Honorarios">
+            <option value="Alquiler">
+            <option value="Servicios">
+            <option value="Impuestos">
+            <option value="Materiales">
+            <option value="Equipamiento">
+            <option value="Marketing">
+            <option value="Viajes">
+            <option value="Capacitación">
+            <option value="Mantenimiento">
+            <option value="Seguros">
+            <option value="Otros">
+          </datalist>
+          
+          <datalist id="subcategorias-sugeridas">
+            <option value="Cobro Cliente">
+            <option value="Pago Proveedor">
+            <option value="Sueldo Base">
+            <option value="Comisiones">
+            <option value="Luz">
+            <option value="Agua">
+            <option value="Gas">
+            <option value="Internet">
+            <option value="Telefonía">
+            <option value="IVA">
+            <option value="Ganancias">
+            <option value="Publicidad">
+            <option value="Redes Sociales">
+          </datalist>
+          
+          <datalist id="proyectos-sugeridos">
+            <option value="Desarrollo Agroecológico">
+            <option value="BioEmprende">
+            <option value="Huerta Orgánica">
+            <option value="Consultoría">
+            <option value="Desarrollo Web">
+            <option value="Capacitaciones">
+          </datalist>
+          
+          <datalist id="responsables-sugeridos">
+            <option value="Hernán Garbarino">
+            <option value="María García">
+            <option value="Carlos López">
+            <option value="Ana Martínez">
+          </datalist>
+          
+          <datalist id="clientes-proveedores-sugeridos">
+            <option value="La Esencia">
+            <option value="BioEmprende">
+            <option value="Empresa XYZ">
+            <option value="Cliente Final">
+          </datalist>
+
+          <div class="form-actions">
             <button type="submit" class="btn">Guardar Registro</button>
-            <button type="reset" class="btn secondary">Limpiar</button>
+            <button type="reset" class="btn secondary">Limpiar Formulario</button>
+            <div style="flex: 1;"></div>
+            <span class="text-muted" style="font-size: 12px;">* Campos obligatorios</span>
           </div>
         </form>
       </div>
@@ -112,18 +303,20 @@
       <!-- TABLA DE REGISTROS -->
       <div class="card" data-grid="full">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-          <h2 style="margin: 0;">Registros Existentes</h2>
-          <div style="display: flex; gap: 8px;">
+          <h2 style="margin: 0;">Registros Existentes - Finanzas_RegistroDiario</h2>
+          <div style="display: flex; gap: 8px; align-items: center;">
             <input type="text" id="buscar-registro" placeholder="Buscar..." 
-                   style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); color: var(--text); padding: 6px 10px; border-radius: 6px;">
+                   style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); color: var(--text); padding: 6px 10px; border-radius: 6px; min-width: 200px;">
             <select id="filtro-mes" class="btn small">
               <option value="">Todos los meses</option>
-              <!-- Se llenará con los meses disponibles -->
             </select>
             <select id="filtro-tipo" class="btn small">
               <option value="">Todos los tipos</option>
-              <option value="Ingreso">Ingreso</option>
-              <option value="Egreso">Egreso</option>
+              <option value="Ingreso">Ingresos</option>
+              <option value="Egreso">Egresos</option>
+            </select>
+            <select id="filtro-categoria" class="btn small">
+              <option value="">Todas las categorías</option>
             </select>
           </div>
         </div>
@@ -135,8 +328,16 @@
                 <th>Fecha</th>
                 <th>Tipo</th>
                 <th>Categoría</th>
-                <th>Descripción</th>
+                <th>Subcategoría</th>
                 <th>Monto</th>
+                <th>Medio Pago</th>
+                <th>Comprobante</th>
+                <th>Descripción</th>
+                <th>Proyecto</th>
+                <th>Responsable</th>
+                <th>Cliente/Proveedor</th>
+                <th>ID Relacionado</th>
+                <th>Observaciones</th>
                 <th>Reflejado en Caja</th>
                 <th>Acciones</th>
               </tr>
