@@ -298,7 +298,8 @@ const DashboardApp = {
           cotizacionesMonedas: true,
           analisisCategorias: false,
           cuentasPendientes: false,
-          controlStock: false
+          controlStock: false,
+      proyeccionFlujo: false
         };
       }
     } catch (error) {
@@ -309,7 +310,8 @@ const DashboardApp = {
         cotizacionesMonedas: true,
         analisisCategorias: false,
         cuentasPendientes: false,
-        controlStock: false
+        controlStock: false,
+      proyeccionFlujo: false
       };
     }
 
@@ -320,7 +322,8 @@ const DashboardApp = {
       cotizacionesMonedas: { name: 'Cotizaciones', category: 'liviano' },
       analisisCategorias: { name: 'Análisis por Categorías', category: 'mediano' },
       cuentasPendientes: { name: 'Cuentas Pendientes', category: 'mediano' },
-      controlStock: { name: 'Control de Stock', category: 'pesado' }
+      controlStock: { name: 'Control de Stock', category: 'pesado' },
+  proyeccionFlujo: { name: 'Proyección de Flujo', category: 'pesado' } 
     };
 
     let html = '';
