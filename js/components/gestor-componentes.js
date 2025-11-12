@@ -120,7 +120,8 @@ ComponentSystem.registrar('gestorComponentes', {
       analisisCategorias: 'Análisis por Categorías',
       cuentasPendientes: 'Cuentas Pendientes',
       controlStock: 'Control de Stock',
-      proyeccionFlujo: 'Proyección de Flujo'
+      proyeccionFlujo: 'Proyección de Flujo',
+      calculadoraInversion: 'Calculadora de Inversiones'
     };
     return nombres[id] || id;
   },
@@ -160,7 +161,8 @@ ComponentSystem.registrar('gestorComponentes', {
       analisisCategorias: 'span-6',
       cuentasPendientes: 'span-6', 
       controlStock: 'span-6',
-      proyeccionFlujo: 'span-6'
+      proyeccionFlujo: 'span-6',
+      calculadoraInversion: 'span-6'
     };
     return grids[componentId] || 'span-6';
   },
