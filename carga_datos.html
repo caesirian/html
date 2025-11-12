@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Carga de Datos - HG Soluciones</title>
+  
+  <!-- CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/datatables.net-dt@1.13.6/css/jquery.dataTables.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/datatables.net-buttons-dt@2.4.1/css/buttons.dataTables.min.css" rel="stylesheet"/>
+  <link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" role="navigation">
+      <h1>HG - Carga de Datos</h1>
+      <div class="nav">
+        <button id="nav-dashboard" onclick="location.href='dash_beta.html'">Dashboard</button>
+        <button id="nav-carga-datos" class="active">Carga de Datos</button>
+        <button id="nav-ventas">Ventas</button>
+        <button id="nav-finanzas">Finanzas</button>
+        <button id="nav-simulador">Simulador</button>
+        <button id="nav-tablas">Tablas</button>
+      </div>
+      <footer style="margin-top:14px;color:var(--muted);font-size:12px">
+        <div>Conexión: <span id="conn-status">sin iniciar</span></div>
+        <div style="margin-top:8px"><button class="btn small" id="refresh-data">Actualizar datos</button></div>
+      </footer>
+    </aside>
+
+    <main>
+      <header class="topbar header-hg" style="display:flex; align-items:center; gap:12px;">
+        <button id="menu-toggle" class="menu-toggle">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 12H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M3 6H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M3 18H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        
+        <div style="flex: 1;">
+          <h1 style="margin:0">Carga de Datos Financieros</h1>
+          <p style="margin:0; color:var(--muted); font-size:13px">Formulario para cargar nuevos registros en Finanzas_RegistroDiario</p>
+        </div>
+        
+        <div style="display:flex; gap:8px; align-items:center;">
+          <div id="estado" class="text-muted">Esperando datos...</div>
+        </div>
+      </header>
+
+      <!-- Overlay para móviles -->
+      <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+      <!-- FORMULARIO DE CARGA -->
+      <div class="card" data-grid="full" style="margin-bottom: 20px;">
+        <h2 style="margin-top: 0;">Nuevo Registro Financiero</h2>
+        <form id="form-carga">
+          <div class="dashboard-grid" style="grid-template-columns: repeat(12, 1fr); gap: 12px;">
+            <!-- Fecha -->
+            <div class="card" data-grid="span-3">
+              <label for="fecha" style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--muted);">Fecha *</label>
+              <input type="date" id="fecha" name="fecha" required 
+                     style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); color: var(--text);">
+            </div>
+
+            <!-- Monto -->
+            <div class="card" data-grid="span-3">
+              <label for="monto" style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--muted);">Monto *</label>
+              <input type="number" id="monto" name="monto" step="0.01" required 
+                     style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); color: var(--text);">
+            </div>
+
+            <!-- Tipo -->
+            <div class="card" data-grid="span-3">
+              <label for="tipo" style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--muted);">Tipo *</label>
+              <select id="tipo" name="tipo" required 
+                      style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); color: var(--text);">
+                <option value="">Seleccionar...</option>
+                <option value="Ingreso">Ingreso</option>
+                <option value="Egreso">Egreso</option>
+              </select>
+            </div>
+
+            <!-- Categoría -->
+            <div class="card" data-grid="span-3">
+              <label for="categoria" style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--muted);">Categoría *</label>
+              <input type="text" id="categoria" name="categoria" required 
+                     style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); color: var(--text);">
+            </div>
+
+            <!-- Descripción -->
+            <div class="card" data-grid="span-6">
+              <label for="descripcion" style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--muted);">Descripción</label>
+              <input type="text" id="descripcion" name="descripcion" 
+                     style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); color: var(--text);">
+            </div>
+
+            <!-- Reflejar en Caja -->
+            <div class="card" data-grid="span-6" style="display: flex; align-items: center;">
+              <input type="checkbox" id="reflejarEnCaja" name="reflejarEnCaja" style="margin-right: 8px;">
+              <label for="reflejarEnCaja" style="font-size: 14px; color: var(--muted);">Reflejar en Caja_Movimientos</label>
+            </div>
+          </div>
+
+          <div style="margin-top: 16px; display: flex; gap: 12px;">
+            <button type="submit" class="btn">Guardar Registro</button>
+            <button type="reset" class="btn secondary">Limpiar</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- TABLA DE REGISTROS -->
+      <div class="card" data-grid="full">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h2 style="margin: 0;">Registros Existentes</h2>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="buscar-registro" placeholder="Buscar..." 
+                   style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); color: var(--text); padding: 6px 10px; border-radius: 6px;">
+            <select id="filtro-mes" class="btn small">
+              <option value="">Todos los meses</option>
+              <!-- Se llenará con los meses disponibles -->
+            </select>
+            <select id="filtro-tipo" class="btn small">
+              <option value="">Todos los tipos</option>
+              <option value="Ingreso">Ingreso</option>
+              <option value="Egreso">Egreso</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="tabla-container">
+          <table id="tabla-registros" class="tabla-datos" style="width: 100%;">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Tipo</th>
+                <th>Categoría</th>
+                <th>Descripción</th>
+                <th>Monto</th>
+                <th>Reflejado en Caja</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Se llenará dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <footer class="footer-hg">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div class="text-muted">Última sincronización: <span id="last-sync">nunca</span></div>
+          <div class="text-muted">Cache: <span id="cache-status">no</span></div>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- JS Libraries -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/datatables.net-buttons@2.4.1/js/dataTables.buttons.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/datatables.net-buttons@2.4.1/js/buttons.html5.min.js"></script>
+
+  <!-- Nuestra aplicación -->
+  <script src="js/core/config.js"></script>
+  <script src="js/core/utils.js"></script>
+  <script src="js/core/data-manager.js"></script>
+  
+  <!-- Script específico para esta página -->
+  <script src="js/carga-datos.js"></script>
+</body>
+</html>
