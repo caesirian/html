@@ -213,3 +213,22 @@ const ComponentManager = {
     return scripts.filter(Boolean);
   }
 };
+
+
+        // AGREGAR esta función al component-manager.js existente
+getComponentInfo(componentId) {
+  // Mapeo simple de componentes a su información
+  const componentInfo = {
+    saldoCaja: { name: 'Saldo de Caja', category: 'liviano', grid: 'span-3' },
+    ingresosVsEgresos: { name: 'Ingresos vs Egresos', category: 'liviano', grid: 'span-5' },
+    egresosVsAnterior: { name: 'Comparación Mes Anterior', category: 'liviano', grid: 'span-4' },
+    cotizacionesMonedas: { name: 'Cotizaciones', category: 'liviano', grid: 'span-6' },
+    analisisCategorias: { name: 'Análisis por Categorías', category: 'mediano', grid: 'span-6' },
+    cuentasPendientes: { name: 'Cuentas Pendientes', category: 'mediano', grid: 'span-6' },
+    controlStock: { name: 'Control de Stock', category: 'pesado', grid: 'span-6' },
+    proyeccionFlujo: { name: 'Proyección de Flujo', category: 'pesado', grid: 'span-6' },
+    calculadoraInversiones: { name: 'Calculadora de Inversiones', category: 'mediano', grid: 'span-6' }
+  };
+  
+  return componentInfo[componentId] || { name: componentId, category: 'liviano', grid: 'span-6' };
+},
