@@ -121,7 +121,8 @@ ComponentSystem.registrar('gestorComponentes', {
       cuentasPendientes: 'Cuentas Pendientes',
       controlStock: 'Control de Stock',
       proyeccionFlujo: 'Proyección de Flujo',
-      calculadoraInversion: 'Calculadora de Inversiones'
+      calculadoraInversion: 'Calculadora de Inversiones',
+      calculadoraInversiones: 'Calculadora de Inversiones 2'
     };
     return nombres[id] || id;
   },
