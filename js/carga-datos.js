@@ -5,11 +5,30 @@ const CargaDatosApp = {
   async init() {
     console.log('🚀 Iniciando app de carga de datos...');
     
+    // Limpiar filas vacías excesivas al iniciar
+    await this.limpiarFilasVacias();
+    
     const estructura = await this.verificarEstructuraHoja();
     console.log('📊 Estructura verificada:', estructura);
     
     this.setupEventListeners();
     await this.loadData();
+  },
+
+  async limpiarFilasVacias() {
+    try {
+      console.log('🧹 Solicitando limpieza de filas vacías...');
+      
+      const url = CONFIG.GAS_ENDPOINT + '?action=cleanEmptyRows&sheet=Finanzas_RegistroDiario';
+      const response = await fetch(url);
+      const result = await response.json();
+      
+      console.log('✅ Resultado limpieza:', result);
+      return result;
+    } catch (error) {
+      console.error('Error limpiando filas:', error);
+      return null;
+    }
   },
 
   async verificarEstructuraHoja() {
