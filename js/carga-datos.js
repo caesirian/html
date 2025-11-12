@@ -1,48 +1,59 @@
-// Reemplazar la función enviarRegistro con esta versión mejorada
 async enviarRegistro(registro) {
   try {
-    console.log('📤 Enviando registro:', registro);
+    console.log('📤 PREPARANDO ENVÍO DE REGISTRO:', registro);
     
-    const endpoint = CONFIG.GAS_ENDPOINT;
-    
-    // Construir URL con parámetros
-    const url = new URL(endpoint);
-    url.searchParams.append('action', 'insert');
-    url.searchParams.append('sheet', 'Finanzas_RegistroDiario');
-    
-    // Agregar todos los campos del registro
-    Object.keys(registro).forEach(key => {
-      if (registro[key] !== null && registro[key] !== undefined && registro[key] !== '') {
-        url.searchParams.append(key, registro[key]);
+    const datosEnvio = {
+      action: 'insert',
+      sheet: 'Finanzas_RegistroDiario',
+      Fecha: registro.Fecha,
+      Monto: registro.Monto.toString(),
+      Tipo: registro.Tipo,
+      Categoría: registro.Categoría,
+      Subcategoría: registro.Subcategoría,
+      MediodePago: registro['Medio de Pago'],
+      Comprobante: registro.Comprobante,
+      Descripción: registro.Descripción,
+      Proyecto: registro.Proyecto,
+      Responsable: registro.Responsable,
+      ClienteProveedor: registro['Cliente/Proveedor'],
+      IDRelacionado: registro['ID Relacionado'],
+      Observaciones: registro.Observaciones,
+      ReflejarenCaja: registro['Reflejar en Caja'],
+      Mes: registro.Mes
+    };
+
+    Object.keys(datosEnvio).forEach(key => {
+      if (datosEnvio[key] === '' || datosEnvio[key] === null || datosEnvio[key] === undefined) {
+        delete datosEnvio[key];
       }
     });
 
-    console.log('🔗 URL de envío:', url.toString());
+    console.log('📨 Datos a enviar (limpios):', datosEnvio);
 
-    const response = await fetch(url.toString(), {
-      method: 'GET', // Cambiar a GET ya que GAS funciona con doGet
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const url = CONFIG.GAS_ENDPOINT + '?' + new URLSearchParams(datosEnvio);
+    console.log('🔗 URL final:', url);
 
-    console.log('📨 Respuesta del servidor:', response.status, response.statusText);
+    const response = await fetch(url);
+    console.log('📞 Respuesta HTTP:', response.status, response.statusText);
+
+    const responseText = await response.text();
+    console.log('📄 Respuesta cruda:', responseText);
 
     if (!response.ok) {
-      throw new Error(`Error HTTP: ${response.status} - ${response.statusText}`);
+      throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
     }
 
-    const result = await response.json();
-    console.log('✅ Resultado del servidor:', result);
+    const result = JSON.parse(responseText);
+    console.log('✅ Resultado parseado:', result);
 
-    if (result.success !== true) {
-      throw new Error(result.error || 'Error desconocido al guardar');
+    if (!result.success) {
+      throw new Error(result.error || 'Error desconocido del servidor');
     }
 
     return result;
 
   } catch (error) {
-    console.error('❌ Error en enviarRegistro:', error);
+    console.error('❌ ERROR EN ENVIAR REGISTRO:', error);
     throw error;
   }
 },
