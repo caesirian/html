@@ -18,6 +18,8 @@ const ComponentManager = {
         egresosVsAnterior: true,
         cotizacionesMonedas: true,
         proyeccionFlujo: true,
+        calculadoraInversion: true,
+        calculadoraInversiones: true,
         analisisCategorias: false,
         cuentasPendientes: false,
         controlStock: false
