@@ -66,11 +66,11 @@ const CargaDatosApp = {
     }
   },
 
-  mostrarEstado(mensaje, tipo) {
+  mostrarEstado(mensaje, tipo = 'info') {
     const estadoElement = document.getElementById('estado');
     if (!estadoElement) return;
 
-    var iconos = {
+    const iconos = {
       loading: '<span class="loader"></span> ',
       success: '<span style="color: #28a745;">✓</span> ',
       error: '<span style="color: #dc3545;">✗</span> ',
@@ -81,8 +81,8 @@ const CargaDatosApp = {
   },
 
   renderizarTabla(data) {
-    var registros = data.Finanzas_RegistroDiario || data['Finanzas_RegistroDiario'] || [];
-    var tbody = document.querySelector('#tabla-registros tbody');
+    const registros = data.Finanzas_RegistroDiario || data['Finanzas_RegistroDiario'] || [];
+    const tbody = document.querySelector('#tabla-registros tbody');
     
     if (!tbody) return;
 
@@ -94,30 +94,27 @@ const CargaDatosApp = {
       return;
     }
 
-    var registrosOrdenados = registros.slice().sort(function(a, b) {
-      var fechaA = new Date(a.Fecha || a.Date || a.fecha);
-      var fechaB = new Date(b.Fecha || b.Date || b.fecha);
-      return fechaB - fechaA;
+    const registrosOrdenados = [...registros].sort((a, b) => {
+      return new Date(b.Fecha || b.Date || b.fecha) - new Date(a.Fecha || a.Date || a.fecha);
     });
 
-    var self = this;
-    registrosOrdenados.forEach(function(registro) {
-      var fila = document.createElement('tr');
+    registrosOrdenados.forEach(registro => {
+      const fila = document.createElement('tr');
       
-      var fecha = registro.Fecha || registro.Date || registro.fecha || '';
-      var tipo = registro.Tipo || registro.tipo || '';
-      var categoria = registro.Categoría || registro.Categoria || registro.categoría || '';
-      var subcategoria = registro.Subcategoría || registro.Subcategoria || '';
-      var monto = UTILS.parseNumber(registro.Monto || registro.monto || 0);
-      var medioPago = registro['Medio de Pago'] || registro.MedioPago || '';
-      var comprobante = registro.Comprobante || registro.comprobante || '';
-      var descripcion = registro.Descripción || registro.Descripcion || registro.descripción || '';
-      var proyecto = registro.Proyecto || registro.proyecto || '';
-      var responsable = registro.Responsable || registro.responsable || '';
-      var clienteProveedor = registro['Cliente/Proveedor'] || registro.ClienteProveedor || '';
-      var idRelacionado = registro['ID Relacionado'] || registro.IDRelacionado || '';
-      var observaciones = registro.Observaciones || registro.observaciones || '';
-      var reflejarEnCaja = registro['Reflejar en Caja'] || registro.ReflejarEnCaja || '';
+      const fecha = registro.Fecha || registro.Date || registro.fecha || '';
+      const tipo = registro.Tipo || registro.tipo || '';
+      const categoria = registro.Categoría || registro.Categoria || registro.categoría || '';
+      const subcategoria = registro.Subcategoría || registro.Subcategoria || '';
+      const monto = UTILS.parseNumber(registro.Monto || registro.monto || 0);
+      const medioPago = registro['Medio de Pago'] || registro.MedioPago || '';
+      const comprobante = registro.Comprobante || registro.comprobante || '';
+      const descripcion = registro.Descripción || registro.Descripcion || registro.descripción || '';
+      const proyecto = registro.Proyecto || registro.proyecto || '';
+      const responsable = registro.Responsable || registro.responsable || '';
+      const clienteProveedor = registro['Cliente/Proveedor'] || registro.ClienteProveedor || '';
+      const idRelacionado = registro['ID Relacionado'] || registro.IDRelacionado || '';
+      const observaciones = registro.Observaciones || registro.observaciones || '';
+      const reflejarEnCaja = registro['Reflejar en Caja'] || registro.ReflejarEnCaja || '';
 
       fila.innerHTML = `
         <td>${UTILS.formatDate(fecha)}</td>
@@ -133,12 +130,12 @@ const CargaDatosApp = {
         </td>
         <td>${medioPago}</td>
         <td>${comprobante}</td>
-        <td title="${descripcion}">${self.acortarTexto(descripcion, 30)}</td>
+        <td title="${descripcion}">${this.acortarTexto(descripcion, 30)}</td>
         <td>${proyecto}</td>
         <td>${responsable}</td>
         <td>${clienteProveedor}</td>
         <td>${idRelacionado}</td>
-        <td title="${observaciones}">${self.acortarTexto(observaciones, 30)}</td>
+        <td title="${observaciones}">${this.acortarTexto(observaciones, 30)}</td>
         <td>${reflejarEnCaja ? 'Sí' : 'No'}</td>
         <td>
           <button class="btn small secondary" onclick="CargaDatosApp.editarRegistro('${registro.ID || ''}')">Editar</button>
@@ -156,7 +153,7 @@ const CargaDatosApp = {
   },
 
   inicializarDataTable(registros) {
-    var table = $('#tabla-registros');
+    const table = $('#tabla-registros');
     
     if ($.fn.dataTable.isDataTable(table)) {
       table.DataTable().destroy();
@@ -171,7 +168,7 @@ const CargaDatosApp = {
       buttons: [{ 
         extend: 'csv', 
         text: 'Exportar CSV',
-        filename: 'registros_finanzas_' + new Date().toISOString().split('T')[0]
+        filename: `registros_finanzas_${new Date().toISOString().split('T')[0]}`
       }],
       language: {
         search: "Buscar:",
@@ -195,62 +192,49 @@ const CargaDatosApp = {
   },
 
   actualizarFiltros(data) {
-    var registros = data.Finanzas_RegistroDiario || data['Finanzas_RegistroDiario'] || [];
+    const registros = data.Finanzas_RegistroDiario || data['Finanzas_RegistroDiario'] || [];
     
-    var filtroMes = document.getElementById('filtro-mes');
-    var meses = [];
-    var mesesSet = new Set();
-    
-    registros.forEach(function(r) {
-      var fecha = UTILS.parseDate(r.Fecha || r.Date || r.fecha);
-      var mesKey = fecha.getFullYear() + '-' + String(fecha.getMonth() + 1).padStart(2, '0');
-      mesesSet.add(mesKey);
-    });
-    
-    meses = Array.from(mesesSet).sort().reverse();
+    const filtroMes = document.getElementById('filtro-mes');
+    const meses = [...new Set(registros.map(r => {
+      const fecha = UTILS.parseDate(r.Fecha || r.Date || r.fecha);
+      return `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
+    }))].sort().reverse();
 
     filtroMes.innerHTML = '<option value="">Todos los meses</option>';
-    meses.forEach(function(mes) {
-      var option = document.createElement('option');
+    meses.forEach(mes => {
+      const option = document.createElement('option');
       option.value = mes;
       option.textContent = UTILS.formatMonthKey(mes, true);
       filtroMes.appendChild(option);
     });
 
-    var filtroCategoria = document.getElementById('filtro-categoria');
-    var categorias = [];
-    var categoriasSet = new Set();
-    
-    registros.forEach(function(r) {
-      var cat = r.Categoría || r.Categoria || r.categoría;
-      if (cat) categoriasSet.add(cat);
-    });
-    
-    categorias = Array.from(categoriasSet).sort();
+    const filtroCategoria = document.getElementById('filtro-categoria');
+    const categorias = [...new Set(registros.map(r => 
+      r.Categoría || r.Categoria || r.categoría
+    ).filter(Boolean))].sort();
 
     filtroCategoria.innerHTML = '<option value="">Todas las categorías</option>';
-    categorias.forEach(function(cat) {
-      var option = document.createElement('option');
+    categorias.forEach(cat => {
+      const option = document.createElement('option');
       option.value = cat;
       option.textContent = cat;
       filtroCategoria.appendChild(option);
     });
 
-    var self = this;
-    filtroMes.addEventListener('change', function() { self.aplicarFiltros(); });
-    document.getElementById('filtro-tipo').addEventListener('change', function() { self.aplicarFiltros(); });
-    filtroCategoria.addEventListener('change', function() { self.aplicarFiltros(); });
-    document.getElementById('buscar-registro').addEventListener('input', function() { self.aplicarFiltros(); });
+    filtroMes.addEventListener('change', () => this.aplicarFiltros());
+    document.getElementById('filtro-tipo').addEventListener('change', () => this.aplicarFiltros());
+    filtroCategoria.addEventListener('change', () => this.aplicarFiltros());
+    document.getElementById('buscar-registro').addEventListener('input', () => this.aplicarFiltros());
   },
 
   aplicarFiltros() {
-    var tabla = $('#tabla-registros').DataTable();
+    const tabla = $('#tabla-registros').DataTable();
     if (!tabla) return;
 
-    var filtroMes = document.getElementById('filtro-mes').value;
-    var filtroTipo = document.getElementById('filtro-tipo').value;
-    var filtroCategoria = document.getElementById('filtro-categoria').value;
-    var busqueda = document.getElementById('buscar-registro').value;
+    const filtroMes = document.getElementById('filtro-mes').value;
+    const filtroTipo = document.getElementById('filtro-tipo').value;
+    const filtroCategoria = document.getElementById('filtro-categoria').value;
+    const busqueda = document.getElementById('buscar-registro').value;
 
     tabla.column(0).search(filtroMes, true, false);
     tabla.column(1).search(filtroTipo);
@@ -259,44 +243,42 @@ const CargaDatosApp = {
   },
 
   setupEventListeners() {
-    var form = document.getElementById('form-carga');
-    var self = this;
-    
-    form.addEventListener('submit', function(e) {
+    const form = document.getElementById('form-carga');
+    form.addEventListener('submit', (e) => {
       e.preventDefault();
-      self.guardarRegistro();
+      this.guardarRegistro();
     });
 
-    var fechaInput = document.getElementById('fecha');
+    const fechaInput = document.getElementById('fecha');
     if (fechaInput) {
       fechaInput.value = UTILS.getCurrentDateForInput();
     }
 
-    var menuToggle = document.getElementById('menu-toggle');
-    var sidebar = document.querySelector('.sidebar');
-    var overlay = document.getElementById('sidebar-overlay');
+    const menuToggle = document.getElementById('menu-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
     
     if (menuToggle && sidebar && overlay) {
-      menuToggle.addEventListener('click', function() {
+      menuToggle.addEventListener('click', () => {
         sidebar.classList.toggle('active');
         overlay.classList.toggle('active');
       });
       
-      overlay.addEventListener('click', function() {
+      overlay.addEventListener('click', () => {
         sidebar.classList.remove('active');
         overlay.classList.remove('active');
       });
     }
 
-    var refreshBtn = document.getElementById('refresh-data');
+    const refreshBtn = document.getElementById('refresh-data');
     if (refreshBtn) {
-      refreshBtn.addEventListener('click', function() { self.loadData(); });
+      refreshBtn.addEventListener('click', () => this.loadData());
     }
 
-    var tipoSelect = document.getElementById('tipo');
-    var categoriaInput = document.getElementById('categoria');
+    const tipoSelect = document.getElementById('tipo');
+    const categoriaInput = document.getElementById('categoria');
     
-    tipoSelect.addEventListener('change', function() {
+    tipoSelect.addEventListener('change', () => {
       if (tipoSelect.value === 'Ingreso' && !categoriaInput.value) {
         categoriaInput.value = 'Ventas';
       } else if (tipoSelect.value === 'Egreso' && !categoriaInput.value) {
@@ -306,13 +288,13 @@ const CargaDatosApp = {
   },
 
   async guardarRegistro() {
-    var form = document.getElementById('form-carga');
-    var formData = new FormData(form);
+    const form = document.getElementById('form-carga');
+    const formData = new FormData(form);
 
-    var fecha = formData.get('fecha');
-    var monto = formData.get('monto');
-    var tipo = formData.get('tipo');
-    var categoria = formData.get('categoria');
+    const fecha = formData.get('fecha');
+    const monto = formData.get('monto');
+    const tipo = formData.get('tipo');
+    const categoria = formData.get('categoria');
 
     if (!fecha || !monto || !tipo || !categoria) {
       alert('Por favor complete todos los campos obligatorios (marcados con *).');
@@ -327,7 +309,7 @@ const CargaDatosApp = {
     try {
       this.mostrarEstado('Guardando registro...', 'loading');
 
-      var registro = {
+      const registro = {
         Fecha: fecha,
         Monto: parseFloat(monto),
         Tipo: tipo,
@@ -347,12 +329,11 @@ const CargaDatosApp = {
 
       console.log('💾 Registro a guardar:', registro);
 
-      var resultado = await this.enviarRegistro(registro);
+      const resultado = await this.enviarRegistro(registro);
 
       this.mostrarEstado('✓ Registro guardado exitosamente', 'success');
       
-      var self = this;
-      setTimeout(function() {
+      setTimeout(() => {
         alert('✅ Registro guardado correctamente en la fila: ' + (resultado.row || 'N/A'));
       }, 100);
 
@@ -364,7 +345,7 @@ const CargaDatosApp = {
     } catch (error) {
       console.error('❌ Error guardando registro:', error);
       
-      var mensajeError = 'Error al guardar el registro. ';
+      let mensajeError = 'Error al guardar el registro. ';
       
       if (error.message.includes('404') || error.message.includes('Failed to fetch')) {
         mensajeError += 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
@@ -383,7 +364,7 @@ const CargaDatosApp = {
     try {
       console.log('📤 PREPARANDO ENVÍO DE REGISTRO:', registro);
       
-      var datosEnvio = {
+      const datosEnvio = {
         action: 'insert',
         sheet: 'Finanzas_RegistroDiario',
         Fecha: registro.Fecha,
@@ -403,7 +384,7 @@ const CargaDatosApp = {
         Mes: registro.Mes
       };
 
-      Object.keys(datosEnvio).forEach(function(key) {
+      Object.keys(datosEnvio).forEach(key => {
         if (datosEnvio[key] === '' || datosEnvio[key] === null || datosEnvio[key] === undefined) {
           delete datosEnvio[key];
         }
@@ -411,20 +392,20 @@ const CargaDatosApp = {
 
       console.log('📨 Datos a enviar (limpios):', datosEnvio);
 
-      var url = CONFIG.GAS_ENDPOINT + '?' + new URLSearchParams(datosEnvio);
+      const url = CONFIG.GAS_ENDPOINT + '?' + new URLSearchParams(datosEnvio);
       console.log('🔗 URL final:', url);
 
-      var response = await fetch(url);
+      const response = await fetch(url);
       console.log('📞 Respuesta HTTP:', response.status, response.statusText);
 
-      var responseText = await response.text();
+      const responseText = await response.text();
       console.log('📄 Respuesta cruda:', responseText);
 
       if (!response.ok) {
-        throw new Error('Error HTTP ' + response.status + ': ' + response.statusText);
+        throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
       }
 
-      var result = JSON.parse(responseText);
+      const result = JSON.parse(responseText);
       console.log('✅ Resultado parseado:', result);
 
       if (!result.success) {
@@ -440,16 +421,8 @@ const CargaDatosApp = {
   },
 
   editarRegistro(id) {
-    var registros = this.currentData ? 
-      (this.currentData.Finanzas_RegistroDiario || this.currentData['Finanzas_RegistroDiario'] || []) : [];
-    
-    var registro = null;
-    for (var i = 0; i < registros.length; i++) {
-      if (registros[i].ID === id) {
-        registro = registros[i];
-        break;
-      }
-    }
+    const registros = this.currentData?.Finanzas_RegistroDiario || this.currentData?.['Finanzas_RegistroDiario'] || [];
+    const registro = registros.find(r => r.ID === id);
     
     if (!registro) {
       alert('Registro no encontrado');
@@ -471,14 +444,12 @@ const CargaDatosApp = {
     document.getElementById('observaciones').value = registro.Observaciones || registro.observaciones || '';
     document.getElementById('reflejarEnCaja').checked = registro['Reflejar en Caja'] || registro.ReflejarEnCaja || false;
 
-    var submitBtn = document.querySelector('#form-carga button[type="submit"]');
-    var originalText = submitBtn.textContent;
-    var self = this;
-    
+    const submitBtn = document.querySelector('#form-carga button[type="submit"]');
+    const originalText = submitBtn.textContent;
     submitBtn.textContent = 'Actualizar Registro';
-    submitBtn.onclick = function(e) {
+    submitBtn.onclick = (e) => {
       e.preventDefault();
-      self.actualizarRegistro(id);
+      this.actualizarRegistro(id);
       submitBtn.textContent = originalText;
       submitBtn.onclick = null;
     };
@@ -491,20 +462,18 @@ const CargaDatosApp = {
   }
 };
 
-// Agregar función auxiliar si no existe
 if (typeof UTILS.getCurrentDateForInput === 'undefined') {
   UTILS.getCurrentDateForInput = function() {
-    var now = new Date();
-    var year = now.getFullYear();
-    var month = String(now.getMonth() + 1).padStart(2, '0');
-    var day = String(now.getDate()).padStart(2, '0');
-    return year + '-' + month + '-' + day;
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 }
 
-// Inicialización
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', () => {
     CargaDatosApp.init();
   });
 } else {
