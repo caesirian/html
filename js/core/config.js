@@ -12,6 +12,7 @@ const CONFIG = {
     'cotizacionesMonedas',
     'analisisCategorias',
     'cuentasPendientes',
+        'proyeccionFlujo',
     'controlStock'
   ],
   
@@ -23,6 +24,7 @@ const CONFIG = {
     cotizacionesMonedas: true,
     analisisCategorias: false,
     cuentasPendientes: false,
+    proyeccionFlujo:true,
     controlStock: false
   }
 };
