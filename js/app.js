@@ -299,7 +299,8 @@ const DashboardApp = {
           analisisCategorias: false,
           cuentasPendientes: false,
           controlStock: false,
-      proyeccionFlujo: false
+      proyeccionFlujo: false,
+      calculadoraInversion: false
         };
       }
     } catch (error) {
@@ -311,7 +312,8 @@ const DashboardApp = {
         analisisCategorias: false,
         cuentasPendientes: false,
         controlStock: false,
-      proyeccionFlujo: false
+      proyeccionFlujo: false,
+      calculadoraInversion: false
       };
     }
 
@@ -323,7 +325,8 @@ const DashboardApp = {
       analisisCategorias: { name: 'Análisis por Categorías', category: 'mediano' },
       cuentasPendientes: { name: 'Cuentas Pendientes', category: 'mediano' },
       controlStock: { name: 'Control de Stock', category: 'pesado' },
-  proyeccionFlujo: { name: 'Proyección de Flujo', category: 'pesado' } 
+  proyeccionFlujo: { name: 'Proyección de Flujo', category: 'pesado' },
+  calculadoraInversion: { name: 'Calculadora de Inversiones', category: 'pesado' } 
     };
 
     let html = '';
