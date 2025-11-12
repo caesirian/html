@@ -57,3 +57,30 @@ async enviarRegistro(registro) {
     throw error;
   }
 },
+
+
+async verificarEstructuraHoja() {
+  try {
+    console.log('🔍 Verificando estructura de la hoja...');
+    
+    const url = CONFIG.GAS_ENDPOINT + '?action=debugSheetStructure';
+    const response = await fetch(url);
+    const result = await response.json();
+    
+    console.log('🏗️ Estructura de la hoja:', result);
+    return result;
+  } catch (error) {
+    console.error('Error verificando estructura:', error);
+    return null;
+  }
+},
+
+async init() {
+  console.log('🚀 Iniciando app de carga de datos...');
+  
+  const estructura = await this.verificarEstructuraHoja();
+  console.log('📊 Estructura verificada:', estructura);
+  
+  this.setupEventListeners();
+  await this.loadData();
+},
