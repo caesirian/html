@@ -13,6 +13,8 @@ const CONFIG = {
     'analisisCategorias',
     'cuentasPendientes',
         'proyeccionFlujo',
+        'calculadoraInversion',
+        'calculadoraInversiones',
     'controlStock'
   ],
   
@@ -25,6 +27,8 @@ const CONFIG = {
     analisisCategorias: false,
     cuentasPendientes: false,
     proyeccionFlujo:true,
+    calculadoraInversion:true,
+    calculadoraInversiones:true,
     controlStock: false
   }
 };
