@@ -141,31 +141,37 @@ const DashboardApp = {
     // Limpiar skeletons
     grid.innerHTML = '';
     
-    // Obtener componentes activos
-    let componentesActivos = [];
-    try {
-      if (typeof ComponentManager !== 'undefined') {
-        ComponentManager.init();
-        componentesActivos = ComponentManager.getActiveComponents();
-      } else {
-        componentesActivos = ['saldoCaja', 'ingresosVsEgresos', 'egresosVsAnterior', 'cotizacionesMonedas'];
-      }
-    } catch (error) {
-      console.warn('⚠️ Error al cargar ComponentManager, usando componentes por defecto');
-      componentesActivos = ['saldoCaja', 'ingresosVsEgresos', 'egresosVsAnterior', 'cotizacionesMonedas'];
-    }
-    
-    console.log('🎨 Renderizando componentes activos:', componentesActivos);
-    
-    if (componentesActivos.length === 0) {
-      grid.innerHTML = `
-        <div class="card" data-grid="full" style="text-align: center; padding: 40px;">
-          <h3>No hay componentes activos</h3>
-          <p>Usa el gestor de componentes para activar algunos componentes.</p>
-          <button class="btn" onclick="DashboardApp.mostrarGestorComponentes()">Abrir Gestor de Componentes</button>
-        </div>
-      `;
-      return;
+  // Obtener componentes activos
+  let componentesActivos = [];
+  try {
+    if (typeof ComponentManager !== 'undefined') {
+      ComponentManager.init();
+      componentesActivos = ComponentManager.getActiveComponents();
+      
+      // Cargar scripts de componentes dinámicamente
+      await ComponentManager.loadComponentScripts(componentesActivos);
+    } else {
+      // Fallback a componentes por defecto del registro
+      const defaultActive = ComponentsRegistry.getDefaultActive();
+      componentesActivos = Object.keys(defaultActive);
+    }
+  } catch (error) {
+    console.warn('⚠️ Error al cargar ComponentManager, usando componentes por defecto');
+    const defaultActive = ComponentsRegistry.getDefaultActive();
+    componentesActivos = Object.keys(defaultActive);
+  }
+  
+  console.log('🎨 Renderizando componentes activos:', componentesActivos);
+  
+  if (componentesActivos.length === 0) {
+    grid.innerHTML = `
+      <div class="card" data-grid="full" style="text-align: center; padding: 40px;">
+        <h3>No hay componentes activos</h3>
+        <p>Usa el gestor de componentes para activar algunos componentes.</p>
+        <button class="btn" onclick="DashboardApp.mostrarGestorComponentes()">Abrir Gestor de Componentes</button>
+      </div>
+    `;
+    return;
     }
     
     // Renderizar componentes en orden de prioridad
@@ -214,6 +220,80 @@ const DashboardApp = {
       }
     }
   },
+
+    // Actualizar mensaje de carga
+  this.actualizarPaso(`Cargando ${componentesActivos.length} componentes...`);
+  
+  // Renderizar componentes activos
+  for (let i = 0; i < componentesActivos.length; i++) {
+    const componentId = componentesActivos[i];
+    this.actualizarPaso(`Cargando ${this.obtenerNombreComponente(componentId)}...`);
+    
+    await this.renderizarComponente(componentId, data, grid);
+  }
+}, 
+
+// Actualizar generarListaComponentes
+generarListaComponentes() {
+  let config = {};
+  try {
+    if (typeof ComponentManager !== 'undefined') {
+      config = ComponentManager.config;
+    } else {
+      const defaultActive = ComponentsRegistry.getDefaultActive();
+      config = Object.keys(ComponentsRegistry.getAll()).reduce((acc, id) => {
+        acc[id] = defaultActive[id] ? true : false;
+        return acc;
+      }, {});
+    }
+  } catch (error) {
+    const defaultActive = ComponentsRegistry.getDefaultActive();
+    config = Object.keys(ComponentsRegistry.getAll()).reduce((acc, id) => {
+      acc[id] = defaultActive[id] ? true : false;
+      return acc;
+    }, {});
+  } 
+
+  let html = '';
+  Object.entries(ComponentsRegistry.getAll()).forEach(([id, componentConfig]) => {
+    const activo = config[id] || false;
+    html += `
+      <div style="padding: 16px; border: 1px solid ${activo ? '#3ea6ff' : 'rgba(255,255,255,0.1)'}; border-radius: 8px; background: rgba(255,255,255,0.02);">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+          <input type="checkbox" id="chk-${id}" ${activo ? 'checked' : ''} 
+                 style="margin: 0; transform: scale(1.2);">
+          <label for="chk-${id}" style="flex: 1; font-weight: 600; cursor: pointer;">
+            ${componentConfig.name}
+          </label>
+          <span style="font-size: 12px; padding: 4px 8px; border-radius: 4px; background: ${
+            componentConfig.category === 'liviano' ? 'rgba(40, 167, 69, 0.2)' : 
+            componentConfig.category === 'mediano' ? 'rgba(255, 193, 7, 0.2)' : 
+            'rgba(220, 53, 69, 0.2)'
+          }; color: ${
+            componentConfig.category === 'liviano' ? '#28a745' : 
+            componentConfig.category === 'mediano' ? '#ffc107' : 
+            '#dc3545'
+          };">
+            ${componentConfig.category}
+          </span>
+        </div>
+        <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+          ${componentConfig.description}
+        </div>
+        <div style="font-size: 11px; color: var(--muted);">
+          ID: ${id} | Grid: ${componentConfig.grid}
+        </div>
+      </div>
+    `;
+  });
+  return html;
+}, 
+
+// Actualizar obtenerNombreComponente
+obtenerNombreComponente(id) {
+  const componentConfig = ComponentsRegistry.getComponent(id);
+  return componentConfig ? componentConfig.name : id;
+},
 
   ocultarBarraProgreso() {
     const progressBar = document.querySelector('.progress-bar-global');
