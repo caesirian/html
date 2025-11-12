@@ -12,42 +12,43 @@ const DashboardApp = {
   },
 
   mostrarPantallaCarga() {
-    const loadingScreen = document.getElementById('loading-screen');
+    var loadingScreen = document.getElementById('loading-screen');
     if (loadingScreen) {
       loadingScreen.classList.add('active');
     }
     
-    // Iniciar contador de tiempo
     this.actualizarTiempoCarga();
-    this.loadingInterval = setInterval(() => {
-      this.actualizarTiempoCarga();
+    var self = this;
+    this.loadingInterval = setInterval(function() {
+      self.actualizarTiempoCarga();
     }, 1000);
   },
 
   actualizarTiempoCarga() {
-    const timeElement = document.getElementById('loading-time');
+    var timeElement = document.getElementById('loading-time');
     if (timeElement && this.loadingStartTime) {
-      const seconds = Math.floor((Date.now() - this.loadingStartTime) / 1000);
-      timeElement.textContent = `${seconds}s`;
+      var seconds = Math.floor((Date.now() - this.loadingStartTime) / 1000);
+      timeElement.textContent = seconds + 's';
     }
   },
 
   ocultarPantallaCarga() {
     console.log('🔄 Ocultando pantalla de carga...');
-    const loadingScreen = document.getElementById('loading-screen');
+    var loadingScreen = document.getElementById('loading-screen');
     if (loadingScreen) {
       loadingScreen.style.opacity = '0';
-      setTimeout(() => {
+      var self = this;
+      setTimeout(function() {
         loadingScreen.classList.remove('active');
-        if (this.loadingInterval) {
-          clearInterval(this.loadingInterval);
+        if (self.loadingInterval) {
+          clearInterval(self.loadingInterval);
         }
       }, 500);
     }
   },
 
   mostrarLoading() {
-    const grid = document.querySelector('.dashboard-grid');
+    var grid = document.querySelector('.dashboard-grid');
     if (grid) {
       grid.innerHTML = this.getSkeletonHTML();
     }
@@ -64,44 +65,42 @@ const DashboardApp = {
   },
 
   mostrarBarraProgreso() {
-    const progressBar = document.createElement('div');
+    var progressBar = document.createElement('div');
     progressBar.className = 'progress-bar-global';
     progressBar.innerHTML = '<div class="progress-bar-inner-global"></div>';
     document.body.appendChild(progressBar);
     
-    setTimeout(() => {
+    var self = this;
+    setTimeout(function() {
       if (progressBar.parentNode) {
         progressBar.parentNode.removeChild(progressBar);
       }
     }, 5000);
   },
 
-  async loadData(force = false) {
+  async loadData(force) {
     try {
       this.actualizarPaso("Conectando con Google Sheets...");
       
       console.log('📡 Cargando datos...');
-      const estadoElement = document.getElementById('estado');
+      var estadoElement = document.getElementById('estado');
       if (estadoElement) estadoElement.innerHTML = '<span class="loader"></span> Cargando datos...';
       
-      // Mostrar skeletons mientras se cargan los datos
       this.mostrarLoading();
       
-      const data = await DataManager.fetchData(force);
+      var data = await DataManager.fetchData(force);
       console.log('✅ Datos recibidos:', data);
       
       if (estadoElement) estadoElement.innerHTML = '<span style="color: #28a745;">✓</span> Datos actualizados';
       
-      // Renderizar componentes
       await this.renderizarComponentes(data);
       
-      // Ocultar pantalla de carga
       this.ocultarPantallaCarga();
       this.ocultarBarraProgreso();
       
     } catch(error) {
       console.error('❌ Error cargando datos:', error);
-      const estadoElement = document.getElementById('estado');
+      var estadoElement = document.getElementById('estado');
       if (estadoElement) estadoElement.innerHTML = '<span style="color: #dc3545;">✗</span> Error: ' + error.message;
       
       this.mostrarErrorEnCarga(error);
@@ -109,14 +108,14 @@ const DashboardApp = {
   },
 
   actualizarPaso(mensaje) {
-    const stepElement = document.getElementById('loading-step');
+    var stepElement = document.getElementById('loading-step');
     if (stepElement) {
       stepElement.textContent = mensaje;
     }
   },
 
   mostrarErrorEnCarga(error) {
-    const loadingContent = document.querySelector('.loading-content');
+    var loadingContent = document.querySelector('.loading-content');
     if (loadingContent) {
       loadingContent.innerHTML = `
         <div style="text-align: center; color: #dc3545;">
@@ -132,69 +131,87 @@ const DashboardApp = {
   },
 
   async renderizarComponentes(data) {
-    const grid = document.querySelector('.dashboard-grid');
+    var grid = document.querySelector('.dashboard-grid');
     if (!grid) {
       console.error('❌ No se encontró el grid principal');
       return;
     }
     
-    // Limpiar skeletons
     grid.innerHTML = '';
     
-  // Obtener componentes activos
-  let componentesActivos = [];
-  try {
-    if (typeof ComponentManager !== 'undefined') {
-      ComponentManager.init();
-      componentesActivos = ComponentManager.getActiveComponents();
-      
-      // Cargar scripts de componentes dinámicamente
-      await ComponentManager.loadComponentScripts(componentesActivos);
-    } else {
-      // Fallback a componentes por defecto del registro
-      const defaultActive = ComponentsRegistry.getDefaultActive();
-      componentesActivos = Object.keys(defaultActive);
-    }
-  } catch (error) {
-    console.warn('⚠️ Error al cargar ComponentManager, usando componentes por defecto');
-    const defaultActive = ComponentsRegistry.getDefaultActive();
-    componentesActivos = Object.keys(defaultActive);
-  }
-  
-  console.log('🎨 Renderizando componentes activos:', componentesActivos);
-  
-  if (componentesActivos.length === 0) {
-    grid.innerHTML = `
-      <div class="card" data-grid="full" style="text-align: center; padding: 40px;">
-        <h3>No hay componentes activos</h3>
-        <p>Usa el gestor de componentes para activar algunos componentes.</p>
-        <button class="btn" onclick="DashboardApp.mostrarGestorComponentes()">Abrir Gestor de Componentes</button>
-      </div>
-    `;
-    return;
+    var componentesActivos = [];
+    try {
+      if (typeof ComponentManager !== 'undefined') {
+        ComponentManager.init();
+        componentesActivos = ComponentManager.getActiveComponents();
+      } else {
+        componentesActivos = ['saldoCaja', 'ingresosVsEgresos', 'egresosVsAnterior', 'cotizacionesMonedas'];
+      }
+    } catch (error) {
+      console.warn('⚠️ Error al cargar ComponentManager, usando componentes por defecto');
+      componentesActivos = ['saldoCaja', 'ingresosVsEgresos', 'egresosVsAnterior', 'cotizacionesMonedas'];
     }
     
-    // Renderizar componentes en orden de prioridad
-    for (let i = 0; i < componentesActivos.length; i++) {
-      const componentId = componentesActivos[i];
+    console.log('🎨 Renderizando componentes activos:', componentesActivos);
+    
+    if (componentesActivos.length === 0) {
+      grid.innerHTML = `
+        <div class="card" data-grid="full" style="text-align: center; padding: 40px;">
+          <h3>No hay componentes activos</h3>
+          <p>Usa el gestor de componentes para activar algunos componentes.</p>
+          <button class="btn" onclick="DashboardApp.mostrarGestorComponentes()">Abrir Gestor de Componentes</button>
+        </div>
+      `;
+      return;
+    }
+    
+    this.actualizarPaso('Cargando ' + componentesActivos.length + ' componentes...');
+    
+    for (var i = 0; i < componentesActivos.length; i++) {
+      var componentId = componentesActivos[i];
+      this.actualizarPaso('Cargando ' + this.obtenerNombreComponente(componentId) + '...');
+      
       await this.renderizarComponente(componentId, data, grid);
     }
   },
 
+  obtenerNombreComponente(id) {
+    var nombres = {
+      saldoCaja: 'Saldo de Caja',
+      ingresosVsEgresos: 'Ingresos vs Egresos',
+      egresosVsAnterior: 'Comparación Mensual',
+      cotizacionesMonedas: 'Cotizaciones',
+      analisisCategorias: 'Análisis por Categorías',
+      cuentasPendientes: 'Cuentas Pendientes',
+      controlStock: 'Control de Stock',
+      proyeccionFlujo: 'Proyección de Flujo',
+      calculadoraInversiones: 'Calculadora de Inversiones'
+    };
+    return nombres[id] || id;
+  },
+
   async renderizarComponente(componentId, data, grid) {
     try {
-      console.log(`🔄 Renderizando componente: ${componentId}`);
+      console.log('🔄 Renderizando componente: ' + componentId);
       
-      const component = ComponentSystem.registros[componentId];
+      var component = ComponentSystem.registros[componentId];
       if (!component) {
-        console.warn(`⚠️ Componente ${componentId} no encontrado en registros`);
+        console.warn('⚠️ Componente ' + componentId + ' no encontrado en registros');
         return;
       }
 
-      const element = document.createElement('section');
-      element.id = `componente-${componentId}`;
+      var element = document.createElement('section');
+      element.id = 'componente-' + componentId;
       element.className = 'card fade-in';
-      element.setAttribute('data-grid', component.grid || 'span-6');
+      
+      var componentInfo = {};
+      if (typeof ComponentManager !== 'undefined') {
+        componentInfo = ComponentManager.getComponentInfo(componentId);
+      } else {
+        componentInfo = { grid: 'span-6' };
+      }
+      
+      element.setAttribute('data-grid', component.grid || componentInfo.grid || 'span-6');
       
       if (component.html) {
         element.innerHTML = component.html;
@@ -204,12 +221,12 @@ const DashboardApp = {
 
       if (component.render) {
         await component.render(data, element);
-        console.log(`✅ Componente ${componentId} renderizado correctamente`);
+        console.log('✅ Componente ' + componentId + ' renderizado correctamente');
       }
       
     } catch (error) {
-      console.error(`❌ Error renderizando componente ${componentId}:`, error);
-      const errorElement = document.querySelector(`#componente-${componentId}`);
+      console.error('❌ Error renderizando componente ' + componentId + ':', error);
+      var errorElement = document.querySelector('#componente-' + componentId);
       if (errorElement) {
         errorElement.innerHTML = `
           <div style="color: #dc3545; padding: 20px; text-align: center;">
@@ -221,112 +238,41 @@ const DashboardApp = {
     }
   },
 
-    // Actualizar mensaje de carga
-  this.actualizarPaso(`Cargando ${componentesActivos.length} componentes...`);
-  
-  // Renderizar componentes activos
-  for (let i = 0; i < componentesActivos.length; i++) {
-    const componentId = componentesActivos[i];
-    this.actualizarPaso(`Cargando ${this.obtenerNombreComponente(componentId)}...`);
-    
-    await this.renderizarComponente(componentId, data, grid);
-  }
-}, 
-
-// Actualizar generarListaComponentes
-generarListaComponentes() {
-  let config = {};
-  try {
-    if (typeof ComponentManager !== 'undefined') {
-      config = ComponentManager.config;
-    } else {
-      const defaultActive = ComponentsRegistry.getDefaultActive();
-      config = Object.keys(ComponentsRegistry.getAll()).reduce((acc, id) => {
-        acc[id] = defaultActive[id] ? true : false;
-        return acc;
-      }, {});
-    }
-  } catch (error) {
-    const defaultActive = ComponentsRegistry.getDefaultActive();
-    config = Object.keys(ComponentsRegistry.getAll()).reduce((acc, id) => {
-      acc[id] = defaultActive[id] ? true : false;
-      return acc;
-    }, {});
-  } 
-
-  let html = '';
-  Object.entries(ComponentsRegistry.getAll()).forEach(([id, componentConfig]) => {
-    const activo = config[id] || false;
-    html += `
-      <div style="padding: 16px; border: 1px solid ${activo ? '#3ea6ff' : 'rgba(255,255,255,0.1)'}; border-radius: 8px; background: rgba(255,255,255,0.02);">
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-          <input type="checkbox" id="chk-${id}" ${activo ? 'checked' : ''} 
-                 style="margin: 0; transform: scale(1.2);">
-          <label for="chk-${id}" style="flex: 1; font-weight: 600; cursor: pointer;">
-            ${componentConfig.name}
-          </label>
-          <span style="font-size: 12px; padding: 4px 8px; border-radius: 4px; background: ${
-            componentConfig.category === 'liviano' ? 'rgba(40, 167, 69, 0.2)' : 
-            componentConfig.category === 'mediano' ? 'rgba(255, 193, 7, 0.2)' : 
-            'rgba(220, 53, 69, 0.2)'
-          }; color: ${
-            componentConfig.category === 'liviano' ? '#28a745' : 
-            componentConfig.category === 'mediano' ? '#ffc107' : 
-            '#dc3545'
-          };">
-            ${componentConfig.category}
-          </span>
-        </div>
-        <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
-          ${componentConfig.description}
-        </div>
-        <div style="font-size: 11px; color: var(--muted);">
-          ID: ${id} | Grid: ${componentConfig.grid}
-        </div>
-      </div>
-    `;
-  });
-  return html;
-}, 
-
-// Actualizar obtenerNombreComponente
-obtenerNombreComponente(id) {
-  const componentConfig = ComponentsRegistry.getComponent(id);
-  return componentConfig ? componentConfig.name : id;
-},
-
   ocultarBarraProgreso() {
-    const progressBar = document.querySelector('.progress-bar-global');
+    var progressBar = document.querySelector('.progress-bar-global');
     if (progressBar && progressBar.parentNode) {
       progressBar.parentNode.removeChild(progressBar);
     }
   },
 
   setupEventListeners() {
-    // Botón de refresh
-    const refreshBtn = document.getElementById('refresh-data');
+    var refreshBtn = document.getElementById('refresh-data');
     if (refreshBtn) {
-      refreshBtn.addEventListener('click', () => this.loadData(true));
+      var self = this;
+      refreshBtn.addEventListener('click', function() {
+        self.loadData(true);
+      });
     }
 
-    // Botón de gestión de componentes
-    const btnGestion = document.getElementById('btn-gestion-componentes');
+    var btnGestion = document.getElementById('btn-gestion-componentes');
     if (btnGestion) {
-      btnGestion.addEventListener('click', () => this.mostrarGestorComponentes());
+      var self = this;
+      btnGestion.addEventListener('click', function() {
+        self.mostrarGestorComponentes();
+      });
     }
 
-    // Menú hamburguesa para móviles
-    const menuToggle = document.getElementById('menu-toggle');
-    const sidebar = document.querySelector('.sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
+    var menuToggle = document.getElementById('menu-toggle');
+    var sidebar = document.querySelector('.sidebar');
+    var overlay = document.getElementById('sidebar-overlay');
     
     if (menuToggle && sidebar && overlay) {
-      menuToggle.addEventListener('click', () => {
+      menuToggle.addEventListener('click', function() {
         sidebar.classList.toggle('active');
         overlay.classList.toggle('active');
       });
       
-      overlay.addEventListener('click', () => {
+      overlay.addEventListener('click', function() {
         sidebar.classList.remove('active');
         overlay.classList.remove('active');
       });
@@ -334,12 +280,12 @@ obtenerNombreComponente(id) {
   },
 
   mostrarGestorComponentes() {
-    const grid = document.querySelector('.dashboard-grid');
+    var grid = document.querySelector('.dashboard-grid');
     if (!grid) return;
     
     grid.innerHTML = '';
     
-    const gestorHTML = `
+    var gestorHTML = `
       <div class="card" data-grid="full">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
           <h2 style="margin: 0;">Gestor de Componentes</h2>
@@ -365,13 +311,12 @@ obtenerNombreComponente(id) {
   },
 
   generarListaComponentes() {
-    // Si ComponentManager no está disponible, usar configuración por defecto
-    let config = {};
+    var config = {};
     try {
       if (typeof ComponentManager !== 'undefined') {
         config = ComponentManager.config;
       } else {
-        config = {
+        var defaultComponents = {
           saldoCaja: true,
           ingresosVsEgresos: true,
           egresosVsAnterior: true,
@@ -379,13 +324,13 @@ obtenerNombreComponente(id) {
           analisisCategorias: false,
           cuentasPendientes: false,
           controlStock: false,
-      proyeccionFlujo: false,
-      calculadoraInversion: false,
-      calculadoraInversiones: false
+          proyeccionFlujo: false,
+          calculadoraInversiones: false
         };
+        config = defaultComponents;
       }
     } catch (error) {
-      config = {
+      var defaultComponents = {
         saldoCaja: true,
         ingresosVsEgresos: true,
         egresosVsAnterior: true,
@@ -393,13 +338,13 @@ obtenerNombreComponente(id) {
         analisisCategorias: false,
         cuentasPendientes: false,
         controlStock: false,
-      proyeccionFlujo: false,
-      calculadoraInversion: false,
-      calculadoraInversiones: false
+        proyeccionFlujo: false,
+        calculadoraInversiones: false
       };
+      config = defaultComponents;
     }
 
-    const componentes = {
+    var componentes = {
       saldoCaja: { name: 'Saldo de Caja', category: 'liviano' },
       ingresosVsEgresos: { name: 'Ingresos vs Egresos', category: 'liviano' },
       egresosVsAnterior: { name: 'Comparación Mes Anterior', category: 'liviano' },
@@ -407,81 +352,86 @@ obtenerNombreComponente(id) {
       analisisCategorias: { name: 'Análisis por Categorías', category: 'mediano' },
       cuentasPendientes: { name: 'Cuentas Pendientes', category: 'mediano' },
       controlStock: { name: 'Control de Stock', category: 'pesado' },
-  proyeccionFlujo: { name: 'Proyección de Flujo', category: 'pesado' },
-  calculadoraInversion: { name: 'Calculadora de Inversiones', category: 'pesado' } ,
-  calculadoraInversiones: { name: 'Calculadora de Inversiones 2', category: 'pesado' } 
+      proyeccionFlujo: { name: 'Proyección de Flujo', category: 'pesado' },
+      calculadoraInversiones: { name: 'Calculadora de Inversiones', category: 'mediano' }
     };
 
-    let html = '';
-    for (const [id, info] of Object.entries(componentes)) {
-      const activo = config[id] || false;
-      html += `
-        <div style="padding: 16px; border: 1px solid ${activo ? '#3ea6ff' : 'rgba(255,255,255,0.1)'}; border-radius: 8px; background: rgba(255,255,255,0.02);">
-          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-            <input type="checkbox" id="chk-${id}" ${activo ? 'checked' : ''} 
-                   style="margin: 0; transform: scale(1.2);">
-            <label for="chk-${id}" style="flex: 1; font-weight: 600; cursor: pointer;">
-              ${info.name}
-            </label>
-            <span style="font-size: 12px; padding: 4px 8px; border-radius: 4px; background: ${
-              info.category === 'liviano' ? 'rgba(40, 167, 69, 0.2)' : 
-              info.category === 'mediano' ? 'rgba(255, 193, 7, 0.2)' : 
-              'rgba(220, 53, 69, 0.2)'
-            }; color: ${
-              info.category === 'liviano' ? '#28a745' : 
-              info.category === 'mediano' ? '#ffc107' : 
-              '#dc3545'
-            };">
-              ${info.category}
-            </span>
+    var html = '';
+    for (var id in componentes) {
+      if (componentes.hasOwnProperty(id)) {
+        var info = componentes[id];
+        var activo = config[id] || false;
+        var colorFondo = '';
+        var colorTexto = '';
+        
+        if (info.category === 'liviano') {
+          colorFondo = 'rgba(40, 167, 69, 0.2)';
+          colorTexto = '#28a745';
+        } else if (info.category === 'mediano') {
+          colorFondo = 'rgba(255, 193, 7, 0.2)';
+          colorTexto = '#ffc107';
+        } else {
+          colorFondo = 'rgba(220, 53, 69, 0.2)';
+          colorTexto = '#dc3545';
+        }
+        
+        html += `
+          <div style="padding: 16px; border: 1px solid ${activo ? '#3ea6ff' : 'rgba(255,255,255,0.1)'}; border-radius: 8px; background: rgba(255,255,255,0.02);">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+              <input type="checkbox" id="chk-${id}" ${activo ? 'checked' : ''} 
+                     style="margin: 0; transform: scale(1.2);">
+              <label for="chk-${id}" style="flex: 1; font-weight: 600; cursor: pointer;">
+                ${info.name}
+              </label>
+              <span style="font-size: 12px; padding: 4px 8px; border-radius: 4px; background: ${colorFondo}; color: ${colorTexto};">
+                ${info.category}
+              </span>
+            </div>
+            <div style="font-size: 13px; color: var(--muted);">
+              ID: ${id}
+            </div>
           </div>
-          <div style="font-size: 13px; color: var(--muted);">
-            ID: ${id}
-          </div>
-        </div>
-      `;
+        `;
+      }
     }
     return html;
   },
 
   setupGestorEventListeners() {
-    // Volver al dashboard
-    const btnVolver = document.getElementById('btn-volver-dashboard');
+    var btnVolver = document.getElementById('btn-volver-dashboard');
     if (btnVolver) {
-      btnVolver.addEventListener('click', () => {
+      btnVolver.addEventListener('click', function() {
         window.location.reload();
       });
     }
     
-    // Activar/desactivar todos
-    const btnActivarTodos = document.getElementById('btn-activar-todos');
+    var btnActivarTodos = document.getElementById('btn-activar-todos');
     if (btnActivarTodos) {
-      btnActivarTodos.addEventListener('click', () => {
-        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-        checkboxes.forEach(checkbox => {
+      btnActivarTodos.addEventListener('click', function() {
+        var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(function(checkbox) {
           checkbox.checked = true;
         });
       });
     }
     
-    const btnDesactivarTodos = document.getElementById('btn-desactivar-todos');
+    var btnDesactivarTodos = document.getElementById('btn-desactivar-todos');
     if (btnDesactivarTodos) {
-      btnDesactivarTodos.addEventListener('click', () => {
-        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-        checkboxes.forEach(checkbox => {
+      btnDesactivarTodos.addEventListener('click', function() {
+        var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(function(checkbox) {
           checkbox.checked = false;
         });
       });
     }
     
-    // Aplicar cambios
-    const btnAplicar = document.getElementById('btn-aplicar-cambios');
+    var btnAplicar = document.getElementById('btn-aplicar-cambios');
     if (btnAplicar) {
-      btnAplicar.addEventListener('click', () => {
+      btnAplicar.addEventListener('click', function() {
         try {
-          const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-          checkboxes.forEach(checkbox => {
-            const componentId = checkbox.id.replace('chk-', '');
+          var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+          checkboxes.forEach(function(checkbox) {
+            var componentId = checkbox.id.replace('chk-', '');
             if (typeof ComponentManager !== 'undefined') {
               ComponentManager.config[componentId] = checkbox.checked;
             }
@@ -504,7 +454,7 @@ obtenerNombreComponente(id) {
 
 // Inicialización
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', function() {
     console.log('📄 DOM cargado, iniciando app...');
     DashboardApp.init();
   });
