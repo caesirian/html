@@ -1,432 +1,375 @@
-// js/carga-datos.js - VERSIÓN CORREGIDA
-const CargaDatosApp = {
-  currentData: null,
-
-  async init() {
-    console.log('🚀 Iniciando app de carga de datos...');
-    
-    this.setupEventListeners();
-    await this.loadData();
-  },
-
-  async loadData() {
-    try {
-      console.log('📡 Cargando datos...');
-      this.mostrarEstado('Cargando datos...', 'loading');
-
-      const data = await DataManager.fetchData(true);
-      console.log('✅ Datos recibidos:', data);
-      
-      this.currentData = data;
-      this.mostrarEstado('Datos actualizados', 'success');
-      this.renderizarTabla(data);
-      this.actualizarFiltros(data);
-
-    } catch(error) {
-      console.error('❌ Error cargando datos:', error);
-      this.mostrarEstado('Error: ' + error.message, 'error');
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Carga de Datos - HG Soluciones</title>
+  
+  <!-- CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/datatables.net-dt@1.13.6/css/jquery.dataTables.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/datatables.net-buttons-dt@2.4.1/css/buttons.dataTables.min.css" rel="stylesheet"/>
+  <link href="css/styles.css" rel="stylesheet">
+  
+  <style>
+    .form-section {
+      margin-bottom: 24px;
     }
-  },
-
-  mostrarEstado(mensaje, tipo = 'info') {
-    const estadoElement = document.getElementById('estado');
-    if (!estadoElement) return;
-
-    const iconos = {
-      loading: '<span class="loader"></span> ',
-      success: '<span style="color: #28a745;">✓</span> ',
-      error: '<span style="color: #dc3545;">✗</span> ',
-      info: ''
-    };
-
-    estadoElement.innerHTML = (iconos[tipo] || '') + mensaje;
-  },
-
-  renderizarTabla(data) {
-    const registros = data.Finanzas_RegistroDiario || [];
-    const tbody = document.querySelector('#tabla-registros tbody');
-    
-    if (!tbody) return;
-
-    tbody.innerHTML = '';
-
-    if (registros.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="15" style="text-align: center; color: var(--muted); padding: 20px;">No hay registros</td></tr>';
-      this.inicializarDataTable([]);
-      return;
+    .form-section h3 {
+      color: var(--accent);
+      margin-bottom: 12px;
+      font-size: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 8px;
     }
-
-    // Ordenar por fecha descendente (más recientes primero)
-    const registrosOrdenados = [...registros].sort((a, b) => {
-      const fechaA = UTILS.parseDate(a.Fecha);
-      const fechaB = UTILS.parseDate(b.Fecha);
-      return fechaB - fechaA; // Más reciente primero
-    });
-
-    registrosOrdenados.forEach(registro => {
-      const fila = document.createElement('tr');
-      
-      const fecha = registro.Fecha || '';
-      const tipo = registro.Tipo || '';
-      const categoria = registro.Categoría || '';
-      const subcategoria = registro.Subcategoría || '';
-      const monto = UTILS.parseNumber(registro.Monto || 0);
-      const medioPago = registro['Medio de Pago'] || '';
-      const comprobante = registro.Comprobante || '';
-      const descripcion = registro.Descripción || '';
-      const proyecto = registro.Proyecto || '';
-      const responsable = registro.Responsable || '';
-      const clienteProveedor = registro['Cliente/Proveedor'] || '';
-      const idRelacionado = registro['ID Relacionado'] || '';
-      const observaciones = registro.Observaciones || '';
-      const reflejarEnCaja = registro['Reflejar en Caja'] || '';
-
-      fila.innerHTML = `
-        <td>${UTILS.formatDate(fecha)}</td>
-        <td>
-          <span style="color: ${tipo === 'Ingreso' ? '#28a745' : '#dc3545'}; font-weight: 600;">
-            ${tipo}
-          </span>
-        </td>
-        <td>${categoria}</td>
-        <td>${subcategoria}</td>
-        <td style="text-align: right; font-weight: 600; color: ${tipo === 'Ingreso' ? '#28a745' : '#dc3545'}">
-          $ ${monto.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-        </td>
-        <td>${medioPago}</td>
-        <td>${comprobante}</td>
-        <td title="${descripcion}">${this.acortarTexto(descripcion, 30)}</td>
-        <td>${proyecto}</td>
-        <td>${responsable}</td>
-        <td>${clienteProveedor}</td>
-        <td>${idRelacionado}</td>
-        <td title="${observaciones}">${this.acortarTexto(observaciones, 30)}</td>
-        <td>${reflejarEnCaja ? 'Sí' : 'No'}</td>
-        <td>
-          <button class="btn small secondary" onclick="CargaDatosApp.editarRegistro('${registro.ID || ''}')">Editar</button>
-        </td>
-      `;
-      tbody.appendChild(fila);
-    });
-
-    this.inicializarDataTable(registrosOrdenados);
-  },
-
-  acortarTexto(texto, longitud) {
-    if (!texto) return '';
-    return texto.length > longitud ? texto.substring(0, longitud) + '...' : texto;
-  },
-
-  inicializarDataTable(registros) {
-    const table = $('#tabla-registros');
-    
-    if ($.fn.dataTable.isDataTable(table)) {
-      table.DataTable().destroy();
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
     }
-
-    if (registros.length === 0) return;
-
-    table.DataTable({
-      pageLength: 10,
-      lengthMenu: [10, 25, 50, 100],
-      order: [[0, 'desc']], // Ordenar por fecha descendente
-      language: {
-        search: "Buscar:",
-        lengthMenu: "Mostrar _MENU_ registros",
-        info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
-        paginate: {
-          first: "Primero",
-          last: "Último", 
-          next: "Siguiente",
-          previous: "Anterior"
-        }
-      },
-      columnDefs: [
-        { targets: [7, 12], width: '200px' },
-        { targets: [4], className: 'dt-body-right' },
-        { targets: '_all', className: 'dt-body-left' }
-      ],
-      responsive: true
-    });
-  },
-
-  actualizarFiltros(data) {
-    const registros = data.Finanzas_RegistroDiario || [];
-    
-    const filtroMes = document.getElementById('filtro-mes');
-    const meses = [...new Set(registros.map(r => {
-      const fecha = UTILS.parseDate(r.Fecha);
-      return `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
-    }))].sort().reverse();
-
-    filtroMes.innerHTML = '<option value="">Todos los meses</option>';
-    meses.forEach(mes => {
-      const option = document.createElement('option');
-      option.value = mes;
-      option.textContent = UTILS.formatMonthKey(mes, true);
-      filtroMes.appendChild(option);
-    });
-
-    const filtroCategoria = document.getElementById('filtro-categoria');
-    const categorias = [...new Set(registros.map(r => r.Categoría).filter(Boolean))].sort();
-
-    filtroCategoria.innerHTML = '<option value="">Todas las categorías</option>';
-    categorias.forEach(cat => {
-      const option = document.createElement('option');
-      option.value = cat;
-      option.textContent = cat;
-      filtroCategoria.appendChild(option);
-    });
-
-    filtroMes.addEventListener('change', () => this.aplicarFiltros());
-    document.getElementById('filtro-tipo').addEventListener('change', () => this.aplicarFiltros());
-    filtroCategoria.addEventListener('change', () => this.aplicarFiltros());
-    document.getElementById('buscar-registro').addEventListener('input', () => this.aplicarFiltros());
-  },
-
-  aplicarFiltros() {
-    const tabla = $('#tabla-registros').DataTable();
-    if (!tabla) return;
-
-    const filtroMes = document.getElementById('filtro-mes').value;
-    const filtroTipo = document.getElementById('filtro-tipo').value;
-    const filtroCategoria = document.getElementById('filtro-categoria').value;
-    const busqueda = document.getElementById('buscar-registro').value;
-
-    tabla.column(0).search(filtroMes, true, false);
-    tabla.column(1).search(filtroTipo);
-    tabla.column(2).search(filtroCategoria);
-    tabla.search(busqueda).draw();
-  },
-
-  setupEventListeners() {
-    const form = document.getElementById('form-carga');
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      this.guardarRegistro();
-    });
-
-    const fechaInput = document.getElementById('fecha');
-    if (fechaInput) {
-      fechaInput.value = UTILS.getCurrentDateForInput();
+    .form-field {
+      display: flex;
+      flex-direction: column;
     }
-
-    const menuToggle = document.getElementById('menu-toggle');
-    const sidebar = document.querySelector('.sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
-    
-    if (menuToggle && sidebar && overlay) {
-      menuToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('active');
-        overlay.classList.toggle('active');
-      });
-      
-      overlay.addEventListener('click', () => {
-        sidebar.classList.remove('active');
-        overlay.classList.remove('active');
-      });
+    .form-field label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 500;
     }
-
-    const refreshBtn = document.getElementById('refresh-data');
-    if (refreshBtn) {
-      refreshBtn.addEventListener('click', () => this.loadData());
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-size: 14px;
     }
-
-    const tipoSelect = document.getElementById('tipo');
-    const categoriaInput = document.getElementById('categoria');
-    
-    if (tipoSelect && categoriaInput) {
-      tipoSelect.addEventListener('change', () => {
-        if (tipoSelect.value === 'Ingreso' && !categoriaInput.value) {
-          categoriaInput.value = 'Ventas';
-        } else if (tipoSelect.value === 'Egreso' && !categoriaInput.value) {
-          categoriaInput.value = 'Compras';
-        }
-      });
+    .form-field input:focus,
+    .form-field select:focus,
+    .form-field textarea:focus {
+      outline: none;
+      border-color: var(--accent);
     }
-  },
-
-  async guardarRegistro() {
-    const form = document.getElementById('form-carga');
-    const formData = new FormData(form);
-
-    const fecha = formData.get('fecha');
-    const monto = formData.get('monto');
-    const tipo = formData.get('tipo');
-    const categoria = formData.get('categoria');
-
-    if (!fecha || !monto || !tipo || !categoria) {
-      alert('Por favor complete todos los campos obligatorios (marcados con *).');
-      return;
+    .required label::after {
+      content: " *";
+      color: #dc3545;
     }
-
-    if (parseFloat(monto) <= 0) {
-      alert('El monto debe ser mayor a 0.');
-      return;
+    .checkbox-field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-
-    try {
-      this.mostrarEstado('Guardando registro...', 'loading');
-
-      const registro = {
-        Fecha: fecha,
-        Monto: parseFloat(monto),
-        Tipo: tipo,
-        Categoría: categoria,
-        Subcategoría: formData.get('subcategoria') || '',
-        'Medio de Pago': formData.get('medioPago') || '',
-        Comprobante: formData.get('comprobante') || '',
-        Descripción: formData.get('descripcion') || '',
-        Proyecto: formData.get('proyecto') || '',
-        Responsable: formData.get('responsable') || '',
-        'Cliente/Proveedor': formData.get('clienteProveedor') || '',
-        'ID Relacionado': formData.get('idRelacionado') || '',
-        Observaciones: formData.get('observaciones') || '',
-        'Reflejar en Caja': formData.get('reflejarEnCaja') === 'on' ? 'TRUE' : 'FALSE',
-        Mes: fecha.substring(0, 7) // YYYY-MM
-      };
-
-      console.log('💾 Registro a guardar:', registro);
-
-      const resultado = await this.enviarRegistro(registro);
-
-      this.mostrarEstado('✓ Registro guardado exitosamente', 'success');
-      
-      // Esperar un momento antes de recargar para evitar Too Many Requests
-      setTimeout(() => {
-        alert('✅ Registro guardado correctamente en la fila: ' + (resultado.row || 'N/A'));
-        this.loadData(); // Recargar datos
-      }, 2000);
-
-      form.reset();
-      document.getElementById('fecha').value = UTILS.getCurrentDateForInput();
-
-    } catch (error) {
-      console.error('❌ Error guardando registro:', error);
-      
-      let mensajeError = 'Error al guardar el registro. ';
-      
-      if (error.message.includes('429')) {
-        mensajeError += 'Demasiadas solicitudes. Espere unos segundos e intente nuevamente.';
-      } else if (error.message.includes('404') || error.message.includes('Failed to fetch')) {
-        mensajeError += 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
-      } else {
-        mensajeError += error.message;
-      }
-      
-      alert(mensajeError);
-      this.mostrarEstado('✗ Error al guardar', 'error');
+    .checkbox-field input {
+      margin: 0;
     }
-  },
-
-  async enviarRegistro(registro) {
-    try {
-      console.log('📤 PREPARANDO ENVÍO DE REGISTRO:', registro);
-      
-      const datosEnvio = {
-        action: 'insert',
-        sheet: 'Finanzas_RegistroDiario',
-        Fecha: registro.Fecha,
-        Monto: registro.Monto.toString(),
-        Tipo: registro.Tipo,
-        Categoría: registro.Categoría,
-        Subcategoría: registro.Subcategoría,
-        MediodePago: registro['Medio de Pago'],
-        Comprobante: registro.Comprobante,
-        Descripción: registro.Descripción,
-        Proyecto: registro.Proyecto,
-        Responsable: registro.Responsable,
-        ClienteProveedor: registro['Cliente/Proveedor'],
-        IDRelacionado: registro['ID Relacionado'],
-        Observaciones: registro.Observaciones,
-        ReflejarenCaja: registro['Reflejar en Caja'],
-        Mes: registro.Mes
-      };
-
-      // Limpiar campos vacíos
-      Object.keys(datosEnvio).forEach(key => {
-        if (datosEnvio[key] === '' || datosEnvio[key] === null || datosEnvio[key] === undefined) {
-          delete datosEnvio[key];
-        }
-      });
-
-      console.log('📨 Datos a enviar (limpios):', datosEnvio);
-
-      const url = CONFIG.GAS_ENDPOINT + '?' + new URLSearchParams(datosEnvio);
-      console.log('🔗 URL final:', url);
-
-      const response = await fetch(url);
-      console.log('📞 Respuesta HTTP:', response.status, response.statusText);
-
-      const responseText = await response.text();
-      console.log('📄 Respuesta cruda:', responseText);
-
-      if (!response.ok) {
-        throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const result = JSON.parse(responseText);
-      console.log('✅ Resultado parseado:', result);
-
-      if (!result.success) {
-        throw new Error(result.error || 'Error desconocido del servidor');
-      }
-
-      return result;
-
-    } catch (error) {
-      console.error('❌ ERROR EN ENVIAR REGISTRO:', error);
-      throw error;
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.1);
     }
-  },
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" role="navigation">
+      <h1>HG - Carga de Datos</h1>
+      <div class="nav">
+        <button id="nav-dashboard" onclick="location.href='dash_beta.html'">Dashboard</button>
+        <button id="nav-carga-datos" class="active">Carga de Datos</button>
+        <button id="nav-ventas">Ventas</button>
+        <button id="nav-finanzas">Finanzas</button>
+        <button id="nav-simulador">Simulador</button>
+        <button id="nav-tablas">Tablas</button>
+      </div>
+      <footer style="margin-top:14px;color:var(--muted);font-size:12px">
+        <div>Conexión: <span id="conn-status">sin iniciar</span></div>
+        <div style="margin-top:8px"><button class="btn small" id="refresh-data">Actualizar datos</button></div>
+      </footer>
+    </aside>
 
-  editarRegistro(id) {
-    const registros = this.currentData?.Finanzas_RegistroDiario || [];
-    const registro = registros.find(r => r.ID === id);
-    
-    if (!registro) {
-      alert('Registro no encontrado');
-      return;
-    }
+    <main>
+      <header class="topbar header-hg" style="display:flex; align-items:center; gap:12px;">
+        <button id="menu-toggle" class="menu-toggle">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 12H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M3 6H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M3 18H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        
+        <div style="flex: 1;">
+          <h1 style="margin:0;">Carga de Datos Financieros</h1>
+          <p style="margin:0; color:var(--muted); font-size:13px">Formulario para cargar nuevos registros en Finanzas_RegistroDiario</p>
+        </div>
+        
+        <div style="display:flex; gap:8px; align-items:center;">
+          <div id="estado" class="text-muted">Esperando datos...</div>
+        </div>
+      </header>
 
-    document.getElementById('fecha').value = UTILS.formatDateForInput(registro.Fecha);
-    document.getElementById('tipo').value = registro.Tipo || '';
-    document.getElementById('categoria').value = registro.Categoría || '';
-    document.getElementById('subcategoria').value = registro.Subcategoría || '';
-    document.getElementById('monto').value = UTILS.parseNumber(registro.Monto || 0);
-    document.getElementById('medioPago').value = registro['Medio de Pago'] || '';
-    document.getElementById('comprobante').value = registro.Comprobante || '';
-    document.getElementById('descripcion').value = registro.Descripción || '';
-    document.getElementById('proyecto').value = registro.Proyecto || '';
-    document.getElementById('responsable').value = registro.Responsable || '';
-    document.getElementById('clienteProveedor').value = registro['Cliente/Proveedor'] || '';
-    document.getElementById('idRelacionado').value = registro['ID Relacionado'] || '';
-    document.getElementById('observaciones').value = registro.Observaciones || '';
-    document.getElementById('reflejarEnCaja').checked = registro['Reflejar en Caja'] === 'TRUE';
+      <!-- Overlay para móviles -->
+      <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
-    const submitBtn = document.querySelector('#form-carga button[type="submit"]');
-    const originalText = submitBtn.textContent;
-    submitBtn.textContent = 'Actualizar Registro';
-    submitBtn.onclick = (e) => {
-      e.preventDefault();
-      this.actualizarRegistro(id);
-      submitBtn.textContent = originalText;
-      submitBtn.onclick = null;
-    };
+      <!-- FORMULARIO DE CARGA -->
+      <div class="card" data-grid="full" style="margin-bottom: 20px;">
+        <h2 style="margin-top: 0; margin-bottom: 20px;">Nuevo Registro Financiero</h2>
+        
+        <form id="form-carga">
+          <!-- Sección: Información Básica -->
+          <div class="form-section">
+            <h3>Información Básica</h3>
+            <div class="form-grid">
+              <div class="form-field required">
+                <label for="fecha">Fecha</label>
+                <input type="date" id="fecha" name="fecha" required>
+              </div>
+              
+              <div class="form-field required">
+                <label for="tipo">Tipo</label>
+                <select id="tipo" name="tipo" required>
+                  <option value="">Seleccionar...</option>
+                  <option value="Ingreso">Ingreso</option>
+                  <option value="Egreso">Egreso</option>
+                </select>
+              </div>
+              
+              <div class="form-field required">
+                <label for="categoria">Categoría</label>
+                <input type="text" id="categoria" name="categoria" list="categorias-sugeridas" required>
+              </div>
+              
+              <div class="form-field">
+                <label for="subcategoria">Subcategoría</label>
+                <input type="text" id="subcategoria" name="subcategoria" list="subcategorias-sugeridas">
+              </div>
+            </div>
+          </div>
 
-    document.querySelector('#form-carga').scrollIntoView({ behavior: 'smooth' });
-  },
+          <!-- Sección: Monto y Medio de Pago -->
+          <div class="form-section">
+            <h3>Monto y Medio de Pago</h3>
+            <div class="form-grid">
+              <div class="form-field required">
+                <label for="monto">Monto</label>
+                <input type="number" id="monto" name="monto" step="0.01" min="0" required placeholder="0.00">
+              </div>
+              
+              <div class="form-field">
+                <label for="medioPago">Medio de Pago</label>
+                <select id="medioPago" name="medioPago">
+                  <option value="">Seleccionar...</option>
+                  <option value="Efectivo">Efectivo</option>
+                  <option value="Transferencia">Transferencia</option>
+                  <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
+                  <option value="Tarjeta de Débito">Tarjeta de Débito</option>
+                  <option value="Cheque">Cheque</option>
+                  <option value="Mercado Pago">Mercado Pago</option>
+                  <option value="Otro">Otro</option>
+                </select>
+              </div>
+              
+              <div class="form-field">
+                <label for="comprobante">Comprobante</label>
+                <input type="text" id="comprobante" name="comprobante" placeholder="Número de comprobante">
+              </div>
+            </div>
+          </div>
 
-  async actualizarRegistro(id) {
-    alert('Funcionalidad de actualización para el registro ' + id + ' - Por implementar');
-  }
-};
+          <!-- Sección: Descripción y Proyecto -->
+          <div class="form-section">
+            <h3>Descripción y Proyecto</h3>
+            <div class="form-grid">
+              <div class="form-field" style="grid-column: span 2;">
+                <label for="descripcion">Descripción</label>
+                <textarea id="descripcion" name="descripcion" rows="3" placeholder="Descripción detallada del movimiento"></textarea>
+              </div>
+              
+              <div class="form-field">
+                <label for="proyecto">Proyecto</label>
+                <input type="text" id="proyecto" name="proyecto" list="proyectos-sugeridos" placeholder="Proyecto asociado">
+              </div>
+            </div>
+          </div>
 
-// Inicialización
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    CargaDatosApp.init();
-  });
-} else {
-  CargaDatosApp.init();
-}
+          <!-- Sección: Responsable y Relaciones -->
+          <div class="form-section">
+            <h3>Responsable y Relaciones</h3>
+            <div class="form-grid">
+              <div class="form-field">
+                <label for="responsable">Responsable</label>
+                <input type="text" id="responsable" name="responsable" list="responsables-sugeridos">
+              </div>
+              
+              <div class="form-field">
+                <label for="clienteProveedor">Cliente/Proveedor</label>
+                <input type="text" id="clienteProveedor" name="clienteProveedor" list="clientes-proveedores-sugeridos">
+              </div>
+              
+              <div class="form-field">
+                <label for="idRelacionado">ID Relacionado</label>
+                <input type="text" id="idRelacionado" name="idRelacionado" placeholder="ID de registro relacionado">
+              </div>
+            </div>
+          </div>
+
+          <!-- Sección: Observaciones y Configuración -->
+          <div class="form-section">
+            <h3>Observaciones y Configuración</h3>
+            <div class="form-grid">
+              <div class="form-field" style="grid-column: span 2;">
+                <label for="observaciones">Observaciones</label>
+                <textarea id="observaciones" name="observaciones" rows="2" placeholder="Observaciones adicionales"></textarea>
+              </div>
+              
+              <div class="form-field checkbox-field">
+                <input type="checkbox" id="reflejarEnCaja" name="reflejarEnCaja" checked>
+                <label for="reflejarEnCaja">Reflejar en Caja_Movimientos</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Datalists para autocompletar -->
+          <datalist id="categorias-sugeridas">
+            <option value="Ventas">
+            <option value="Compras">
+            <option value="Sueldos">
+            <option value="Honorarios">
+            <option value="Alquiler">
+            <option value="Servicios">
+            <option value="Impuestos">
+            <option value="Materiales">
+            <option value="Equipamiento">
+            <option value="Marketing">
+            <option value="Viajes">
+            <option value="Capacitación">
+            <option value="Mantenimiento">
+            <option value="Seguros">
+            <option value="Otros">
+          </datalist>
+          
+          <datalist id="subcategorias-sugeridas">
+            <option value="Cobro Cliente">
+            <option value="Pago Proveedor">
+            <option value="Sueldo Base">
+            <option value="Comisiones">
+            <option value="Luz">
+            <option value="Agua">
+            <option value="Gas">
+            <option value="Internet">
+            <option value="Telefonía">
+            <option value="IVA">
+            <option value="Ganancias">
+            <option value="Publicidad">
+            <option value="Redes Sociales">
+          </datalist>
+          
+          <datalist id="proyectos-sugeridos">
+            <option value="Desarrollo Agroecológico">
+            <option value="BioEmprende">
+            <option value="Huerta Orgánica">
+            <option value="Consultoría">
+            <option value="Desarrollo Web">
+            <option value="Capacitaciones">
+          </datalist>
+          
+          <datalist id="responsables-sugeridos">
+            <option value="Hernán Garbarino">
+            <option value="María García">
+            <option value="Carlos López">
+            <option value="Ana Martínez">
+          </datalist>
+          
+          <datalist id="clientes-proveedores-sugeridos">
+            <option value="La Esencia">
+            <option value="BioEmprende">
+            <option value="Empresa XYZ">
+            <option value="Cliente Final">
+          </datalist>
+
+          <div class="form-actions">
+            <button type="submit" class="btn">Guardar Registro</button>
+            <button type="reset" class="btn secondary">Limpiar Formulario</button>
+            <div style="flex: 1;"></div>
+            <span class="text-muted" style="font-size: 12px;">* Campos obligatorios</span>
+          </div>
+        </form>
+      </div>
+
+      <!-- TABLA DE REGISTROS -->
+      <div class="card" data-grid="full">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h2 style="margin: 0;">Registros Existentes - Finanzas_RegistroDiario</h2>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="text" id="buscar-registro" placeholder="Buscar..." 
+                   style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); color: var(--text); padding: 6px 10px; border-radius: 6px; min-width: 200px;">
+            <select id="filtro-mes" class="btn small">
+              <option value="">Todos los meses</option>
+            </select>
+            <select id="filtro-tipo" class="btn small">
+              <option value="">Todos los tipos</option>
+              <option value="Ingreso">Ingresos</option>
+              <option value="Egreso">Egresos</option>
+            </select>
+            <select id="filtro-categoria" class="btn small">
+              <option value="">Todas las categorías</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="tabla-container">
+          <table id="tabla-registros" class="tabla-datos" style="width: 100%;">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Tipo</th>
+                <th>Categoría</th>
+                <th>Subcategoría</th>
+                <th>Monto</th>
+                <th>Medio Pago</th>
+                <th>Comprobante</th>
+                <th>Descripción</th>
+                <th>Proyecto</th>
+                <th>Responsable</th>
+                <th>Cliente/Proveedor</th>
+                <th>ID Relacionado</th>
+                <th>Observaciones</th>
+                <th>Reflejado en Caja</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Se llenará dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <footer class="footer-hg">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div class="text-muted">Última sincronización: <span id="last-sync">nunca</span></div>
+          <div class="text-muted">Cache: <span id="cache-status">no</span></div>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- JS Libraries -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/datatables.net-buttons@2.4.1/js/dataTables.buttons.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/datatables.net-buttons@2.4.1/js/buttons.html5.min.js"></script>
+
+  <!-- Nuestra aplicación -->
+  <script src="js/core/config.js"></script>
+  <script src="js/core/utils.js"></script>
+  <script src="js/core/data-manager.js"></script>
+  
+  <!-- Script específico para esta página -->
+  <script src="js/carga-datos.js"></script>
+</body>
+</html>
