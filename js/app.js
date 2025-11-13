@@ -1,4 +1,4 @@
-// app.js - VERSIÓN COMPLETAMENTE CORREGIDA
+// app.js - VERSIÓN CORREGIDA Y SIMPLIFICADA
 const DashboardApp = {
   loadingStartTime: null,
   loadingInterval: null,
@@ -12,83 +12,48 @@ const DashboardApp = {
   },
 
   mostrarPantallaCarga() {
-    var loadingScreen = document.getElementById('loading-screen');
+    const loadingScreen = document.getElementById('loading-screen');
     if (loadingScreen) {
       loadingScreen.classList.add('active');
     }
     
     this.actualizarTiempoCarga();
-    var self = this;
-    this.loadingInterval = setInterval(function() {
-      self.actualizarTiempoCarga();
+    this.loadingInterval = setInterval(() => {
+      this.actualizarTiempoCarga();
     }, 1000);
   },
 
   actualizarTiempoCarga() {
-    var timeElement = document.getElementById('loading-time');
+    const timeElement = document.getElementById('loading-time');
     if (timeElement && this.loadingStartTime) {
-      var seconds = Math.floor((Date.now() - this.loadingStartTime) / 1000);
+      const seconds = Math.floor((Date.now() - this.loadingStartTime) / 1000);
       timeElement.textContent = seconds + 's';
     }
   },
 
   ocultarPantallaCarga() {
     console.log('🔄 Ocultando pantalla de carga...');
-    var loadingScreen = document.getElementById('loading-screen');
+    const loadingScreen = document.getElementById('loading-screen');
     if (loadingScreen) {
       loadingScreen.style.opacity = '0';
-      var self = this;
-      setTimeout(function() {
+      setTimeout(() => {
         loadingScreen.classList.remove('active');
-        if (self.loadingInterval) {
-          clearInterval(self.loadingInterval);
+        if (this.loadingInterval) {
+          clearInterval(this.loadingInterval);
         }
       }, 500);
     }
   },
 
-  mostrarLoading() {
-    var grid = document.querySelector('.dashboard-grid');
-    if (grid) {
-      grid.innerHTML = this.getSkeletonHTML();
-    }
-    this.mostrarBarraProgreso();
-  },
-
-  getSkeletonHTML() {
-    return `
-      <section class="card skeleton-loader" data-grid="span-3" style="min-height: 110px;"></section>
-      <section class="card skeleton-loader" data-grid="span-5" style="min-height: 220px;"></section>
-      <section class="card skeleton-loader" data-grid="span-4" style="min-height: 220px;"></section>
-      <section class="card skeleton-loader" data-grid="span-6" style="min-height: 220px;"></section>
-    `;
-  },
-
-  mostrarBarraProgreso() {
-    var progressBar = document.createElement('div');
-    progressBar.className = 'progress-bar-global';
-    progressBar.innerHTML = '<div class="progress-bar-inner-global"></div>';
-    document.body.appendChild(progressBar);
-    
-    var self = this;
-    setTimeout(function() {
-      if (progressBar.parentNode) {
-        progressBar.parentNode.removeChild(progressBar);
-      }
-    }, 5000);
-  },
-
-  async loadData(force) {
+  async loadData(force = false) {
     try {
       this.actualizarPaso("Conectando con Google Sheets...");
       
       console.log('📡 Cargando datos...');
-      var estadoElement = document.getElementById('estado');
+      const estadoElement = document.getElementById('estado');
       if (estadoElement) estadoElement.innerHTML = '<span class="loader"></span> Cargando datos...';
       
-      this.mostrarLoading();
-      
-      var data = await DataManager.fetchData(force);
+      const data = await DataManager.fetchData(force);
       console.log('✅ Datos recibidos:', data);
       
       if (estadoElement) estadoElement.innerHTML = '<span style="color: #28a745;">✓</span> Datos actualizados';
@@ -96,11 +61,10 @@ const DashboardApp = {
       await this.renderizarComponentes(data);
       
       this.ocultarPantallaCarga();
-      this.ocultarBarraProgreso();
       
     } catch(error) {
       console.error('❌ Error cargando datos:', error);
-      var estadoElement = document.getElementById('estado');
+      const estadoElement = document.getElementById('estado');
       if (estadoElement) estadoElement.innerHTML = '<span style="color: #dc3545;">✗</span> Error: ' + error.message;
       
       this.mostrarErrorEnCarga(error);
@@ -108,14 +72,14 @@ const DashboardApp = {
   },
 
   actualizarPaso(mensaje) {
-    var stepElement = document.getElementById('loading-step');
+    const stepElement = document.getElementById('loading-step');
     if (stepElement) {
       stepElement.textContent = mensaje;
     }
   },
 
   mostrarErrorEnCarga(error) {
-    var loadingContent = document.querySelector('.loading-content');
+    const loadingContent = document.querySelector('.loading-content');
     if (loadingContent) {
       loadingContent.innerHTML = `
         <div style="text-align: center; color: #dc3545;">
@@ -131,7 +95,7 @@ const DashboardApp = {
   },
 
   async renderizarComponentes(data) {
-    var grid = document.querySelector('.dashboard-grid');
+    const grid = document.querySelector('.dashboard-grid');
     if (!grid) {
       console.error('❌ No se encontró el grid principal');
       return;
@@ -139,12 +103,14 @@ const DashboardApp = {
     
     grid.innerHTML = '';
     
-    var componentesActivos = [];
+    let componentesActivos = [];
     try {
+      // Inicializar ComponentManager si existe
       if (typeof ComponentManager !== 'undefined') {
         ComponentManager.init();
         componentesActivos = ComponentManager.getActiveComponents();
       } else {
+        // Fallback a componentes por defecto
         componentesActivos = ['saldoCaja', 'ingresosVsEgresos', 'egresosVsAnterior', 'cotizacionesMonedas'];
       }
     } catch (error) {
@@ -167,8 +133,8 @@ const DashboardApp = {
     
     this.actualizarPaso('Cargando ' + componentesActivos.length + ' componentes...');
     
-    for (var i = 0; i < componentesActivos.length; i++) {
-      var componentId = componentesActivos[i];
+    for (let i = 0; i < componentesActivos.length; i++) {
+      const componentId = componentesActivos[i];
       this.actualizarPaso('Cargando ' + this.obtenerNombreComponente(componentId) + '...');
       
       await this.renderizarComponente(componentId, data, grid);
@@ -176,7 +142,7 @@ const DashboardApp = {
   },
 
   obtenerNombreComponente(id) {
-    var nombres = {
+    const nombres = {
       saldoCaja: 'Saldo de Caja',
       ingresosVsEgresos: 'Ingresos vs Egresos',
       egresosVsAnterior: 'Comparación Mensual',
@@ -194,24 +160,27 @@ const DashboardApp = {
     try {
       console.log('🔄 Renderizando componente: ' + componentId);
       
-      var component = ComponentSystem.registros[componentId];
-      if (!component) {
+      // Verificar si el componente existe en el sistema
+      if (!ComponentSystem.registros || !ComponentSystem.registros[componentId]) {
         console.warn('⚠️ Componente ' + componentId + ' no encontrado en registros');
         return;
       }
 
-      var element = document.createElement('section');
+      const component = ComponentSystem.registros[componentId];
+      const element = document.createElement('section');
       element.id = 'componente-' + componentId;
       element.className = 'card fade-in';
       
-      var componentInfo = {};
+      // Obtener configuración del grid
+      let gridConfig = 'span-6';
       if (typeof ComponentManager !== 'undefined') {
-        componentInfo = ComponentManager.getComponentInfo(componentId);
-      } else {
-        componentInfo = { grid: 'span-6' };
+        const componentInfo = ComponentManager.getComponentInfo(componentId);
+        gridConfig = componentInfo.grid;
+      } else if (component.grid) {
+        gridConfig = component.grid;
       }
       
-      element.setAttribute('data-grid', component.grid || componentInfo.grid || 'span-6');
+      element.setAttribute('data-grid', gridConfig);
       
       if (component.html) {
         element.innerHTML = component.html;
@@ -226,11 +195,11 @@ const DashboardApp = {
       
     } catch (error) {
       console.error('❌ Error renderizando componente ' + componentId + ':', error);
-      var errorElement = document.querySelector('#componente-' + componentId);
+      const errorElement = document.querySelector('#componente-' + componentId);
       if (errorElement) {
         errorElement.innerHTML = `
           <div style="color: #dc3545; padding: 20px; text-align: center;">
-            <h3>Error en ${componentId}</h3>
+            <h3>Error en ${this.obtenerNombreComponente(componentId)}</h3>
             <p>${error.message}</p>
           </div>
         `;
@@ -238,41 +207,32 @@ const DashboardApp = {
     }
   },
 
-  ocultarBarraProgreso() {
-    var progressBar = document.querySelector('.progress-bar-global');
-    if (progressBar && progressBar.parentNode) {
-      progressBar.parentNode.removeChild(progressBar);
-    }
-  },
-
   setupEventListeners() {
-    var refreshBtn = document.getElementById('refresh-data');
+    const refreshBtn = document.getElementById('refresh-data');
     if (refreshBtn) {
-      var self = this;
-      refreshBtn.addEventListener('click', function() {
-        self.loadData(true);
+      refreshBtn.addEventListener('click', () => {
+        this.loadData(true);
       });
     }
 
-    var btnGestion = document.getElementById('btn-gestion-componentes');
+    const btnGestion = document.getElementById('btn-gestion-componentes');
     if (btnGestion) {
-      var self = this;
-      btnGestion.addEventListener('click', function() {
-        self.mostrarGestorComponentes();
+      btnGestion.addEventListener('click', () => {
+        this.mostrarGestorComponentes();
       });
     }
 
-    var menuToggle = document.getElementById('menu-toggle');
-    var sidebar = document.querySelector('.sidebar');
-    var overlay = document.getElementById('sidebar-overlay');
+    const menuToggle = document.getElementById('menu-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
     
     if (menuToggle && sidebar && overlay) {
-      menuToggle.addEventListener('click', function() {
+      menuToggle.addEventListener('click', () => {
         sidebar.classList.toggle('active');
         overlay.classList.toggle('active');
       });
       
-      overlay.addEventListener('click', function() {
+      overlay.addEventListener('click', () => {
         sidebar.classList.remove('active');
         overlay.classList.remove('active');
       });
@@ -280,12 +240,12 @@ const DashboardApp = {
   },
 
   mostrarGestorComponentes() {
-    var grid = document.querySelector('.dashboard-grid');
+    const grid = document.querySelector('.dashboard-grid');
     if (!grid) return;
     
     grid.innerHTML = '';
     
-    var gestorHTML = `
+    const gestorHTML = `
       <div class="card" data-grid="full">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
           <h2 style="margin: 0;">Gestor de Componentes</h2>
@@ -311,40 +271,19 @@ const DashboardApp = {
   },
 
   generarListaComponentes() {
-    var config = {};
+    let config = {};
     try {
       if (typeof ComponentManager !== 'undefined') {
+        ComponentManager.init();
         config = ComponentManager.config;
       } else {
-        var defaultComponents = {
-          saldoCaja: true,
-          ingresosVsEgresos: true,
-          egresosVsAnterior: true,
-          cotizacionesMonedas: true,
-          analisisCategorias: false,
-          cuentasPendientes: false,
-          controlStock: false,
-          proyeccionFlujo: false,
-          calculadoraInversiones: false
-        };
-        config = defaultComponents;
+        config = CONFIG.COMPONENTES_POR_DEFECTO;
       }
     } catch (error) {
-      var defaultComponents = {
-        saldoCaja: true,
-        ingresosVsEgresos: true,
-        egresosVsAnterior: true,
-        cotizacionesMonedas: true,
-        analisisCategorias: false,
-        cuentasPendientes: false,
-        controlStock: false,
-        proyeccionFlujo: false,
-        calculadoraInversiones: false
-      };
-      config = defaultComponents;
+      config = CONFIG.COMPONENTES_POR_DEFECTO;
     }
 
-    var componentes = {
+    const componentes = {
       saldoCaja: { name: 'Saldo de Caja', category: 'liviano' },
       ingresosVsEgresos: { name: 'Ingresos vs Egresos', category: 'liviano' },
       egresosVsAnterior: { name: 'Comparación Mes Anterior', category: 'liviano' },
@@ -356,13 +295,13 @@ const DashboardApp = {
       calculadoraInversiones: { name: 'Calculadora de Inversiones', category: 'mediano' }
     };
 
-    var html = '';
-    for (var id in componentes) {
+    let html = '';
+    for (const id in componentes) {
       if (componentes.hasOwnProperty(id)) {
-        var info = componentes[id];
-        var activo = config[id] || false;
-        var colorFondo = '';
-        var colorTexto = '';
+        const info = componentes[id];
+        const activo = config[id] || false;
+        let colorFondo = '';
+        let colorTexto = '';
         
         if (info.category === 'liviano') {
           colorFondo = 'rgba(40, 167, 69, 0.2)';
@@ -398,40 +337,40 @@ const DashboardApp = {
   },
 
   setupGestorEventListeners() {
-    var btnVolver = document.getElementById('btn-volver-dashboard');
+    const btnVolver = document.getElementById('btn-volver-dashboard');
     if (btnVolver) {
-      btnVolver.addEventListener('click', function() {
+      btnVolver.addEventListener('click', () => {
         window.location.reload();
       });
     }
     
-    var btnActivarTodos = document.getElementById('btn-activar-todos');
+    const btnActivarTodos = document.getElementById('btn-activar-todos');
     if (btnActivarTodos) {
-      btnActivarTodos.addEventListener('click', function() {
-        var checkboxes = document.querySelectorAll('input[type="checkbox"]');
-        checkboxes.forEach(function(checkbox) {
+      btnActivarTodos.addEventListener('click', () => {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach((checkbox) => {
           checkbox.checked = true;
         });
       });
     }
     
-    var btnDesactivarTodos = document.getElementById('btn-desactivar-todos');
+    const btnDesactivarTodos = document.getElementById('btn-desactivar-todos');
     if (btnDesactivarTodos) {
-      btnDesactivarTodos.addEventListener('click', function() {
-        var checkboxes = document.querySelectorAll('input[type="checkbox"]');
-        checkboxes.forEach(function(checkbox) {
+      btnDesactivarTodos.addEventListener('click', () => {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach((checkbox) => {
           checkbox.checked = false;
         });
       });
     }
     
-    var btnAplicar = document.getElementById('btn-aplicar-cambios');
+    const btnAplicar = document.getElementById('btn-aplicar-cambios');
     if (btnAplicar) {
-      btnAplicar.addEventListener('click', function() {
+      btnAplicar.addEventListener('click', () => {
         try {
-          var checkboxes = document.querySelectorAll('input[type="checkbox"]');
-          checkboxes.forEach(function(checkbox) {
-            var componentId = checkbox.id.replace('chk-', '');
+          const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+          checkboxes.forEach((checkbox) => {
+            const componentId = checkbox.id.replace('chk-', '');
             if (typeof ComponentManager !== 'undefined') {
               ComponentManager.config[componentId] = checkbox.checked;
             }
@@ -454,7 +393,7 @@ const DashboardApp = {
 
 // Inicialización
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', () => {
     console.log('📄 DOM cargado, iniciando app...');
     DashboardApp.init();
   });
