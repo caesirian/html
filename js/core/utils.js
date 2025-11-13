@@ -56,17 +56,76 @@ const UTILS = {
     }
   },
   
-  parseNumber(val) {
-    if(val === null || val === undefined || val === "") return 0;
-    if(typeof val === "number") return val;
-    const s = String(val).replace(/[^0-9\-,\.]/g,"").trim();
-    if(!s) return 0;
-    const parts = s.split(',');
-    if(parts.length > 1 && parts[0].includes('.')) {
-      return parseFloat(s.replace(/\./g,'').replace(',','.')) || 0;
+parseNumber(val) {
+  if(val === null || val === undefined || val === "") return 0;
+  if(typeof val === "number") return val;
+  
+  let s = String(val).trim();
+  
+  // Casos especiales
+  if(s === '' || s === '-' || s === '.') return 0;
+  
+  // Remover símbolos de moneda, espacios y caracteres no numéricos
+  s = s.replace(/[^\d,\-.]/g, '');
+  
+  // Si no queda nada, retornar 0
+  if(!s) return 0;
+  
+  // Manejar negativo
+  const esNegativo = s.startsWith('-');
+  if(esNegativo) {
+    s = s.substring(1);
+  }
+  
+  // Contar separadores
+  const tieneComa = s.includes(',');
+  const tienePunto = s.includes('.');
+  
+  // CASO 1: Sin separadores - número entero simple
+  if(!tieneComa && !tienePunto) {
+    const num = parseInt(s);
+    return esNegativo ? -num : num;
+  }
+  
+  // CASO 2: Solo coma
+  if(tieneComa && !tienePunto) {
+    const partes = s.split(',');
+    // Si después de la coma hay 2-3 dígitos, es decimal europeo
+    if(partes.length === 2 && (partes[1].length === 2 || partes[1].length === 3)) {
+      s = partes[0] + '.' + partes[1]; // Convertir a formato inglés
+    } else {
+      s = s.replace(/,/g, ''); // Eliminar comas (miles)
     }
-    return parseFloat(s.replace(',', '.')) || 0;
-  },
+  }
+  
+  // CASO 3: Solo punto
+  else if(!tieneComa && tienePunto) {
+    const partes = s.split('.');
+    // Si después del punto hay 2-3 dígitos, es decimal inglés
+    if(partes.length === 2 && (partes[1].length === 2 || partes[1].length === 3)) {
+      // Ya está en formato inglés, dejar igual
+    } else {
+      s = s.replace(/\./g, ''); // Eliminar puntos (miles)
+    }
+  }
+  
+  // CASO 4: Ambos separadores
+  else if(tieneComa && tienePunto) {
+    const ultimaComa = s.lastIndexOf(',');
+    const ultimoPunto = s.lastIndexOf('.');
+    
+    if(ultimaComa > ultimoPunto) {
+      // Formato: 1.000,00 (europeo)
+      s = s.replace(/\./g, '').replace(',', '.');
+    } else {
+      // Formato: 1,000.00 (inglés)
+      s = s.replace(/,/g, '');
+    }
+  }
+  
+  const numero = parseFloat(s);
+  return isNaN(numero) ? 0 : (esNegativo ? -numero : numero);
+},
 
   parseDate(v) {
     if(!v) return new Date(NaN);
