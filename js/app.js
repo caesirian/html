@@ -191,58 +191,53 @@ const DashboardApp = {
   },
 
   async renderizarComponente(componentId, data, grid) {
-  try {
-    console.log('🔄 Renderizando componente: ' + componentId);
-    
-    var component = ComponentSystem.registros[componentId];
-    if (!component) {
-      console.warn('⚠️ Componente ' + componentId + ' no encontrado en registros');
-      return;
-    }
+    try {
+      console.log('🔄 Renderizando componente: ' + componentId);
+      
+      var component = ComponentSystem.registros[componentId];
+      if (!component) {
+        console.warn('⚠️ Componente ' + componentId + ' no encontrado en registros');
+        return;
+      }
 
-    var element = document.createElement('section');
-    element.id = 'componente-' + componentId;
-    element.className = 'card fade-in';
-    
-    // OBTENER GRID CON MEJOR FALLBACK
-    var gridSize = 'span-6'; // Valor por defecto
-    
-    if (component.grid) {
-      gridSize = component.grid;
-    } else {
-      // Intentar obtener de ComponentManager
-      if (typeof ComponentManager !== 'undefined' && typeof ComponentManager.getComponentInfo === 'function') {
-        var componentInfo = ComponentManager.getComponentInfo(componentId);
-        gridSize = componentInfo.grid || 'span-6';
+      var element = document.createElement('section');
+      element.id = 'componente-' + componentId;
+      element.className = 'card fade-in';
+      
+      var componentInfo = {};
+      if (typeof ComponentManager !== 'undefined') {
+        componentInfo = ComponentManager.getComponentInfo(componentId);
+      } else {
+        componentInfo = { grid: 'span-6' };
+      }
+      
+      element.setAttribute('data-grid', component.grid || componentInfo.grid || 'span-6');
+      
+      if (component.html) {
+        element.innerHTML = component.html;
+      }
+
+      grid.appendChild(element);
+
+      if (component.render) {
+        await component.render(data, element);
+        console.log('✅ Componente ' + componentId + ' renderizado correctamente');
+      }
+      
+    } catch (error) {
+      console.error('❌ Error renderizando componente ' + componentId + ':', error);
+      var errorElement = document.querySelector('#componente-' + componentId);
+      if (errorElement) {
+        errorElement.innerHTML = `
+          <div style="color: #dc3545; padding: 20px; text-align: center;">
+            <h3>Error en ${componentId}</h3>
+            <p>${error.message}</p>
+          </div>
+        `;
       }
     }
-    
-    element.setAttribute('data-grid', gridSize);
-    
-    if (component.html) {
-      element.innerHTML = component.html;
-    }
+  },
 
-    grid.appendChild(element);
-
-    if (component.render) {
-      await component.render(data, element);
-      console.log('✅ Componente ' + componentId + ' renderizado correctamente');
-    }
-    
-  } catch (error) {
-    console.error('❌ Error renderizando componente ' + componentId + ':', error);
-    var errorElement = document.querySelector('#componente-' + componentId);
-    if (errorElement) {
-      errorElement.innerHTML = `
-        <div style="color: #dc3545; padding: 20px; text-align: center;">
-          <h3>Error en ${componentId}</h3>
-          <p>${error.message}</p>
-        </div>
-      `;
-    }
-  }
-},
   ocultarBarraProgreso() {
     var progressBar = document.querySelector('.progress-bar-global');
     if (progressBar && progressBar.parentNode) {
