@@ -1,4 +1,4 @@
-// js/carga-datos.js - VERSIÓN CORREGIDA
+// js/carga-datos.js - ARCHIVO COMPLETO CORREGIDO
 const CargaDatosApp = {
   currentData: null,
 
@@ -164,6 +164,7 @@ const CargaDatosApp = {
       const option = document.createElement('option');
       option.value = mes;
       option.textContent = UTILS.formatMonthKey(mes, true);
+      option.selected = mes === '2025-11'; // Seleccionar mes actual por defecto
       filtroMes.appendChild(option);
     });
 
@@ -323,23 +324,24 @@ const CargaDatosApp = {
     try {
       console.log('📤 PREPARANDO ENVÍO DE REGISTRO:', registro);
       
+      // USAR EL NOMBRE EXACTO QUE ESPERA GOOGLE SHEETS
       const datosEnvio = {
         action: 'insert',
         sheet: 'Finanzas_RegistroDiario',
         Fecha: registro.Fecha,
         Monto: registro.Monto.toString(),
-        Tipo: registro.Tipo,
+        'Tipo (Ingreso/Egreso)': registro.Tipo, // ✅ CAMPO CORREGIDO
         Categoría: registro.Categoría,
         Subcategoría: registro.Subcategoría,
-        MediodePago: registro['Medio de Pago'],
+        'Medio de Pago': registro['Medio de Pago'],
         Comprobante: registro.Comprobante,
         Descripción: registro.Descripción,
         Proyecto: registro.Proyecto,
         Responsable: registro.Responsable,
-        ClienteProveedor: registro['Cliente/Proveedor'],
-        IDRelacionado: registro['ID Relacionado'],
+        'Cliente/Proveedor': registro['Cliente/Proveedor'],
+        'ID Relacionado': registro['ID Relacionado'],
         Observaciones: registro.Observaciones,
-        ReflejarenCaja: registro['Reflejar en Caja'],
+        'Reflejar en Caja': registro['Reflejar en Caja'],
         Mes: registro.Mes
       };
 
@@ -350,7 +352,7 @@ const CargaDatosApp = {
         }
       });
 
-      console.log('📨 Datos a enviar (limpios):', datosEnvio);
+      console.log('📨 Datos a enviar (con campo corregido):', datosEnvio);
 
       const url = CONFIG.GAS_ENDPOINT + '?' + new URLSearchParams(datosEnvio);
       console.log('🔗 URL final:', url);
