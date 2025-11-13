@@ -1,4 +1,4 @@
-// js/carga-datos.js - ARCHIVO COMPLETO CORREGIDO
+// js/carga-datos.js - VERSIÓN DEFINITIVA
 const CargaDatosApp = {
   currentData: null,
 
@@ -324,13 +324,17 @@ const CargaDatosApp = {
     try {
       console.log('📤 PREPARANDO ENVÍO DE REGISTRO:', registro);
       
-      // USAR EL NOMBRE EXACTO QUE ESPERA GOOGLE SHEETS
+      // VERSIÓN DEFINITIVA - Probamos diferentes formatos de campos
       const datosEnvio = {
         action: 'insert',
         sheet: 'Finanzas_RegistroDiario',
         Fecha: registro.Fecha,
         Monto: registro.Monto.toString(),
-        'Tipo (Ingreso/Egreso)': registro.Tipo, // ✅ CAMPO CORREGIDO
+        // Intentar diferentes nombres para el campo Tipo
+        'Tipo (Ingreso/Egreso)': registro.Tipo,
+        TipoIngresoEgreso: registro.Tipo,
+        Tipo: registro.Tipo,
+        // Campos adicionales
         Categoría: registro.Categoría,
         Subcategoría: registro.Subcategoría,
         'Medio de Pago': registro['Medio de Pago'],
@@ -345,14 +349,20 @@ const CargaDatosApp = {
         Mes: registro.Mes
       };
 
-      // Limpiar campos vacíos
+      // DEBUG DETALLADO
+      console.log('🔍 ENVIANDO TODOS LOS FORMATOS DE TIPO:');
+      console.log('   - Tipo (Ingreso/Egreso):', registro.Tipo);
+      console.log('   - TipoIngresoEgreso:', registro.Tipo);
+      console.log('   - Tipo:', registro.Tipo);
+
+      // Limpiar campos vacíos pero mantener al menos un campo Tipo
       Object.keys(datosEnvio).forEach(key => {
         if (datosEnvio[key] === '' || datosEnvio[key] === null || datosEnvio[key] === undefined) {
           delete datosEnvio[key];
         }
       });
 
-      console.log('📨 Datos a enviar (con campo corregido):', datosEnvio);
+      console.log('📨 Datos a enviar (con múltiples formatos):', datosEnvio);
 
       const url = CONFIG.GAS_ENDPOINT + '?' + new URLSearchParams(datosEnvio);
       console.log('🔗 URL final:', url);
