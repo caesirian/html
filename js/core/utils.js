@@ -128,22 +128,50 @@ parseNumber(val) {
 },
 
   parseDate(v) {
-    if(!v) return new Date(NaN);
-    if(v instanceof Date) return v;
-    const s = String(v).trim();
-    if(/^\d{4}-\d{2}-\d{2}/.test(s)) return new Date(s);
-    if(/^\d{2}\/\d{2}\/\d{4}/.test(s)) {
-      const [d,m,y] = s.split('/');
-      return new Date(Number(y), Number(m)-1, Number(d));
-    }
-    const n = Number(s);
-    if(!isNaN(n) && n > 1000) {
-      const epoch = new Date(Date.UTC(1899,11,30));
-      epoch.setUTCDate(epoch.getUTCDate() + Math.floor(n));
-      return epoch;
-    }
-    return new Date(s);
-  },
+  if(!v) return new Date(NaN);
+  if(v instanceof Date) return v;
+  
+  const s = String(v).trim();
+  
+  // DEBUG: Ver qué está llegando
+  console.log('Parseando fecha:', s);
+  
+  // 1. Formato ISO con timezone: '2025-08-01T03:00:00.000Z'
+  if(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(s)) {
+    const date = new Date(s);
+    console.log('Fecha ISO parseada:', date);
+    return date;
+  }
+  
+  // 2. Formato YYYY-MM-DD simple
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    const [y, m, d] = s.split('-');
+    return new Date(Number(y), Number(m)-1, Number(d));
+  }
+  
+  // 3. Formato DD/MM/YYYY
+  if(/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
+    const [d, m, y] = s.split('/');
+    return new Date(Number(y), Number(m)-1, Number(d));
+  }
+  
+  // 4. Timestamp de Google Sheets (días desde 1899-12-30)
+  const n = Number(s);
+  if(!isNaN(n) && n > 1000) {
+    const epoch = new Date(Date.UTC(1899,11,30));
+    epoch.setUTCDate(epoch.getUTCDate() + Math.floor(n));
+    return epoch;
+  }
+  
+  // 5. Intentar parseo nativo como último recurso
+  const date = new Date(s);
+  if(!isNaN(date.getTime())) {
+    return date;
+  }
+  
+  console.warn('No se pudo parsear fecha:', s);
+  return new Date(NaN);
+},
 
   formatCurrency(n) {
     const sign = n < 0 ? '-' : '';
