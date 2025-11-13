@@ -1,5 +1,4 @@
 const UTILS = {
-
   // Función para obtener nombre del mes en mayúsculas
   getMonthName(monthNumber, short = false) {
     const months = [
@@ -11,6 +10,7 @@ const UTILS = {
       'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'
     ];
     
+    if (monthNumber < 1 || monthNumber > 12) return '';
     return short ? monthsShort[monthNumber - 1] : months[monthNumber - 1];
   },
 
@@ -36,7 +36,8 @@ const UTILS = {
     
     return `${prevYear}-${String(prevMonth).padStart(2, '0')}`;
   },
-  // Nueva función para formatear fecha
+
+  // Función para formatear fecha
   formatDate(dateString) {
     if (!dateString) return '';
     
@@ -92,31 +93,16 @@ const UTILS = {
   },
 
   saveCache(obj) {
-    localStorage.setItem(CONFIG.CACHE_KEY, JSON.stringify({ts: Date.now(), data: obj}));
-    document.getElementById('cache-status').innerText = 'sí';
-  },
-  getMonthName(monthNumber, short = false) {
-    const months = [
-      'ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO',
-      'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'
-    ];
-    const monthsShort = [
-      'ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN',
-      'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'
-    ];
-    
-    return short ? monthsShort[monthNumber - 1] : months[monthNumber - 1];
-  },
-
-  formatMonthKey(mesKey, short = false) {
-    if (!mesKey || !mesKey.includes('-')) return mesKey;
-    const [year, month] = mesKey.split('-');
-    const monthName = this.getMonthName(parseInt(month), short);
-    return short ? `${monthName} ${year}` : `${monthName} ${year}`;
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(CONFIG.CACHE_KEY, JSON.stringify({ts: Date.now(), data: obj}));
+      const cacheStatus = document.getElementById('cache-status');
+      if (cacheStatus) cacheStatus.innerText = 'sí';
+    }
   },
 
   loadCache() {
     try {
+      if (typeof localStorage === 'undefined') return null;
       const raw = localStorage.getItem(CONFIG.CACHE_KEY);
       if(!raw) return null;
       const parsed = JSON.parse(raw);
@@ -125,32 +111,31 @@ const UTILS = {
     } catch(e) {
       return null;
     }
-  }
-};
+  },
 
-// Agregar estas funciones a utils.js si no existen
-UTILS.formatDateForInput = function(dateString) {
-  if (!dateString) return '';
-  
-  try {
-    const date = this.parseDate(dateString);
-    if (isNaN(date.getTime())) return dateString;
+  formatDateForInput(dateString) {
+    if (!dateString) return '';
     
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    
+    try {
+      const date = this.parseDate(dateString);
+      if (isNaN(date.getTime())) return dateString;
+      
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      
+      return `${year}-${month}-${day}`;
+    } catch (error) {
+      console.error('Error formateando fecha para input:', error);
+      return dateString;
+    }
+  },
+
+  getCurrentDateForInput() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
-  } catch (error) {
-    console.error('Error formateando fecha para input:', error);
-    return dateString;
   }
-};
-
-UTILS.getCurrentDateForInput = function() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
 };
