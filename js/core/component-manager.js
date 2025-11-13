@@ -4,16 +4,17 @@ const ComponentManager = {
   
   init() {
     this.loadConfig();
+    return this;
   },
   
   loadConfig() {
     try {
-      var saved = localStorage.getItem('dashboard_components_config');
+      const saved = localStorage.getItem('dashboard_components_config');
       if (saved) {
         this.config = JSON.parse(saved);
         
         // Limpiar componentes que ya no existen
-        for (var id in this.config) {
+        for (const id in this.config) {
           if (this.config.hasOwnProperty(id)) {
             if (!this.componentExists(id)) {
               delete this.config[id];
@@ -22,11 +23,11 @@ const ComponentManager = {
         }
         
         // Agregar nuevos componentes que no están en la configuración
-        var allComponents = this.getAllComponents();
-        for (var id in allComponents) {
+        const allComponents = this.getAllComponents();
+        for (const id in allComponents) {
           if (allComponents.hasOwnProperty(id)) {
             if (this.config[id] === undefined) {
-              var componentConfig = allComponents[id];
+              const componentConfig = allComponents[id];
               this.config[id] = componentConfig.defaultActive;
             }
           }
@@ -34,10 +35,10 @@ const ComponentManager = {
       } else {
         // Configuración por defecto
         this.config = {};
-        var allComponents = this.getAllComponents();
-        for (var id in allComponents) {
+        const allComponents = this.getAllComponents();
+        for (const id in allComponents) {
           if (allComponents.hasOwnProperty(id)) {
-            var componentConfig = allComponents[id];
+            const componentConfig = allComponents[id];
             this.config[id] = componentConfig.defaultActive;
           }
         }
@@ -45,18 +46,8 @@ const ComponentManager = {
       }
     } catch (error) {
       console.error('Error cargando configuración:', error);
-      // Fallback
-      this.config = {
-        saldoCaja: true,
-        ingresosVsEgresos: true,
-        egresosVsAnterior: true,
-        cotizacionesMonedas: true,
-        analisisCategorias: false,
-        cuentasPendientes: false,
-        controlStock: false,
-        proyeccionFlujo: false,
-        calculadoraInversiones: false
-      };
+      // Fallback a configuración básica
+      this.config = CONFIG.COMPONENTES_POR_DEFECTO;
     }
   },
   
@@ -69,8 +60,8 @@ const ComponentManager = {
   },
   
   getActiveComponents() {
-    var active = [];
-    for (var id in this.config) {
+    const active = [];
+    for (const id in this.config) {
       if (this.config.hasOwnProperty(id) && this.config[id] === true) {
         active.push(id);
       }
@@ -78,10 +69,10 @@ const ComponentManager = {
     return active;
   },
   
-  // NUEVA FUNCIÓN: Obtener información de un componente
+  // Función: Obtener información de un componente
   getComponentInfo(componentId) {
-    var allComponents = this.getAllComponents();
-    var config = allComponents[componentId];
+    const allComponents = this.getAllComponents();
+    const config = allComponents[componentId];
     
     if (config) {
       return {
@@ -101,13 +92,13 @@ const ComponentManager = {
     };
   },
   
-  // NUEVA FUNCIÓN: Verificar si un componente existe
+  // Función: Verificar si un componente existe
   componentExists(componentId) {
-    var allComponents = this.getAllComponents();
+    const allComponents = this.getAllComponents();
     return allComponents.hasOwnProperty(componentId);
   },
   
-  // NUEVA FUNCIÓN: Obtener todos los componentes disponibles
+  // Función: Obtener todos los componentes disponibles
   getAllComponents() {
     return {
       saldoCaja: {
@@ -176,17 +167,17 @@ const ComponentManager = {
     };
   },
   
-  // NUEVA FUNCIÓN: Cargar scripts de componentes dinámicamente
+  // Función: Cargar scripts de componentes dinámicamente
   loadComponentScripts(componentIds) {
-    var scriptsToLoad = this.getScriptsToLoad(componentIds);
-    var loadPromises = scriptsToLoad.map(function(scriptPath) {
+    const scriptsToLoad = this.getScriptsToLoad(componentIds);
+    const loadPromises = scriptsToLoad.map(function(scriptPath) {
       return new Promise(function(resolve, reject) {
         if (document.querySelector('script[src="' + scriptPath + '"]')) {
           resolve(); // Ya cargado
           return;
         }
         
-        var script = document.createElement('script');
+        const script = document.createElement('script');
         script.src = scriptPath;
         script.onload = resolve;
         script.onerror = reject;
@@ -197,14 +188,14 @@ const ComponentManager = {
     return Promise.all(loadPromises);
   },
   
-  // NUEVA FUNCIÓN: Obtener scripts que necesitan ser cargados
+  // Función: Obtener scripts que necesitan ser cargados
   getScriptsToLoad(componentIds) {
-    var scripts = [];
-    var allComponents = this.getAllComponents();
+    const scripts = [];
+    const allComponents = this.getAllComponents();
     
-    for (var i = 0; i < componentIds.length; i++) {
-      var componentId = componentIds[i];
-      var component = allComponents[componentId];
+    for (let i = 0; i < componentIds.length; i++) {
+      const componentId = componentIds[i];
+      const component = allComponents[componentId];
       if (component && component.script) {
         scripts.push(component.script);
       }
@@ -213,22 +204,3 @@ const ComponentManager = {
     return scripts.filter(Boolean);
   }
 };
-
-
-        // AGREGAR esta función al component-manager.js existente
-getComponentInfo(componentId) {
-  // Mapeo simple de componentes a su información
-  const componentInfo = {
-    saldoCaja: { name: 'Saldo de Caja', category: 'liviano', grid: 'span-3' },
-    ingresosVsEgresos: { name: 'Ingresos vs Egresos', category: 'liviano', grid: 'span-5' },
-    egresosVsAnterior: { name: 'Comparación Mes Anterior', category: 'liviano', grid: 'span-4' },
-    cotizacionesMonedas: { name: 'Cotizaciones', category: 'liviano', grid: 'span-6' },
-    analisisCategorias: { name: 'Análisis por Categorías', category: 'mediano', grid: 'span-6' },
-    cuentasPendientes: { name: 'Cuentas Pendientes', category: 'mediano', grid: 'span-6' },
-    controlStock: { name: 'Control de Stock', category: 'pesado', grid: 'span-6' },
-    proyeccionFlujo: { name: 'Proyección de Flujo', category: 'pesado', grid: 'span-6' },
-    calculadoraInversiones: { name: 'Calculadora de Inversiones', category: 'mediano', grid: 'span-6' }
-  };
-  
-  return componentInfo[componentId] || { name: componentId, category: 'liviano', grid: 'span-6' };
-},
