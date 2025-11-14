@@ -72,7 +72,7 @@
       padding-top: 16px;
       border-top: 1px solid rgba(255,255,255,0.1);
     }
-    .supplier-status {
+    .proveedor-status {
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -89,10 +89,6 @@
       background: rgba(108, 117, 125, 0.2);
       color: #6c757d;
     }
-    .status-pending {
-      background: rgba(255, 193, 7, 0.2);
-      color: #ffc107;
-    }
     .action-buttons {
       display: flex;
       gap: 6px;
@@ -101,21 +97,141 @@
       padding: 4px 8px;
       font-size: 12px;
     }
-    .payment-terms {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
+    .loader {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: var(--accent);
+      animation: spin 1s ease-in-out infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .fade-in {
+      animation: fadeIn 0.5s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* ====== PANTALLA DE CARGA ====== */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(11, 18, 32, 0.85);
+      backdrop-filter: blur(10px);
+      z-index: 10000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease-in-out;
+    }
+    
+    .loading-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .loading-content {
+      text-align: center;
+      max-width: 400px;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(15px);
+      animation: fadeInUp 0.4s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .loading-spinner {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .spinner-circle {
+      width: 10px;
+      height: 10px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: bounce 1.4s infinite ease-in-out;
+    }
+    
+    .spinner-circle:nth-child(1) { animation-delay: -0.32s; }
+    .spinner-circle:nth-child(2) { animation-delay: -0.16s; }
+    
+    @keyframes bounce {
+      0%, 80%, 100% {
+        transform: scale(0.8);
+        opacity: 0.5;
+      }
+      40% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    
+    .loading-title {
+      color: var(--text);
+      font-size: 22px;
+      font-weight: 700;
+      margin: 0 0 10px 0;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .loading-message {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0;
+      line-height: 1.5;
     }
   </style>
 </head>
 <body>
+  <!-- Pantalla de carga - SOLO PARA OPERACIONES CRÍTICAS -->
+  <div id="loading-overlay" class="loading-overlay">
+    <div class="loading-content">
+      <div class="loading-spinner">
+        <div class="spinner-circle"></div>
+        <div class="spinner-circle"></div>
+        <div class="spinner-circle"></div>
+      </div>
+      <h3 class="loading-title">Procesando información</h3>
+      <p class="loading-message" id="loading-message">Por favor espere...</p>
+    </div>
+  </div>
+
   <div class="app">
     <aside class="sidebar" role="navigation">
       <h1>HG - Gestión de Proveedores</h1>
       <div class="nav">
         <button id="nav-dashboard" onclick="location.href='dash_beta.html'">Dashboard</button>
         <button id="nav-carga-datos" onclick="location.href='carga_datos.html'">Carga de Datos</button>
-        <button id="nav-clientes" onclick="location.href='clientes.html'">Gestión de Clientes</button>
+        <button id="nav-clientes" onclick="location.href='abmclients2.html'">Gestión de Clientes</button>
         <button id="nav-proveedores" class="active">Gestión de Proveedores</button>
         <button id="nav-ventas">Ventas</button>
         <button id="nav-finanzas">Finanzas</button>
@@ -190,7 +306,6 @@
                 <select id="estado" name="estado">
                   <option value="Activo">Activo</option>
                   <option value="Inactivo">Inactivo</option>
-                  <option value="Pendiente">Pendiente</option>
                 </select>
               </div>
             </div>
@@ -275,34 +390,30 @@
             </div>
           </div>
 
-          <!-- Sección: Información de Pagos -->
+          <!-- Sección: Información Comercial -->
           <div class="form-section">
-            <h3>Información de Pagos</h3>
+            <h3>Información Comercial</h3>
             <div class="form-grid">
               <div class="form-field">
-                <label for="plazoPago">Plazo de Pago (días)</label>
-                <input type="number" id="plazoPago" name="plazoPago" min="0" placeholder="30">
+                <label for="plazoEntrega">Plazo de Entrega (días)</label>
+                <input type="number" id="plazoEntrega" name="plazoEntrega" min="0">
               </div>
               
               <div class="form-field">
-                <label for="formaPago">Forma de Pago Preferida</label>
-                <select id="formaPago" name="formaPago">
+                <label for="condicionesPago">Condiciones de Pago</label>
+                <select id="condicionesPago" name="condicionesPago">
                   <option value="">Seleccionar...</option>
-                  <option value="Transferencia">Transferencia</option>
-                  <option value="Cheque">Cheque</option>
-                  <option value="Efectivo">Efectivo</option>
-                  <option value="Tarjeta">Tarjeta</option>
+                  <option value="Contado">Contado</option>
+                  <option value="7 días">7 días</option>
+                  <option value="15 días">15 días</option>
+                  <option value="30 días">30 días</option>
+                  <option value="60 días">60 días</option>
                 </select>
               </div>
               
               <div class="form-field">
-                <label for="cuentaBancaria">Cuenta Bancaria</label>
-                <input type="text" id="cuentaBancaria" name="cuentaBancaria">
-              </div>
-              
-              <div class="form-field">
-                <label for="cbu">CBU/CVU</label>
-                <input type="text" id="cbu" name="cbu">
+                <label for="descuento">Descuento (%)</label>
+                <input type="number" id="descuento" name="descuento" min="0" max="100" step="0.1">
               </div>
             </div>
           </div>
@@ -313,7 +424,7 @@
             <div class="form-grid">
               <div class="form-field" style="grid-column: span 2;">
                 <label for="productosServicios">Productos/Servicios</label>
-                <textarea id="productosServicios" name="productosServicios" rows="3" placeholder="Descripción de productos o servicios ofrecidos"></textarea>
+                <textarea id="productosServicios" name="productosServicios" rows="3" placeholder="Descripción de productos o servicios que ofrece"></textarea>
               </div>
               
               <div class="form-field" style="grid-column: span 2;">
@@ -344,13 +455,18 @@
               <option value="">Todos los estados</option>
               <option value="Activo">Activos</option>
               <option value="Inactivo">Inactivos</option>
-              <option value="Pendiente">Pendientes</option>
             </select>
             <select id="filtro-categoria" class="btn small">
               <option value="">Todas las categorías</option>
-              <option value="A - Estratégico">Estratégicos</option>
-              <option value="B - Regular">Regulares</option>
-              <option value="C - Ocasional">Ocasionales</option>
+              <option value="A - Estratégico">Estratégico</option>
+              <option value="B - Regular">Regular</option>
+              <option value="C - Ocasional">Ocasional</option>
+            </select>
+            <select id="filtro-tipo" class="btn small">
+              <option value="">Todos los tipos</option>
+              <option value="Productos">Productos</option>
+              <option value="Servicios">Servicios</option>
+              <option value="Ambos">Ambos</option>
             </select>
           </div>
         </div>
@@ -366,7 +482,6 @@
                 <th>Contacto</th>
                 <th>Teléfono</th>
                 <th>Estado</th>
-                <th>Plazo Pago</th>
                 <th>Fecha Alta</th>
                 <th>Acciones</th>
               </tr>
@@ -400,24 +515,27 @@
   
   <!-- Script específico para esta página -->
   <script>
-    // js/proveedores.js - VERSIÓN DEFINITIVA
+    // js/proveedores.js - VERSIÓN COMPLETA PARA PROVEEDORES
     const ProveedoresApp = {
       currentData: null,
-      editingSupplierId: null,
+      editingProveedorId: null,
+      dataTable: null,
+      autoRefreshInterval: null,
 
       async init() {
         console.log('🚀 Iniciando app de gestión de proveedores...');
         
         this.setupEventListeners();
+        this.setupAutoRefresh();
         await this.loadData();
       },
 
-      async loadData() {
+      async loadData(forceRefresh = true) {
         try {
           console.log('📡 Cargando datos de proveedores...');
           this.mostrarEstado('Cargando datos...', 'loading');
 
-          const data = await DataManager.fetchData(true);
+          const data = await DataManager.fetchData(forceRefresh);
           console.log('✅ Datos recibidos:', data);
           
           this.currentData = data;
@@ -445,16 +563,38 @@
         estadoElement.innerHTML = (iconos[tipo] || '') + mensaje;
       },
 
+      // Función para mostrar pantalla de carga - SOLO PARA OPERACIONES CRÍTICAS
+      mostrarLoading(mensaje = 'Estoy procesando info, por favor espera...') {
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const loadingMessage = document.getElementById('loading-message');
+        
+        if (loadingOverlay && loadingMessage) {
+          loadingMessage.textContent = mensaje;
+          loadingOverlay.classList.add('active');
+        }
+      },
+
+      // Función para ocultar pantalla de carga
+      ocultarLoading() {
+        const loadingOverlay = document.getElementById('loading-overlay');
+        if (loadingOverlay) {
+          loadingOverlay.classList.remove('active');
+        }
+      },
+
       renderizarTabla(data) {
         const proveedores = data.Proveedores || [];
         const tbody = document.querySelector('#tabla-proveedores tbody');
         
-        if (!tbody) return;
+        if (!tbody) {
+          console.error('❌ No se encontró el tbody de la tabla');
+          return;
+        }
 
         tbody.innerHTML = '';
 
         if (proveedores.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--muted); padding: 20px;">No hay proveedores registrados</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--muted); padding: 20px;">No hay proveedores registrados</td></tr>';
           this.inicializarDataTable([]);
           document.getElementById('total-proveedores').textContent = '0';
           return;
@@ -477,12 +617,8 @@
           const contacto = proveedor.Contacto || '';
           const telefono = proveedor.Telefono || '';
           const estado = proveedor.Estado || 'Activo';
-          const plazoPago = proveedor.PlazoPago || '';
           const fechaAlta = proveedor.FechaAlta || '';
-          
-          let estadoClass = 'status-active';
-          if (estado === 'Inactivo') estadoClass = 'status-inactive';
-          if (estado === 'Pendiente') estadoClass = 'status-pending';
+          const estadoClass = estado === 'Activo' ? 'status-active' : 'status-inactive';
 
           fila.innerHTML = `
             <td>${id}</td>
@@ -491,13 +627,12 @@
             <td>${categoria}</td>
             <td>${contacto}</td>
             <td>${telefono}</td>
-            <td><span class="supplier-status ${estadoClass}">${estado}</span></td>
-            <td>${plazoPago ? plazoPago + ' días' : ''}</td>
+            <td><span class="proveedor-status ${estadoClass}">${estado}</span></td>
             <td>${UTILS.formatDate(fechaAlta)}</td>
             <td>
               <div class="action-buttons">
                 <button class="btn small" onclick="ProveedoresApp.editarProveedor('${id}')">Editar</button>
-                <button class="btn small secondary" onclick="ProveedoresApp.eliminarProveedor('${id}', '${nombre}')">Eliminar</button>
+                <button class="btn small secondary" onclick="ProveedoresApp.eliminarProveedor('${id}', '${this.escapeString(nombre)}')">Eliminar</button>
               </div>
             </td>
           `;
@@ -508,36 +643,72 @@
         document.getElementById('total-proveedores').textContent = proveedoresOrdenados.length;
       },
 
+      // Función para actualizar la tabla sin recargar todos los datos
+      actualizarTablaEnTiempoReal() {
+        console.log('🔄 Actualizando tabla en tiempo real...');
+        
+        // Si ya existe un DataTable, lo destruimos
+        if (this.dataTable) {
+          this.dataTable.destroy();
+          console.log('🗑️ DataTable anterior destruido');
+        }
+        
+        // Volvemos a renderizar la tabla con los datos actuales
+        this.renderizarTabla(this.currentData);
+        
+        console.log('✅ Tabla actualizada en tiempo real');
+      },
+
+      escapeString(str) {
+        return str ? str.replace(/'/g, "\\'").replace(/"/g, '\\"') : '';
+      },
+
       inicializarDataTable(proveedores) {
         const table = $('#tabla-proveedores');
         
         if ($.fn.dataTable.isDataTable(table)) {
           table.DataTable().destroy();
+          console.log('🔄 DataTable anterior destruido');
         }
 
-        if (proveedores.length === 0) return;
+        if (proveedores.length === 0) {
+          console.log('📊 Tabla vacía, no se inicializa DataTable');
+          return;
+        }
 
-        table.DataTable({
-          pageLength: 10,
-          lengthMenu: [10, 25, 50, 100],
-          order: [[0, 'desc']], // Ordenar por ID descendente
-          language: {
-            search: "Buscar:",
-            lengthMenu: "Mostrar _MENU_ registros",
-            info: "Mostrando _START_ a _END_ de _TOTAL_ proveedores",
-            paginate: {
-              first: "Primero",
-              last: "Último", 
-              next: "Siguiente",
-              previous: "Anterior"
-            }
-          },
-          columnDefs: [
-            { targets: [1], width: '200px' },
-            { targets: '_all', className: 'dt-body-left' }
-          ],
-          responsive: true
-        });
+        try {
+          const dataTable = table.DataTable({
+            pageLength: 10,
+            lengthMenu: [10, 25, 50, 100],
+            order: [[7, 'desc']], // Ordenar por fecha de alta descendente
+            language: {
+              search: "Buscar:",
+              lengthMenu: "Mostrar _MENU_ registros",
+              info: "Mostrando _START_ a _END_ de _TOTAL_ proveedores",
+              paginate: {
+                first: "Primero",
+                last: "Último", 
+                next: "Siguiente",
+                previous: "Anterior"
+              }
+            },
+            columnDefs: [
+              { targets: [1], width: '200px' },
+              { targets: [4], width: '150px' },
+              { targets: [7], width: '120px' },
+              { targets: [8], width: '140px', orderable: false },
+              { targets: '_all', className: 'dt-body-left' }
+            ],
+            responsive: true,
+            stateSave: false
+          });
+
+          console.log('✅ DataTable inicializado correctamente');
+          this.dataTable = dataTable;
+          
+        } catch (error) {
+          console.error('❌ Error inicializando DataTable:', error);
+        }
       },
 
       actualizarFiltros(data) {
@@ -545,8 +716,10 @@
         
         const filtroEstado = document.getElementById('filtro-estado');
         const filtroCategoria = document.getElementById('filtro-categoria');
+        const filtroTipo = document.getElementById('filtro-tipo');
         
         const categorias = [...new Set(proveedores.map(p => p.Categoria).filter(Boolean))].sort();
+        const tipos = [...new Set(proveedores.map(p => p.Tipo).filter(Boolean))].sort();
 
         filtroCategoria.innerHTML = '<option value="">Todas las categorías</option>';
         categorias.forEach(cat => {
@@ -556,8 +729,17 @@
           filtroCategoria.appendChild(option);
         });
 
+        filtroTipo.innerHTML = '<option value="">Todos los tipos</option>';
+        tipos.forEach(tipo => {
+          const option = document.createElement('option');
+          option.value = tipo;
+          option.textContent = tipo;
+          filtroTipo.appendChild(option);
+        });
+
         filtroEstado.addEventListener('change', () => this.aplicarFiltros());
         filtroCategoria.addEventListener('change', () => this.aplicarFiltros());
+        filtroTipo.addEventListener('change', () => this.aplicarFiltros());
         document.getElementById('buscar-proveedor').addEventListener('input', () => this.aplicarFiltros());
       },
 
@@ -567,19 +749,23 @@
 
         const filtroEstado = document.getElementById('filtro-estado').value;
         const filtroCategoria = document.getElementById('filtro-categoria').value;
+        const filtroTipo = document.getElementById('filtro-tipo').value;
         const busqueda = document.getElementById('buscar-proveedor').value;
 
         tabla.column(6).search(filtroEstado);
         tabla.column(3).search(filtroCategoria);
+        tabla.column(2).search(filtroTipo);
         tabla.search(busqueda).draw();
       },
 
       setupEventListeners() {
         const form = document.getElementById('form-proveedor');
-        form.addEventListener('submit', (e) => {
-          e.preventDefault();
-          this.guardarProveedor();
-        });
+        if (form) {
+          form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.guardarProveedor();
+          });
+        }
 
         const menuToggle = document.getElementById('menu-toggle');
         const sidebar = document.querySelector('.sidebar');
@@ -599,7 +785,12 @@
 
         const refreshBtn = document.getElementById('refresh-data');
         if (refreshBtn) {
-          refreshBtn.addEventListener('click', () => this.loadData());
+          refreshBtn.addEventListener('click', () => {
+            this.mostrarLoading('Actualizando datos...');
+            this.loadData(true).finally(() => {
+              this.ocultarLoading();
+            });
+          });
         }
 
         const btnCancelar = document.getElementById('btn-cancelar');
@@ -607,6 +798,32 @@
           btnCancelar.addEventListener('click', () => {
             this.cancelarEdicion();
           });
+        }
+
+        // Fecha actual por defecto
+        const fechaInput = document.getElementById('fecha');
+        if (fechaInput) {
+          fechaInput.value = UTILS.getCurrentDateForInput();
+        }
+      },
+
+      setupAutoRefresh() {
+        // Actualizar cada 30 segundos - SIN MOSTRAR LOADING
+        this.autoRefreshInterval = setInterval(() => {
+          console.log('🔄 Actualización automática de datos...');
+          this.loadData(true);
+        }, 30000);
+        
+        // También actualizar cuando la ventana gana foco - SIN MOSTRAR LOADING
+        window.addEventListener('focus', () => {
+          console.log('👀 Ventana enfocada, actualizando datos...');
+          this.loadData(true);
+        });
+      },
+
+      cleanup() {
+        if (this.autoRefreshInterval) {
+          clearInterval(this.autoRefreshInterval);
         }
       },
 
@@ -623,7 +840,7 @@
         }
 
         try {
-          this.mostrarEstado('Guardando proveedor...', 'loading');
+          this.mostrarLoading('Guardando proveedor...');
 
           const proveedor = {
             Nombre: nombre,
@@ -641,35 +858,36 @@
             CUIT: formData.get('cuit') || '',
             CondicionIVA: formData.get('condicionIva') || '',
             IngresosBrutos: formData.get('ingresosBrutos') || '',
-            PlazoPago: formData.get('plazoPago') || '',
-            FormaPago: formData.get('formaPago') || '',
-            CuentaBancaria: formData.get('cuentaBancaria') || '',
-            CBU: formData.get('cbu') || '',
+            PlazoEntrega: formData.get('plazoEntrega') || '',
+            CondicionesPago: formData.get('condicionesPago') || '',
+            Descuento: formData.get('descuento') || '',
             ProductosServicios: formData.get('productosServicios') || '',
             Observaciones: formData.get('observaciones') || '',
-            FechaAlta: this.editingSupplierId ? '' : UTILS.getCurrentDateForInput(),
+            FechaAlta: this.editingProveedorId ? '' : UTILS.getCurrentDateForInput(),
             FechaModificacion: UTILS.getCurrentDateForInput()
           };
 
           console.log('💾 Proveedor a guardar:', proveedor);
 
           let resultado;
-          if (this.editingSupplierId) {
-            resultado = await this.actualizarProveedor(this.editingSupplierId, proveedor);
+          if (this.editingProveedorId) {
+            resultado = await this.actualizarProveedor(this.editingProveedorId, proveedor);
           } else {
             resultado = await this.crearProveedor(proveedor);
           }
 
           this.mostrarEstado('✓ Proveedor guardado exitosamente', 'success');
           
-          setTimeout(() => {
-            alert('✅ Proveedor guardado correctamente');
-            this.loadData(); // Recargar datos
-            this.cancelarEdicion();
-          }, 1000);
+          // ACTUALIZACIÓN EN TIEMPO REAL - Recargar datos y actualizar tabla
+          await this.loadData(true);
+          
+          this.ocultarLoading();
+          alert('✅ Proveedor guardado correctamente');
+          this.cancelarEdicion();
 
         } catch (error) {
           console.error('❌ Error guardando proveedor:', error);
+          this.ocultarLoading();
           
           let mensajeError = 'Error al guardar el proveedor. ';
           
@@ -696,23 +914,11 @@
             ...proveedor
           };
 
-          // Limpiar campos vacíos
-          Object.keys(datosEnvio).forEach(key => {
-            if (datosEnvio[key] === '' || datosEnvio[key] === null || datosEnvio[key] === undefined) {
-              delete datosEnvio[key];
-            }
-          });
-
-          console.log('📨 Datos a enviar:', datosEnvio);
-
           const url = CONFIG.GAS_ENDPOINT + '?' + new URLSearchParams(datosEnvio);
           console.log('🔗 URL final:', url);
 
           const response = await fetch(url);
-          console.log('📞 Respuesta HTTP:', response.status, response.statusText);
-
           const responseText = await response.text();
-          console.log('📄 Respuesta cruda:', responseText);
 
           if (!response.ok) {
             throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
@@ -744,23 +950,11 @@
             ...proveedor
           };
 
-          // Limpiar campos vacíos
-          Object.keys(datosEnvio).forEach(key => {
-            if (datosEnvio[key] === '' || datosEnvio[key] === null || datosEnvio[key] === undefined) {
-              delete datosEnvio[key];
-            }
-          });
-
-          console.log('📨 Datos a enviar:', datosEnvio);
-
           const url = CONFIG.GAS_ENDPOINT + '?' + new URLSearchParams(datosEnvio);
           console.log('🔗 URL final:', url);
 
           const response = await fetch(url);
-          console.log('📞 Respuesta HTTP:', response.status, response.statusText);
-
           const responseText = await response.text();
-          console.log('📄 Respuesta cruda:', responseText);
 
           if (!response.ok) {
             throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
@@ -782,12 +976,17 @@
       },
 
       async eliminarProveedor(id, nombre) {
+        if (!id) {
+          alert('❌ Error: No se pudo identificar el proveedor a eliminar');
+          return;
+        }
+
         if (!confirm(`¿Está seguro que desea eliminar al proveedor "${nombre}"? Esta acción no se puede deshacer.`)) {
           return;
         }
 
         try {
-          this.mostrarEstado('Eliminando proveedor...', 'loading');
+          this.mostrarLoading('Eliminando proveedor...');
 
           const datosEnvio = {
             action: 'delete',
@@ -801,10 +1000,7 @@
           console.log('🔗 URL final:', url);
 
           const response = await fetch(url);
-          console.log('📞 Respuesta HTTP:', response.status, response.statusText);
-
           const responseText = await response.text();
-          console.log('📄 Respuesta cruda:', responseText);
 
           if (!response.ok) {
             throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
@@ -818,11 +1014,16 @@
           }
 
           this.mostrarEstado('✓ Proveedor eliminado', 'success');
+          
+          // ACTUALIZACIÓN EN TIEMPO REAL - Recargar datos y actualizar tabla
+          await this.loadData(true);
+          
+          this.ocultarLoading();
           alert('✅ Proveedor eliminado correctamente');
-          this.loadData(); // Recargar datos
 
         } catch (error) {
           console.error('❌ ERROR ELIMINANDO PROVEEDOR:', error);
+          this.ocultarLoading();
           
           let mensajeError = 'Error al eliminar el proveedor. ';
           
@@ -864,15 +1065,14 @@
         document.getElementById('cuit').value = proveedor.CUIT || '';
         document.getElementById('condicionIva').value = proveedor.CondicionIVA || '';
         document.getElementById('ingresosBrutos').value = proveedor.IngresosBrutos || '';
-        document.getElementById('plazoPago').value = proveedor.PlazoPago || '';
-        document.getElementById('formaPago').value = proveedor.FormaPago || '';
-        document.getElementById('cuentaBancaria').value = proveedor.CuentaBancaria || '';
-        document.getElementById('cbu').value = proveedor.CBU || '';
+        document.getElementById('plazoEntrega').value = proveedor.PlazoEntrega || '';
+        document.getElementById('condicionesPago').value = proveedor.CondicionesPago || '';
+        document.getElementById('descuento').value = proveedor.Descuento || '';
         document.getElementById('productosServicios').value = proveedor.ProductosServicios || '';
         document.getElementById('observaciones').value = proveedor.Observaciones || '';
 
         // Cambiar interfaz para edición
-        this.editingSupplierId = id;
+        this.editingProveedorId = id;
         document.getElementById('form-title').textContent = 'Editando Proveedor';
         document.getElementById('btn-guardar').textContent = 'Actualizar Proveedor';
         document.getElementById('btn-cancelar').style.display = 'inline-block';
@@ -882,7 +1082,7 @@
       },
 
       cancelarEdicion() {
-        this.editingSupplierId = null;
+        this.editingProveedorId = null;
         document.getElementById('form-title').textContent = 'Nuevo Proveedor';
         document.getElementById('btn-guardar').textContent = 'Guardar Proveedor';
         document.getElementById('btn-cancelar').style.display = 'none';
@@ -898,6 +1098,11 @@
     } else {
       ProveedoresApp.init();
     }
+
+    // Limpiar recursos cuando se cierre la página
+    window.addEventListener('beforeunload', () => {
+      ProveedoresApp.cleanup();
+    });
   </script>
 </body>
 </html>
