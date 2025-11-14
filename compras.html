@@ -482,7 +482,7 @@
   
   <!-- Script específico para esta página -->
   <script>
-    // js/compras.js - VERSIÓN SIN ACTUALIZACIÓN AUTOMÁTICA
+    // js/compras.js - VERSIÓN CORREGIDA
     const ComprasApp = {
       currentData: null,
       editingCompraId: null,
@@ -596,7 +596,7 @@
           return;
         }
 
-        // Ordenar por fecha descendente (más recientes primero)
+        // Ordenar por fecha descendente (más recientes primero) - CORREGIDO
         const comprasOrdenadas = [...compras].sort((a, b) => {
           const fechaA = UTILS.parseDate(a.Fecha || '');
           const fechaB = UTILS.parseDate(b.Fecha || '');
@@ -619,12 +619,15 @@
           const estadoClass = estado === 'Pagado' ? 'status-pagada' : 
                              estado === 'Pendiente' ? 'status-pendiente' : 'status-cancelada';
 
+          // Usar data-order para ordenamiento correcto en DataTables
+          const fechaOrden = new Date(fecha).getTime();
+          
           fila.innerHTML = `
             <td>${id}</td>
-            <td>${UTILS.formatDate(fecha)}</td>
+            <td data-order="${fechaOrden}">${UTILS.formatDate(fecha)}</td>
             <td style="font-weight: 600;">${proveedor}</td>
             <td>${descripcion}</td>
-            <td>${UTILS.formatCurrency(monto)}</td>
+            <td data-order="${monto}">${UTILS.formatCurrency(monto)}</td>
             <td>${categoria}</td>
             <td>${medioPago}</td>
             <td><span class="compra-status ${estadoClass}">${estado}</span></td>
@@ -641,22 +644,6 @@
 
         this.inicializarDataTable(comprasOrdenadas);
         document.getElementById('total-compras').textContent = comprasOrdenadas.length;
-      },
-
-      // Función para actualizar la tabla sin recargar todos los datos
-      actualizarTablaEnTiempoReal() {
-        console.log('🔄 Actualizando tabla en tiempo real...');
-        
-        // Si ya existe un DataTable, lo destruimos
-        if (this.dataTable) {
-          this.dataTable.destroy();
-          console.log('🗑️ DataTable anterior destruido');
-        }
-        
-        // Volvemos a renderizar la tabla con los datos actuales
-        this.renderizarTabla(this.currentData);
-        
-        console.log('✅ Tabla actualizada en tiempo real');
       },
 
       escapeString(str) {
@@ -680,7 +667,7 @@
           const dataTable = table.DataTable({
             pageLength: 10,
             lengthMenu: [10, 25, 50, 100],
-            order: [[1, 'desc']], // Ordenar por fecha descendente
+            order: [[1, 'desc']], // Ordenar por fecha descendente (columna 1)
             language: {
               search: "Buscar:",
               lengthMenu: "Mostrar _MENU_ registros",
@@ -693,8 +680,17 @@
               }
             },
             columnDefs: [
+              { 
+                targets: [1], // Columna de fecha
+                type: 'num', // Tipo numérico para ordenamiento correcto
+                width: '120px'
+              },
+              { 
+                targets: [4], // Columna de monto
+                type: 'num', // Tipo numérico para ordenamiento correcto
+                width: '120px'
+              },
               { targets: [3], width: '200px' },
-              { targets: [4], width: '120px' },
               { targets: [7], width: '100px' },
               { targets: [9], width: '140px', orderable: false },
               { targets: '_all', className: 'dt-body-left' }
@@ -846,6 +842,7 @@
         try {
           this.mostrarLoading('Registrando compra...');
 
+          // CORRECCIÓN: Usar los nombres exactos de los campos del GAS
           const compra = {
             // Campos básicos para Finanzas_RegistroDiario
             Fecha: fecha,
@@ -857,9 +854,7 @@
             Comprobante: formData.get('comprobante') || '',
             Descripción: descripcion,
             Proyecto: formData.get('proyecto') || '',
-            Responsable: '', // Se puede agregar campo en el formulario si es necesario
             'Cliente/Proveedor': proveedor,
-            'ID Relacionado': '', // Para relacionar con otros registros si es necesario
             Observaciones: formData.get('observaciones') || '',
             'Reflejar en Caja': formData.get('reflejarEnCaja') ? 'Sí' : 'No',
             Mes: fecha.substring(0, 7), // Formato YYYY-MM
@@ -878,7 +873,7 @@
 
           this.mostrarEstado('✓ Compra registrada exitosamente', 'success');
           
-          // ACTUALIZACIÓN EN TIEMPO REAL - Recargar datos y actualizar tabla
+          // Recargar datos y actualizar tabla
           await this.loadData(true);
           
           this.ocultarLoading();
@@ -1015,7 +1010,7 @@
 
           this.mostrarEstado('✓ Compra eliminada', 'success');
           
-          // ACTUALIZACIÓN EN TIEMPO REAL - Recargar datos y actualizar tabla
+          // Recargar datos y actualizar tabla
           await this.loadData(true);
           
           this.ocultarLoading();
