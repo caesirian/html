@@ -466,7 +466,7 @@
   
   <!-- Script específico para esta página -->
   <script>
-    // js/clientes.js - VERSIÓN CORREGIDA SIN LOOP DE CARGA
+    // js/clientes.js - VERSIÓN CON ACTUALIZACIÓN EN TIEMPO REAL
     const ClientesApp = {
       currentData: null,
       editingClientId: null,
@@ -592,6 +592,22 @@
 
         this.inicializarDataTable(clientesOrdenados);
         document.getElementById('total-clientes').textContent = clientesOrdenados.length;
+      },
+
+      // Función para actualizar la tabla sin recargar todos los datos
+      actualizarTablaEnTiempoReal() {
+        console.log('🔄 Actualizando tabla en tiempo real...');
+        
+        // Si ya existe un DataTable, lo destruimos
+        if (this.dataTable) {
+          this.dataTable.destroy();
+          console.log('🗑️ DataTable anterior destruido');
+        }
+        
+        // Volvemos a renderizar la tabla con los datos actuales
+        this.renderizarTabla(this.currentData);
+        
+        console.log('✅ Tabla actualizada en tiempo real');
       },
 
       escapeString(str) {
@@ -794,7 +810,7 @@
 
           this.mostrarEstado('✓ Cliente guardado exitosamente', 'success');
           
-          // Recargar datos y actualizar tabla
+          // ACTUALIZACIÓN EN TIEMPO REAL - Recargar datos y actualizar tabla
           await this.loadData(true);
           
           this.ocultarLoading();
@@ -931,7 +947,7 @@
 
           this.mostrarEstado('✓ Cliente eliminado', 'success');
           
-          // Recargar datos y actualizar tabla
+          // ACTUALIZACIÓN EN TIEMPO REAL - Recargar datos y actualizar tabla
           await this.loadData(true);
           
           this.ocultarLoading();
