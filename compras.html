@@ -482,18 +482,16 @@
   
   <!-- Script específico para esta página -->
   <script>
-    // js/compras.js - VERSIÓN COMPLETA PARA GESTIÓN DE COMPRAS
+    // js/compras.js - VERSIÓN SIN ACTUALIZACIÓN AUTOMÁTICA
     const ComprasApp = {
       currentData: null,
       editingCompraId: null,
       dataTable: null,
-      autoRefreshInterval: null,
 
       async init() {
         console.log('🚀 Iniciando app de gestión de compras...');
         
         this.setupEventListeners();
-        this.setupAutoRefresh();
         await this.loadData();
       },
 
@@ -510,6 +508,10 @@
           this.renderizarTabla(data);
           this.actualizarFiltros(data);
           this.cargarProveedores(data);
+
+          // Actualizar última sincronización
+          const now = new Date();
+          document.getElementById('last-sync').textContent = now.toLocaleTimeString();
 
         } catch(error) {
           console.error('❌ Error cargando datos:', error);
@@ -827,26 +829,6 @@
         }
       },
 
-      setupAutoRefresh() {
-        // Actualizar cada 30 segundos - SIN MOSTRAR LOADING
-        this.autoRefreshInterval = setInterval(() => {
-          console.log('🔄 Actualización automática de datos...');
-          this.loadData(true);
-        }, 30000);
-        
-        // También actualizar cuando la ventana gana foco - SIN MOSTRAR LOADING
-        window.addEventListener('focus', () => {
-          console.log('👀 Ventana enfocada, actualizando datos...');
-          this.loadData(true);
-        });
-      },
-
-      cleanup() {
-        if (this.autoRefreshInterval) {
-          clearInterval(this.autoRefreshInterval);
-        }
-      },
-
       async guardarCompra() {
         const form = document.getElementById('form-compra');
         const formData = new FormData(form);
@@ -1115,11 +1097,6 @@
     } else {
       ComprasApp.init();
     }
-
-    // Limpiar recursos cuando se cierre la página
-    window.addEventListener('beforeunload', () => {
-      ComprasApp.cleanup();
-    });
   </script>
 </body>
 </html>
