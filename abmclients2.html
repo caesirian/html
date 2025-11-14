@@ -209,42 +209,10 @@
       margin: 0;
       line-height: 1.5;
     }
-    
-    .loading-progress {
-      width: 100%;
-      height: 3px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 2px;
-      overflow: hidden;
-      margin-top: 15px;
-    }
-    
-    .loading-progress .progress-bar {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--accent-2));
-      border-radius: 2px;
-      width: 0%;
-      animation: progress-indeterminate 2s ease-in-out infinite;
-    }
-    
-    @keyframes progress-indeterminate {
-      0% {
-        transform: translateX(-100%);
-        width: 100%;
-      }
-      50% {
-        transform: translateX(0%);
-        width: 100%;
-      }
-      100% {
-        transform: translateX(100%);
-        width: 100%;
-      }
-    }
   </style>
 </head>
 <body>
-  <!-- Pantalla de carga -->
+  <!-- Pantalla de carga - SOLO PARA OPERACIONES CRÍTICAS -->
   <div id="loading-overlay" class="loading-overlay">
     <div class="loading-content">
       <div class="loading-spinner">
@@ -254,9 +222,6 @@
       </div>
       <h3 class="loading-title">Procesando información</h3>
       <p class="loading-message" id="loading-message">Por favor espere...</p>
-      <div class="loading-progress">
-        <div class="progress-bar"></div>
-      </div>
     </div>
   </div>
 
@@ -501,7 +466,7 @@
   
   <!-- Script específico para esta página -->
   <script>
-    // js/clientes.js - VERSIÓN COMPLETA Y CORREGIDA CON PANTALLA DE CARGA
+    // js/clientes.js - VERSIÓN CORREGIDA SIN LOOP DE CARGA
     const ClientesApp = {
       currentData: null,
       editingClientId: null,
@@ -520,7 +485,6 @@
         try {
           console.log('📡 Cargando datos de clientes...');
           this.mostrarEstado('Cargando datos...', 'loading');
-          this.mostrarLoading('Cargando información de clientes...');
 
           const data = await DataManager.fetchData(forceRefresh);
           console.log('✅ Datos recibidos:', data);
@@ -529,12 +493,10 @@
           this.mostrarEstado('Datos actualizados', 'success');
           this.renderizarTabla(data);
           this.actualizarFiltros(data);
-          this.ocultarLoading();
 
         } catch(error) {
           console.error('❌ Error cargando datos:', error);
           this.mostrarEstado('Error: ' + error.message, 'error');
-          this.ocultarLoading();
         }
       },
 
@@ -552,8 +514,8 @@
         estadoElement.innerHTML = (iconos[tipo] || '') + mensaje;
       },
 
-      // Función para mostrar pantalla de carga
-      mostrarLoading(mensaje = 'Procesando información, por favor espere...') {
+      // Función para mostrar pantalla de carga - SOLO PARA OPERACIONES CRÍTICAS
+      mostrarLoading(mensaje = 'Estoy procesando info, por favor espera...') {
         const loadingOverlay = document.getElementById('loading-overlay');
         const loadingMessage = document.getElementById('loading-message');
         
@@ -673,7 +635,7 @@
               { targets: '_all', className: 'dt-body-left' }
             ],
             responsive: true,
-            stateSave: false // No guardar estado para forzar actualización
+            stateSave: false
           });
 
           console.log('✅ DataTable inicializado correctamente');
@@ -745,7 +707,12 @@
 
         const refreshBtn = document.getElementById('refresh-data');
         if (refreshBtn) {
-          refreshBtn.addEventListener('click', () => this.loadData(true));
+          refreshBtn.addEventListener('click', () => {
+            this.mostrarLoading('Actualizando datos...');
+            this.loadData(true).finally(() => {
+              this.ocultarLoading();
+            });
+          });
         }
 
         const btnCancelar = document.getElementById('btn-cancelar');
@@ -763,13 +730,13 @@
       },
 
       setupAutoRefresh() {
-        // Actualizar cada 30 segundos
+        // Actualizar cada 30 segundos - SIN MOSTRAR LOADING
         this.autoRefreshInterval = setInterval(() => {
           console.log('🔄 Actualización automática de datos...');
           this.loadData(true);
         }, 30000);
         
-        // También actualizar cuando la ventana gana foco
+        // También actualizar cuando la ventana gana foco - SIN MOSTRAR LOADING
         window.addEventListener('focus', () => {
           console.log('👀 Ventana enfocada, actualizando datos...');
           this.loadData(true);
@@ -795,8 +762,7 @@
         }
 
         try {
-          this.mostrarEstado('Guardando cliente...', 'loading');
-          this.mostrarLoading('Guardando información del cliente...');
+          this.mostrarLoading('Guardando cliente...');
 
           const cliente = {
             Nombre: nombre,
@@ -837,6 +803,7 @@
 
         } catch (error) {
           console.error('❌ Error guardando cliente:', error);
+          this.ocultarLoading();
           
           let mensajeError = 'Error al guardar el cliente. ';
           
@@ -848,7 +815,6 @@
             mensajeError += error.message;
           }
           
-          this.ocultarLoading();
           alert(mensajeError);
           this.mostrarEstado('✗ Error al guardar', 'error');
         }
@@ -936,7 +902,6 @@
         }
 
         try {
-          this.mostrarEstado('Eliminando cliente...', 'loading');
           this.mostrarLoading('Eliminando cliente...');
 
           const datosEnvio = {
@@ -974,6 +939,7 @@
 
         } catch (error) {
           console.error('❌ ERROR ELIMINANDO CLIENTE:', error);
+          this.ocultarLoading();
           
           let mensajeError = 'Error al eliminar el cliente. ';
           
@@ -985,7 +951,6 @@
             mensajeError += error.message;
           }
           
-          this.ocultarLoading();
           alert(mensajeError);
           this.mostrarEstado('✗ Error al eliminar', 'error');
         }
