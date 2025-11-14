@@ -116,9 +116,150 @@
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
+    
+    /* ====== PANTALLA DE CARGA ====== */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(11, 18, 32, 0.85);
+      backdrop-filter: blur(10px);
+      z-index: 10000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease-in-out;
+    }
+    
+    .loading-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .loading-content {
+      text-align: center;
+      max-width: 400px;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(15px);
+      animation: fadeInUp 0.4s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .loading-spinner {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .spinner-circle {
+      width: 10px;
+      height: 10px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: bounce 1.4s infinite ease-in-out;
+    }
+    
+    .spinner-circle:nth-child(1) { animation-delay: -0.32s; }
+    .spinner-circle:nth-child(2) { animation-delay: -0.16s; }
+    
+    @keyframes bounce {
+      0%, 80%, 100% {
+        transform: scale(0.8);
+        opacity: 0.5;
+      }
+      40% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    
+    .loading-title {
+      color: var(--text);
+      font-size: 22px;
+      font-weight: 700;
+      margin: 0 0 10px 0;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .loading-message {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0;
+      line-height: 1.5;
+    }
+    
+    .loading-progress {
+      width: 100%;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 15px;
+    }
+    
+    .loading-progress .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      border-radius: 2px;
+      width: 0%;
+      animation: progress-indeterminate 2s ease-in-out infinite;
+    }
+    
+    @keyframes progress-indeterminate {
+      0% {
+        transform: translateX(-100%);
+        width: 100%;
+      }
+      50% {
+        transform: translateX(0%);
+        width: 100%;
+      }
+      100% {
+        transform: translateX(100%);
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
+  <!-- Pantalla de carga -->
+  <div id="loading-overlay" class="loading-overlay">
+    <div class="loading-content">
+      <div class="loading-spinner">
+        <div class="spinner-circle"></div>
+        <div class="spinner-circle"></div>
+        <div class="spinner-circle"></div>
+      </div>
+      <h3 class="loading-title">Procesando información</h3>
+      <p class="loading-message" id="loading-message">Por favor espere...</p>
+      <div class="loading-progress">
+        <div class="progress-bar"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="app">
     <aside class="sidebar" role="navigation">
       <h1>HG - Gestión de Clientes</h1>
@@ -360,7 +501,7 @@
   
   <!-- Script específico para esta página -->
   <script>
-    // js/clientes.js - VERSIÓN COMPLETA Y CORREGIDA
+    // js/clientes.js - VERSIÓN COMPLETA Y CORREGIDA CON PANTALLA DE CARGA
     const ClientesApp = {
       currentData: null,
       editingClientId: null,
@@ -379,6 +520,7 @@
         try {
           console.log('📡 Cargando datos de clientes...');
           this.mostrarEstado('Cargando datos...', 'loading');
+          this.mostrarLoading('Cargando información de clientes...');
 
           const data = await DataManager.fetchData(forceRefresh);
           console.log('✅ Datos recibidos:', data);
@@ -387,10 +529,12 @@
           this.mostrarEstado('Datos actualizados', 'success');
           this.renderizarTabla(data);
           this.actualizarFiltros(data);
+          this.ocultarLoading();
 
         } catch(error) {
           console.error('❌ Error cargando datos:', error);
           this.mostrarEstado('Error: ' + error.message, 'error');
+          this.ocultarLoading();
         }
       },
 
@@ -406,6 +550,25 @@
         };
 
         estadoElement.innerHTML = (iconos[tipo] || '') + mensaje;
+      },
+
+      // Función para mostrar pantalla de carga
+      mostrarLoading(mensaje = 'Procesando información, por favor espere...') {
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const loadingMessage = document.getElementById('loading-message');
+        
+        if (loadingOverlay && loadingMessage) {
+          loadingMessage.textContent = mensaje;
+          loadingOverlay.classList.add('active');
+        }
+      },
+
+      // Función para ocultar pantalla de carga
+      ocultarLoading() {
+        const loadingOverlay = document.getElementById('loading-overlay');
+        if (loadingOverlay) {
+          loadingOverlay.classList.remove('active');
+        }
       },
 
       renderizarTabla(data) {
@@ -633,6 +796,7 @@
 
         try {
           this.mostrarEstado('Guardando cliente...', 'loading');
+          this.mostrarLoading('Guardando información del cliente...');
 
           const cliente = {
             Nombre: nombre,
@@ -667,6 +831,7 @@
           // Recargar datos y actualizar tabla
           await this.loadData(true);
           
+          this.ocultarLoading();
           alert('✅ Cliente guardado correctamente');
           this.cancelarEdicion();
 
@@ -683,6 +848,7 @@
             mensajeError += error.message;
           }
           
+          this.ocultarLoading();
           alert(mensajeError);
           this.mostrarEstado('✗ Error al guardar', 'error');
         }
@@ -771,6 +937,7 @@
 
         try {
           this.mostrarEstado('Eliminando cliente...', 'loading');
+          this.mostrarLoading('Eliminando cliente...');
 
           const datosEnvio = {
             action: 'delete',
@@ -802,6 +969,7 @@
           // Recargar datos y actualizar tabla
           await this.loadData(true);
           
+          this.ocultarLoading();
           alert('✅ Cliente eliminado correctamente');
 
         } catch (error) {
@@ -817,6 +985,7 @@
             mensajeError += error.message;
           }
           
+          this.ocultarLoading();
           alert(mensajeError);
           this.mostrarEstado('✗ Error al eliminar', 'error');
         }
