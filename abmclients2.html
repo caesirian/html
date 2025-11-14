@@ -97,6 +97,25 @@
       padding: 4px 8px;
       font-size: 12px;
     }
+    .loader {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: var(--accent);
+      animation: spin 1s ease-in-out infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .fade-in {
+      animation: fadeIn 0.5s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
@@ -341,37 +360,39 @@
   
   <!-- Script específico para esta página -->
   <script>
-    // js/clientes.js - VERSIÓN CORREGIDA
+    // js/clientes.js - VERSIÓN COMPLETA Y CORREGIDA
     const ClientesApp = {
       currentData: null,
       editingClientId: null,
+      dataTable: null,
+      autoRefreshInterval: null,
 
       async init() {
         console.log('🚀 Iniciando app de gestión de clientes...');
         
         this.setupEventListeners();
+        this.setupAutoRefresh();
         await this.loadData();
       },
 
       async loadData(forceRefresh = true) {
-    try {
-        console.log('📡 Cargando datos de clientes...');
-        this.mostrarEstado('Cargando datos...', 'loading');
+        try {
+          console.log('📡 Cargando datos de clientes...');
+          this.mostrarEstado('Cargando datos...', 'loading');
 
-        // Forzar recarga desde el servidor
-        const data = await DataManager.fetchData(forceRefresh);
-        console.log('✅ Datos recibidos:', data);
-        
-        this.currentData = data;
-        this.mostrarEstado('Datos actualizados', 'success');
-        this.renderizarTabla(data);
-        this.actualizarFiltros(data);
+          const data = await DataManager.fetchData(forceRefresh);
+          console.log('✅ Datos recibidos:', data);
+          
+          this.currentData = data;
+          this.mostrarEstado('Datos actualizados', 'success');
+          this.renderizarTabla(data);
+          this.actualizarFiltros(data);
 
-    } catch(error) {
-        console.error('❌ Error cargando datos:', error);
-        this.mostrarEstado('Error: ' + error.message, 'error');
-    }
-}
+        } catch(error) {
+          console.error('❌ Error cargando datos:', error);
+          this.mostrarEstado('Error: ' + error.message, 'error');
+        }
+      },
 
       mostrarEstado(mensaje, tipo = 'info') {
         const estadoElement = document.getElementById('estado');
@@ -387,56 +408,23 @@
         estadoElement.innerHTML = (iconos[tipo] || '') + mensaje;
       },
 
-      inicializarDataTable(clientes) {
-    const table = $('#tabla-clientes');
-    
-    // Destruir DataTable existente si existe
-    if ($.fn.dataTable.isDataTable(table)) {
-        table.DataTable().destroy();
-        console.log('🔄 DataTable anterior destruido');
-    }
-
-    if (clientes.length === 0) {
-        console.log('📊 Tabla vacía, no se inicializa DataTable');
-        return;
-    }
-
-    try {
-        const dataTable = table.DataTable({
-            pageLength: 10,
-            lengthMenu: [10, 25, 50, 100],
-            order: [[7, 'desc']], // Ordenar por fecha de alta descendente
-            language: {
-                search: "Buscar:",
-                lengthMenu: "Mostrar _MENU_ registros",
-                info: "Mostrando _START_ a _END_ de _TOTAL_ clientes",
-                paginate: {
-                    first: "Primero",
-                    last: "Último", 
-                    next: "Siguiente",
-                    previous: "Anterior"
-                }
-            },
-            columnDefs: [
-                { targets: [1], width: '200px' },
-                { targets: [4], width: '150px' },
-                { targets: [7], width: '120px' },
-                { targets: [8], width: '140px', orderable: false },
-                { targets: '_all', className: 'dt-body-left' }
-            ],
-            responsive: true,
-            stateSave: false // No guardar estado para forzar actualización
-        });
-
-        console.log('✅ DataTable inicializado correctamente');
+      renderizarTabla(data) {
+        const clientes = data.Clientes || [];
+        const tbody = document.querySelector('#tabla-clientes tbody');
         
-        // Guardar referencia al DataTable para futuras actualizaciones
-        this.dataTable = dataTable;
-        
-    } catch (error) {
-        console.error('❌ Error inicializando DataTable:', error);
-    }
-},
+        if (!tbody) {
+          console.error('❌ No se encontró el tbody de la tabla');
+          return;
+        }
+
+        tbody.innerHTML = '';
+
+        if (clientes.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--muted); padding: 20px;">No hay clientes registrados</td></tr>';
+          this.inicializarDataTable([]);
+          document.getElementById('total-clientes').textContent = '0';
+          return;
+        }
 
         // Ordenar por fecha de alta descendente (más recientes primero)
         const clientesOrdenados = [...clientes].sort((a, b) => {
@@ -470,7 +458,7 @@
             <td>
               <div class="action-buttons">
                 <button class="btn small" onclick="ClientesApp.editarCliente('${id}')">Editar</button>
-                <button class="btn small secondary" onclick="ClientesApp.eliminarCliente('${id}', '${nombre}')">Eliminar</button>
+                <button class="btn small secondary" onclick="ClientesApp.eliminarCliente('${id}', '${this.escapeString(nombre)}')">Eliminar</button>
               </div>
             </td>
           `;
@@ -481,36 +469,56 @@
         document.getElementById('total-clientes').textContent = clientesOrdenados.length;
       },
 
+      escapeString(str) {
+        return str ? str.replace(/'/g, "\\'").replace(/"/g, '\\"') : '';
+      },
+
       inicializarDataTable(clientes) {
         const table = $('#tabla-clientes');
         
         if ($.fn.dataTable.isDataTable(table)) {
           table.DataTable().destroy();
+          console.log('🔄 DataTable anterior destruido');
         }
 
-        if (clientes.length === 0) return;
+        if (clientes.length === 0) {
+          console.log('📊 Tabla vacía, no se inicializa DataTable');
+          return;
+        }
 
-        table.DataTable({
-          pageLength: 10,
-          lengthMenu: [10, 25, 50, 100],
-          order: [[0, 'desc']], // Ordenar por ID descendente
-          language: {
-            search: "Buscar:",
-            lengthMenu: "Mostrar _MENU_ registros",
-            info: "Mostrando _START_ a _END_ de _TOTAL_ clientes",
-            paginate: {
-              first: "Primero",
-              last: "Último", 
-              next: "Siguiente",
-              previous: "Anterior"
-            }
-          },
-          columnDefs: [
-            { targets: [1], width: '200px' },
-            { targets: '_all', className: 'dt-body-left' }
-          ],
-          responsive: true
-        });
+        try {
+          const dataTable = table.DataTable({
+            pageLength: 10,
+            lengthMenu: [10, 25, 50, 100],
+            order: [[7, 'desc']], // Ordenar por fecha de alta descendente
+            language: {
+              search: "Buscar:",
+              lengthMenu: "Mostrar _MENU_ registros",
+              info: "Mostrando _START_ a _END_ de _TOTAL_ clientes",
+              paginate: {
+                first: "Primero",
+                last: "Último", 
+                next: "Siguiente",
+                previous: "Anterior"
+              }
+            },
+            columnDefs: [
+              { targets: [1], width: '200px' },
+              { targets: [4], width: '150px' },
+              { targets: [7], width: '120px' },
+              { targets: [8], width: '140px', orderable: false },
+              { targets: '_all', className: 'dt-body-left' }
+            ],
+            responsive: true,
+            stateSave: false // No guardar estado para forzar actualización
+          });
+
+          console.log('✅ DataTable inicializado correctamente');
+          this.dataTable = dataTable;
+          
+        } catch (error) {
+          console.error('❌ Error inicializando DataTable:', error);
+        }
       },
 
       actualizarFiltros(data) {
@@ -549,10 +557,12 @@
 
       setupEventListeners() {
         const form = document.getElementById('form-cliente');
-        form.addEventListener('submit', (e) => {
-          e.preventDefault();
-          this.guardarCliente();
-        });
+        if (form) {
+          form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.guardarCliente();
+          });
+        }
 
         const menuToggle = document.getElementById('menu-toggle');
         const sidebar = document.querySelector('.sidebar');
@@ -572,7 +582,7 @@
 
         const refreshBtn = document.getElementById('refresh-data');
         if (refreshBtn) {
-          refreshBtn.addEventListener('click', () => this.loadData());
+          refreshBtn.addEventListener('click', () => this.loadData(true));
         }
 
         const btnCancelar = document.getElementById('btn-cancelar');
@@ -580,6 +590,32 @@
           btnCancelar.addEventListener('click', () => {
             this.cancelarEdicion();
           });
+        }
+
+        // Fecha actual por defecto
+        const fechaInput = document.getElementById('fecha');
+        if (fechaInput) {
+          fechaInput.value = UTILS.getCurrentDateForInput();
+        }
+      },
+
+      setupAutoRefresh() {
+        // Actualizar cada 30 segundos
+        this.autoRefreshInterval = setInterval(() => {
+          console.log('🔄 Actualización automática de datos...');
+          this.loadData(true);
+        }, 30000);
+        
+        // También actualizar cuando la ventana gana foco
+        window.addEventListener('focus', () => {
+          console.log('👀 Ventana enfocada, actualizando datos...');
+          this.loadData(true);
+        });
+      },
+
+      cleanup() {
+        if (this.autoRefreshInterval) {
+          clearInterval(this.autoRefreshInterval);
         }
       },
 
@@ -628,11 +664,11 @@
 
           this.mostrarEstado('✓ Cliente guardado exitosamente', 'success');
           
-          setTimeout(() => {
-            alert('✅ Cliente guardado correctamente');
-            this.loadData(); // Recargar datos
-            this.cancelarEdicion();
-          }, 1000);
+          // Recargar datos y actualizar tabla
+          await this.loadData(true);
+          
+          alert('✅ Cliente guardado correctamente');
+          this.cancelarEdicion();
 
         } catch (error) {
           console.error('❌ Error guardando cliente:', error);
@@ -658,33 +694,15 @@
           
           const datosEnvio = {
             action: 'insert',
-            sheet: 'Clientes', // Asegurar que es el nombre correcto de la hoja
+            sheet: 'Clientes',
             ...cliente
           };
-
-          // DEBUG: Verificar estructura de datos
-          console.log('🔍 ESTRUCTURA DE DATOS CLIENTE:');
-          Object.keys(cliente).forEach(key => {
-            console.log(`   - ${key}: ${cliente[key]}`);
-          });
-
-          // Limpiar campos vacíos
-          Object.keys(datosEnvio).forEach(key => {
-            if (datosEnvio[key] === '' || datosEnvio[key] === null || datosEnvio[key] === undefined) {
-              delete datosEnvio[key];
-            }
-          });
-
-          console.log('📨 Datos a enviar:', datosEnvio);
 
           const url = CONFIG.GAS_ENDPOINT + '?' + new URLSearchParams(datosEnvio);
           console.log('🔗 URL final:', url);
 
           const response = await fetch(url);
-          console.log('📞 Respuesta HTTP:', response.status, response.statusText);
-
           const responseText = await response.text();
-          console.log('📄 Respuesta cruda:', responseText);
 
           if (!response.ok) {
             throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
@@ -711,28 +729,16 @@
           
           const datosEnvio = {
             action: 'update',
-            sheet: 'Clientes', // Asegurar que es el nombre correcto de la hoja
+            sheet: 'Clientes',
             id: id,
             ...cliente
           };
-
-          // Limpiar campos vacíos
-          Object.keys(datosEnvio).forEach(key => {
-            if (datosEnvio[key] === '' || datosEnvio[key] === null || datosEnvio[key] === undefined) {
-              delete datosEnvio[key];
-            }
-          });
-
-          console.log('📨 Datos a enviar:', datosEnvio);
 
           const url = CONFIG.GAS_ENDPOINT + '?' + new URLSearchParams(datosEnvio);
           console.log('🔗 URL final:', url);
 
           const response = await fetch(url);
-          console.log('📞 Respuesta HTTP:', response.status, response.statusText);
-
           const responseText = await response.text();
-          console.log('📄 Respuesta cruda:', responseText);
 
           if (!response.ok) {
             throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
@@ -754,6 +760,11 @@
       },
 
       async eliminarCliente(id, nombre) {
+        if (!id) {
+          alert('❌ Error: No se pudo identificar el cliente a eliminar');
+          return;
+        }
+
         if (!confirm(`¿Está seguro que desea eliminar al cliente "${nombre}"? Esta acción no se puede deshacer.`)) {
           return;
         }
@@ -763,7 +774,7 @@
 
           const datosEnvio = {
             action: 'delete',
-            sheet: 'Clientes', // Asegurar que es el nombre correcto de la hoja
+            sheet: 'Clientes',
             id: id
           };
 
@@ -773,10 +784,7 @@
           console.log('🔗 URL final:', url);
 
           const response = await fetch(url);
-          console.log('📞 Respuesta HTTP:', response.status, response.statusText);
-
           const responseText = await response.text();
-          console.log('📄 Respuesta cruda:', responseText);
 
           if (!response.ok) {
             throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
@@ -790,8 +798,11 @@
           }
 
           this.mostrarEstado('✓ Cliente eliminado', 'success');
+          
+          // Recargar datos y actualizar tabla
+          await this.loadData(true);
+          
           alert('✅ Cliente eliminado correctamente');
-          this.loadData(); // Recargar datos
 
         } catch (error) {
           console.error('❌ ERROR ELIMINANDO CLIENTE:', error);
@@ -863,6 +874,11 @@
     } else {
       ClientesApp.init();
     }
+
+    // Limpiar recursos cuando se cierre la página
+    window.addEventListener('beforeunload', () => {
+      ClientesApp.cleanup();
+    });
   </script>
 </body>
 </html>
