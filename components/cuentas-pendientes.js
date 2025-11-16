@@ -8,9 +8,15 @@ ComponentSystem.registrar('cuentasPendientes', {
   html: `
     <h2>Resumen de Compromisos Pendientes</h2>
     <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-      <button class="btn small active" data-filter="todos">Todos</button>
-      <button class="btn small secondary" data-filter="cobrar">A Cobrar</button>
-      <button class="btn small secondary" data-filter="pagar">A Pagar</button>
+      <button class="btn small active" data-filter="todos">
+      Todos
+      </button>
+      <button class="btn small secondary" data-filter="cobrar">
+      A Cobrar
+      </button>
+      <button class="btn small secondary" data-filter="pagar">
+      A Pagar
+      </button>
     </div>
     <div class="tabla-container" style="max-height:400px; overflow-y:auto; margin-top:12px;">
       <table id="tabla-pendientes" class="tabla-datos" style="width:100%; border-collapse:collapse;">
