@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Gestión</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Estilos para el layout mejorado */
+        body {
+            display: flex;
+            min-height: 100vh;
+            background: linear-gradient(180deg,#071226 0%, #081426 100%);
+            color: var(--text);
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+            font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, rgba(11,18,32,0.9), rgba(6,10,18,0.85));
+            padding: 18px;
+            box-shadow: 0 6px 24px rgba(2,6,12,0.6);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar h1 {
+            font-size: 18px;
+            margin: 0 0 12px;
+            letter-spacing: 0.6px;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .nav-link {
+            background: transparent;
+            border: 0;
+            color: var(--muted);
+            text-align: left;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+            width: 100%;
+            font-size: 14px;
+            position: relative;
+        }
+        
+        .nav-link.active, .nav-link:hover {
+            background: var(--glass);
+            color: #fff;
+        }
+        
+        .nav-group {
+            position: relative;
+        }
+        
+        .dropdown-icon {
+            margin-left: auto;
+            transition: transform 0.3s ease;
+            font-size: 12px;
+        }
+        
+        .nav-group.active .dropdown-icon {
+            transform: rotate(180deg);
+        }
+        
+        .subnav {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: var(--card-contrast);
+            border-radius: 8px;
+            margin-top: 4px;
+        }
+        
+        .nav-group.active .subnav {
+            max-height: 200px;
+        }
+        
+        .subnav-link {
+            background: transparent;
+            border: 0;
+            color: var(--muted);
+            text-align: left;
+            padding: 10px 16px 10px 40px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 13px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .subnav-link.active, .subnav-link:hover {
+            background: var(--glass);
+            color: var(--text);
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: margin-left 0.3s ease;
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .header-hg {
+            padding: 12px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-hg h1 {
+            margin: 0;
+            font-size: 18px;
+            color: var(--accent);
+            letter-spacing: 0.4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .header-hg p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--glass);
+            padding: 8px 16px;
+            border-radius: 8px;
+        }
+        
+        /* Layout grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 12px;
+            padding: 0 0 12px 0;
+            align-items: start;
+        }
+        
+        /* Cards + panels */
+        .card, .panel {
+            background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 6px 20px rgba(3,7,12,0.6);
+            border: 1px solid rgba(255,255,255,0.02);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(2,6,12,0.7);
+            border-color: rgba(255,255,255,0.05);
+        }
+        
+        /* Grid placements */
+        .card[data-grid="span-3"] { grid-column: span 3; min-height:110px; display:flex; flex-direction:column; justify-content:center; }
+        .card[data-grid="span-4"] { grid-column: span 4; min-height:220px; }
+        .card[data-grid="span-5"] { grid-column: span 5; min-height:220px; }
+        .card[data-grid="span-6"] { grid-column: span 6; min-height:220px; }
+        .card[data-grid="full"] { grid-column: 1 / -1; }
+        
+        /* KPI grande */
+        .kpi-grande {
+            font-size: 28px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-top: 8px;
+            letter-spacing: 0.4px;
+        }
+        
+        /* Headings inside cards */
+        .card h2 {
+            margin: 0;
+            font-size: 14px;
+            color: var(--muted);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        /* Canvas container */
+        .chart-container {
+            position: relative;
+            height: 180px;
+            width: 100%;
+        }
+        
+        /* Table styles */
+        table.display {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        table.display thead th {
+            background: transparent;
+            color: var(--muted);
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            padding: 10px 8px;
+            text-align: left;
+            font-size: 13px;
+        }
+        
+        table.display tbody td {
+            padding: 10px 8px;
+            color: var(--text);
+            border-bottom: 1px dashed rgba(255,255,255,0.02);
+            font-size: 13px;
+        }
+        
+        /* Buttons */
+        .btn {
+            background: var(--accent);
+            color: #00121a;
+            border: 0;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .btn:hover {
+            background: #5ab5ff;
+            transform: translateY(-1px);
+        }
+        
+        /* Footer */
+        .footer-hg {
+            padding: 12px 18px;
+            color: var(--muted);
+            font-size: 13px;
+            border-top: 1px solid rgba(255,255,255,0.02);
+            margin-top: 18px;
+            text-align: center;
+        }
+        
+        /* Small helpers */
+        .text-muted { 
+            color: var(--muted); 
+            font-size: 13px; 
+        }
+        
+        /* ====== MENÚ HAMBURGUESA ====== */
+        .menu-toggle {
+            display: none;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        
+        .menu-toggle:hover {
+            background: var(--glass);
+        }
+        
+        /* Overlay para móviles */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 998;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .sidebar-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+        
+        /* Sidebar responsivo */
+        @media (max-width: 900px) {
+            .menu-toggle {
+                display: block;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+        
+        /* ====== MÓVILES - COMPONENTES AL 100% ANCHO ====== */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr !important;
+                gap: 16px !important;
+                padding: 0 8px !important;
+            }
+            
+            .card[data-grid] {
+                grid-column: 1 / -1 !important;
+                width: 100% !important;
+                min-height: auto !important;
+                margin: 0 !important;
+                box-sizing: border-box;
+            }
+            
+            .card {
+                min-height: 140px !important;
+                padding: 20px !important;
+            }
+            
+            .card[data-grid="span-3"] {
+                min-height: 120px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: center !important;
+                text-align: center !important;
+            }
+            
+            .kpi-grande {
+                font-size: 28px !important;
+                font-weight: 800 !important;
+                margin: 10px 0 !important;
+                line-height: 1.2 !important;
+            }
+            
+            .card h2 {
+                font-size: 16px !important;
+                margin-bottom: 12px !important;
+                color: var(--muted) !important;
+            }
+            
+            .chart-container {
+                height: 200px !important;
+            }
+            
+            .header-hg {
+                padding: 12px 0 !important;
+                flex-wrap: wrap;
+                gap: 12px !important;
+            }
+            
+            .header-hg h1 {
+                font-size: 18px !important;
+                line-height: 1.2 !important;
+            }
+        }
+        
+        /* Contenido de página */
+        .page-content {
+            display: none;
+        }
+        
+        .content-frame {
+            width: 100%;
+            height: calc(100vh - 180px);
+            border: none;
+            border-radius: 12px;
+            background: white;
+        }
+        
+        .loading-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            color: var(--muted);
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(62, 166, 255, 0.3);
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Tabla container */
+        .tabla-container {
+            overflow-x: auto;
+        }
+        
+        /* Ajustes para el header */
+        .header-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <h1><i class="fas fa-chart-line"></i> SistemaGestión</h1>
+        <nav class="nav">
+            <button class="nav-link active" data-page="dashboard">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </button>
+            
+            <div class="nav-group">
+                <button class="nav-link" data-page="compras">
+                    <i class="fas fa-shopping-cart"></i> Gestor de Compras
+                    <i class="fas fa-chevron-down dropdown-icon"></i>
+                </button>
+                <div class="subnav">
+                    <button class="subnav-link" data-page="carga-compra">
+                        <i class="fas fa-upload"></i> Carga Compra
+                    </button>
+                    <button class="subnav-link" data-page="proveedores">
+                        <i class="fas fa-truck"></i> Proveedores
+                    </button>
+                </div>
+            </div>
+            
+            <div class="nav-group">
+                <button class="nav-link" data-page="ventas">
+                    <i class="fas fa-cash-register"></i> Gestor de Ventas
+                    <i class="fas fa-chevron-down dropdown-icon"></i>
+                </button>
+                <div class="subnav">
+                    <button class="subnav-link" data-page="carga-venta">
+                        <i class="fas fa-file-invoice-dollar"></i> Carga Venta
+                    </button>
+                    <button class="subnav-link" data-page="clientes">
+                        <i class="fas fa-users"></i> Clientes
+                    </button>
+                </div>
+            </div>
+            
+            <button class="nav-link" data-page="caja">
+                <i class="fas fa-calculator"></i> Gestor de Caja
+            </button>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="header-hg">
+            <div class="header-container">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div>
+                    <h1><i class="fas fa-tachometer-alt"></i> <span id="page-title">Dashboard</span></h1>
+                    <p id="page-description">Resumen general del sistema</p>
+                </div>
+            </div>
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <span>Usuario Admin</span>
+            </div>
+        </div>
+
+        <!-- Contenedor para todas las páginas -->
+        <div id="content-container">
+            <!-- El dashboard se cargará aquí por defecto -->
+            <iframe id="content-frame" class="content-frame" src="dash_beta.html"></iframe>
+        </div>
+
+        <div class="footer-hg">
+            <p>Sistema de Gestión &copy; 2023 - Todos los derechos reservados</p>
+        </div>
+    </main>
+
+    <!-- Overlay para móviles -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos del DOM
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.querySelector('.sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            const navGroups = document.querySelectorAll('.nav-group');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const subnavLinks = document.querySelectorAll('.subnav-link');
+            const pageTitle = document.getElementById('page-title');
+            const pageDescription = document.getElementById('page-description');
+            const contentFrame = document.getElementById('content-frame');
+
+            // Mapeo de páginas a URLs y descripciones
+            const pageMap = {
+                'dashboard': {
+                    title: 'Dashboard',
+                    description: 'Resumen general del sistema',
+                    url: 'dash_beta.html'
+                },
+                'carga-compra': {
+                    title: 'Carga Compra',
+                    description: 'Registrar nueva compra',
+                    url: 'compras.html'
+                },
+                'proveedores': {
+                    title: 'Proveedores',
+                    description: 'Administración de proveedores',
+                    url: 'abmprov.html'
+                },
+                'carga-venta': {
+                    title: 'Carga Venta',
+                    description: 'Registrar nueva venta',
+                    url: 'ventas.html'
+                },
+                'clientes': {
+                    title: 'Clientes',
+                    description: 'Administración de clientes',
+                    url: 'abmclients2.html'
+                },
+                'caja': {
+                    title: 'Gestor de Caja',
+                    description: 'Control de flujo de caja',
+                    url: 'carga_datos.html'
+                }
+            };
+
+            // Toggle del menú en móviles
+            menuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+                sidebarOverlay.classList.toggle('active');
+            });
+
+            // Cerrar menú al hacer clic en el overlay
+            sidebarOverlay.addEventListener('click', function() {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+            });
+
+            // Manejar grupos de navegación (submenús)
+            navGroups.forEach(group => {
+                const button = group.querySelector('.nav-link');
+                const dropdownIcon = group.querySelector('.dropdown-icon');
+
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    // Cerrar otros grupos abiertos
+                    navGroups.forEach(otherGroup => {
+                        if (otherGroup !== group) {
+                            otherGroup.classList.remove('active');
+                            otherGroup.querySelector('.dropdown-icon').classList.remove('fa-chevron-up');
+                            otherGroup.querySelector('.dropdown-icon').classList.add('fa-chevron-down');
+                        }
+                    });
+
+                    // Alternar grupo actual
+                    group.classList.toggle('active');
+                    
+                    // Alternar icono
+                    if (group.classList.contains('active')) {
+                        dropdownIcon.classList.remove('fa-chevron-down');
+                        dropdownIcon.classList.add('fa-chevron-up');
+                    } else {
+                        dropdownIcon.classList.remove('fa-chevron-up');
+                        dropdownIcon.classList.add('fa-chevron-down');
+                    }
+                });
+            });
+
+            // Manejar clic en enlaces de navegación principales sin submenús
+            const mainNavLinks = document.querySelectorAll('.nav-link:not([data-page="compras"]):not([data-page="ventas"])');
+            mainNavLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    const page = this.getAttribute('data-page');
+                    
+                    // Actualizar estado activo
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Cargar página
+                    loadPage(page);
+                    
+                    // Cerrar todos los submenús
+                    navGroups.forEach(group => {
+                        group.classList.remove('active');
+                        group.querySelector('.dropdown-icon').classList.remove('fa-chevron-up');
+                        group.querySelector('.dropdown-icon').classList.add('fa-chevron-down');
+                    });
+                    
+                    // Cerrar sidebar en móviles
+                    if (window.innerWidth <= 900) {
+                        sidebar.classList.remove('active');
+                        sidebarOverlay.classList.remove('active');
+                    }
+                });
+            });
+
+            // Manejar clic en enlaces de subnavegación
+            subnavLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    const page = this.getAttribute('data-page');
+                    
+                    // Actualizar estado activo
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    subnavLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Marcar el padre como activo
+                    this.closest('.nav-group').querySelector('.nav-link').classList.add('active');
+                    
+                    // Cargar página
+                    loadPage(page);
+                    
+                    // Cerrar sidebar en móviles
+                    if (window.innerWidth <= 900) {
+                        sidebar.classList.remove('active');
+                        sidebarOverlay.classList.remove('active');
+                    }
+                });
+            });
+
+            // Función para cargar páginas
+            function loadPage(pageKey) {
+                const page = pageMap[pageKey];
+                if (!page) return;
+                
+                // Actualizar título y descripción
+                pageTitle.textContent = page.title;
+                pageDescription.textContent = page.description;
+                
+                // Cargar la página en el iframe
+                contentFrame.src = page.url;
+            }
+
+            // Detectar cambios en el iframe para actualizar título
+            contentFrame.addEventListener('load', function() {
+                try {
+                    const iframeDoc = this.contentDocument || this.contentWindow.document;
+                    const iframeTitle = iframeDoc.title;
+                    if (iframeTitle && iframeTitle !== '') {
+                        pageTitle.textContent = iframeTitle;
+                    }
+                } catch (e) {
+                    // Evitar errores de CORS
+                }
+            });
+        });
+    </script>
+</body>
+</html>
