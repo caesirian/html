@@ -139,7 +139,7 @@ const ComponentManager = {
       cuentasPendientes: {
         name: 'Cuentas Pendientes',
         category: 'mediano',
-        grid: 'span-6',
+        grid: 'full',
         defaultActive: false,
         description: 'Control de cuentas por cobrar y pagar'
       },
