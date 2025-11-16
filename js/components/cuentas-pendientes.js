@@ -1,22 +1,12 @@
 // Componente: Resumen de Pendientes (VERSIÓN COMPLETAMENTE CORREGIDA)
-// Componente: Resumen de Pendientes (VERSIÓN COMPLETAMENTE CORREGIDA)
-// Componente: Resumen de Pendientes (VERSIÓN COMPLETAMENTE CORREGIDA)
-// Componente: Resumen de Pendientes (VERSIÓN COMPLETAMENTE CORREGIDA)
-// Componente: Resumen de Pendientes (VERSIÓN COMPLETAMENTE CORREGIDA)
 ComponentSystem.registrar('cuentasPendientes', {
   grid: 'full',
   html: `
     <h2>Resumen de Compromisos Pendientes</h2>
     <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-      <button class="btn small active" data-filter="todos">
-      Todos
-      </button>
-      <button class="btn small secondary" data-filter="cobrar">
-      A Cobrar
-      </button>
-      <button class="btn small secondary" data-filter="pagar">
-      A Pagar
-      </button>
+      <button class="btn small active" data-filter="todos">Todos</button>
+      <button class="btn small secondary" data-filter="cobrar">A Cobrar</button>
+      <button class="btn small secondary" data-filter="pagar">A Pagar</button>
     </div>
     <div class="tabla-container" style="max-height:400px; overflow-y:auto; margin-top:12px;">
       <table id="tabla-pendientes" class="tabla-datos" style="width:100%; border-collapse:collapse;">
@@ -65,21 +55,36 @@ ComponentSystem.registrar('cuentasPendientes', {
       if (hoja.length > 0) {
         console.log('👀 Primer registro:', hoja[0]);
         console.log('🔑 Keys del primer registro:', Object.keys(hoja[0]));
+        
+        // Verificar valores específicos del primer registro
+        console.log('📋 Valores específicos del primer registro:');
+        console.log('   - Cliente/Proveedor:', hoja[0]["Cliente/Proveedor"]);
+        console.log('   - Tipo:', hoja[0]["Tipo (A cobrar/A pagar)"]);
+        console.log('   - Importe:', hoja[0]["Importe"]);
+        console.log('   - Importe parseado:', UTILS.parseNumber(hoja[0]["Importe"]));
+        console.log('   - Estado:', hoja[0]["Estado (Pendiente/Pagado)"]);
       }
 
       // Filtrado SEGURO con verificación completa
       const pendientes = hoja.filter(r => {
         try {
           const estado = r["Estado (Pendiente/Pagado)"];
-          console.log('📝 Estado del registro:', estado);
-          return estado && String(estado).toLowerCase().includes("pendiente");
+          const esPendiente = estado && String(estado).toLowerCase().includes("pendiente");
+          if (esPendiente) {
+            console.log('✅ Registro pendiente encontrado:', {
+              cliente: r["Cliente/Proveedor"],
+              tipo: r["Tipo (A cobrar/A pagar)"],
+              importe: r["Importe"]
+            });
+          }
+          return esPendiente;
         } catch (error) {
           console.warn('⚠️ Error filtrando registro:', error, r);
           return false;
         }
       });
       
-      console.log('✅ Pendientes filtrados:', pendientes.length);
+      console.log('✅ Total pendientes filtrados:', pendientes.length);
 
       if(pendientes.length === 0) {
         element.querySelector('tbody').innerHTML = '<tr><td colspan="7">No hay compromisos pendientes</td></tr>';
@@ -87,28 +92,23 @@ ComponentSystem.registrar('cuentasPendientes', {
         return;
       }
 
-      // DEBUG: Verificar estructura de un pendiente
-      console.log('🔍 Estructura de un pendiente:', pendientes[0]);
-
       // Procesar datos para agrupar por cliente/proveedor
       const resumen = {};
       
       pendientes.forEach((r, index) => {
         try {
-          console.log(`🔍 Procesando registro ${index}:`, r);
-          
           const clave = r["Cliente/Proveedor"] || "Sin nombre";
           // CORRECCIÓN CRÍTICA: Asegurar que tipo siempre sea string
           const tipo = r["Tipo (A cobrar/A pagar)"] || "";
-          const importe = UTILS.parseNumber(r["Importe"] || 0);
+          const importe = UTILS.parseNumber(r["Importe"]);
           const fechaEmision = UTILS.parseDate(r["Fecha Emisión"]);
           
-          console.log(`📊 Registro ${index} - Clave: "${clave}", Tipo: "${tipo}"`);
+          console.log(`📊 Procesando ${index}: "${clave}" - Tipo: "${tipo}" - Importe: ${importe}`);
           
           if (!resumen[clave]) {
             resumen[clave] = {
               nombre: clave,
-              tipo: tipo, // Ahora siempre es string
+              tipo: tipo,
               cantidad: 0,
               total: 0,
               fechas: [],
@@ -152,7 +152,7 @@ ComponentSystem.registrar('cuentasPendientes', {
       
       resumenArray.forEach(item => {
         try {
-          // VERIFICACIÓN EXTRA: Asegurar que item existe y tiene tipo
+          // VERIFICACIÓN EXTRA: Asegurar que item existe
           if (!item) {
             console.warn('⚠️ Item undefined en resumenArray');
             return;
@@ -162,8 +162,10 @@ ComponentSystem.registrar('cuentasPendientes', {
           const tipoSeguro = (item.tipo && typeof item.tipo === 'string') ? item.tipo : '';
           const tipoNormalizado = tipoSeguro.toLowerCase();
           const esCobrar = tipoNormalizado.includes('cobrar');
-          const color = esCobrar ? '#28a745' : '#dc3545';
-          const tipoFiltro = esCobrar ? 'cobrar' : 'pagar';
+          const esPagar = tipoNormalizado.includes('pagar');
+          const color = esCobrar ? '#28a745' : (esPagar ? '#dc3545' : '#ffc107');
+          const tipoFiltro = esCobrar ? 'cobrar' : (esPagar ? 'pagar' : 'otros');
+          const tipoDisplay = tipoSeguro || 'Sin tipo especificado';
           
           const fila = document.createElement('tr');
           fila.setAttribute('data-tipo', tipoFiltro);
@@ -171,7 +173,7 @@ ComponentSystem.registrar('cuentasPendientes', {
             <td><strong>${item.nombre}</strong></td>
             <td>
               <span style="color:${color}; font-weight:600">
-                ${tipoSeguro || 'Sin tipo'}
+                ${tipoDisplay}
               </span>
             </td>
             <td style="text-align:center">${item.cantidad}</td>
@@ -199,17 +201,34 @@ ComponentSystem.registrar('cuentasPendientes', {
         .filter(item => item && (item.tipo || '').toLowerCase().includes('pagar'))
         .reduce((sum, item) => sum + (item?.total || 0), 0);
 
+      const otros = resumenArray
+        .filter(item => item && !(item.tipo || '').toLowerCase().includes('cobrar') && !(item.tipo || '').toLowerCase().includes('pagar'))
+        .reduce((sum, item) => sum + (item?.total || 0), 0);
+
       const saldoNeto = totalCobrar - totalPagar;
+
+      console.log('💰 Totales calculados:', {
+        totalCobrar,
+        totalPagar, 
+        otros,
+        saldoNeto
+      });
 
       // Actualizar resumen de totales
       const resumenTotales = element.querySelector('#resumen-totales');
-      resumenTotales.innerHTML = `
+      let totalesHTML = `
         <strong>Total a Cobrar:</strong> $ ${totalCobrar.toLocaleString("es-AR",{minimumFractionDigits:2})} | 
-        <strong>Total a Pagar:</strong> $ ${totalPagar.toLocaleString("es-AR",{minimumFractionDigits:2})} | 
-        <strong style="color:${saldoNeto >= 0 ? '#28a745' : '#dc3545'}">
-          Saldo Neto: $ ${Math.abs(saldoNeto).toLocaleString("es-AR",{minimumFractionDigits:2})} ${saldoNeto >= 0 ? 'a favor' : 'en contra'}
-        </strong>
-      `;
+        <strong>Total a Pagar:</strong> $ ${totalPagar.toLocaleString("es-AR",{minimumFractionDigits:2})}`;
+      
+      if (otros > 0) {
+        totalesHTML += ` | <strong>Otros:</strong> $ ${otros.toLocaleString("es-AR",{minimumFractionDigits:2})}`;
+      }
+      
+      totalesHTML += ` | <strong style="color:${saldoNeto >= 0 ? '#28a745' : '#dc3545'}">
+        Saldo Neto: $ ${Math.abs(saldoNeto).toLocaleString("es-AR",{minimumFractionDigits:2})} ${saldoNeto >= 0 ? 'a favor' : 'en contra'}
+      </strong>`;
+      
+      resumenTotales.innerHTML = totalesHTML;
 
       // Inicializar DataTable
       this.initializeDataTable(element);
@@ -226,7 +245,7 @@ ComponentSystem.registrar('cuentasPendientes', {
           <td colspan="7" style="color: #dc3545; text-align: center; padding: 20px;">
             <h4>Error al cargar los datos</h4>
             <p>${error.message}</p>
-            <button class="btn small" onclick="console.log('Datos completos:', ${JSON.stringify(data).slice(0, 500)})">Ver datos en consola</button>
+            <button class="btn small" onclick="location.reload()">Reintentar</button>
           </td>
         </tr>
       `;
@@ -296,6 +315,7 @@ ComponentSystem.registrar('cuentasPendientes', {
         } else if (filter === 'pagar') {
           searchValue = 'pagar';
         }
+        // Si es 'todos', searchValue queda vacío
         
         dataTable.column(1).search(searchValue).draw();
       });
@@ -391,11 +411,11 @@ ComponentSystem.registrar('cuentasPendientes', {
           <tbody style="background:#ffffff10; color:#e0e0e0;">
             ${pendientes.map(p => {
               const tipo = p["Tipo (A cobrar/A pagar)"] || '';
-              const color = tipo.includes('cobrar') ? '#28a745' : '#dc3545';
+              const color = tipo.includes('cobrar') ? "#28a745" : (tipo.includes('pagar') ? "#dc3545" : "#ffc107");
               return `
               <tr>
                 <td style="padding: 10px 8px;">${UTILS.formatDate(p["Fecha Emisión"])}</td>
-                <td style="padding: 10px 8px; color:${color}; font-weight:600">${tipo}</td>
+                <td style="padding: 10px 8px; color:${color}; font-weight:600">${tipo || 'Sin tipo'}</td>
                 <td style="padding: 10px 8px;">${p["Cliente/Proveedor"] || ""}</td>
                 <td style="padding: 10px 8px;">${p["ID Relacionado"] || ""}</td>
                 <td style="padding: 10px 8px; text-align: right; font-weight:600">$ ${UTILS.parseNumber(p["Importe"]).toLocaleString("es-AR",{minimumFractionDigits:2})}</td>
@@ -415,7 +435,10 @@ ComponentSystem.registrar('cuentasPendientes', {
     document.body.appendChild(modal);
     
     // Cerrar modal
-    const closeModal = () => document.body.removeChild(modal);
+    const closeModal = () => {
+      document.body.removeChild(modal);
+      document.removeEventListener('keydown', modal._escHandler);
+    };
     
     modal.addEventListener('click', (e) => {
       if (e.target === modal) closeModal();
