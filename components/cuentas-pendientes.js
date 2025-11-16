@@ -1,4 +1,4 @@
-// Componente: Resumen de Pendientes (VERSIÓN CORREGIDA)
+// Componente: Resumen de Pendientes (VERSIÓN COMPLETAMENTE CORREGIDA)
 ComponentSystem.registrar('cuentasPendientes', {
   grid: 'full',
   html: `
@@ -31,29 +31,42 @@ ComponentSystem.registrar('cuentasPendientes', {
   `,
   async render(data, element) {
     try {
-      console.log('🔍 Iniciando render de cuentasPendientes');
+      console.log('🟢 INICIANDO cuentasPendientes.render()');
       
-      // Acceder a la hoja exacta
+      // VERIFICACIÓN EXTRA DE SEGURIDAD
+      if (!data || typeof data !== 'object') {
+        console.error('❌ Datos no válidos recibidos:', data);
+        element.querySelector('tbody').innerHTML = '<tr><td colspan="7">Error: Datos no válidos</td></tr>';
+        return;
+      }
+
       const hoja = data["Cuentas_Pendientes"];
+      console.log('📊 Hoja Cuentas_Pendientes:', hoja);
       
       if(!hoja || !Array.isArray(hoja)) {
-        console.error('❌ No se encontró la hoja Cuentas_Pendientes o no es un array');
+        console.error('❌ No hay hoja o no es array');
         element.querySelector('tbody').innerHTML = '<tr><td colspan="7">No se encontraron datos de cuentas pendientes</td></tr>';
         return;
       }
 
-      console.log('📊 Total de registros en hoja:', hoja.length);
+      console.log('🔍 Total de registros en hoja:', hoja.length);
       
+      // DEBUG: Ver estructura del primer registro
       if (hoja.length > 0) {
-        console.log('📋 Ejemplo de registro:', hoja[0]);
-        console.log('🔑 Claves del primer registro:', Object.keys(hoja[0]));
+        console.log('👀 Primer registro:', hoja[0]);
+        console.log('🔑 Keys del primer registro:', Object.keys(hoja[0]));
       }
 
-      // Filtrado seguro usando el nombre exacto del header
+      // Filtrado SEGURO con verificación completa
       const pendientes = hoja.filter(r => {
-        const estado = r["Estado (Pendiente/Pagado)"];
-        // Verificar que el estado existe y contiene "pendiente"
-        return estado && String(estado).toLowerCase().includes("pendiente");
+        try {
+          const estado = r["Estado (Pendiente/Pagado)"];
+          console.log('📝 Estado del registro:', estado);
+          return estado && String(estado).toLowerCase().includes("pendiente");
+        } catch (error) {
+          console.warn('⚠️ Error filtrando registro:', error, r);
+          return false;
+        }
       });
       
       console.log('✅ Pendientes filtrados:', pendientes.length);
@@ -64,21 +77,28 @@ ComponentSystem.registrar('cuentasPendientes', {
         return;
       }
 
+      // DEBUG: Verificar estructura de un pendiente
+      console.log('🔍 Estructura de un pendiente:', pendientes[0]);
+
       // Procesar datos para agrupar por cliente/proveedor
       const resumen = {};
       
       pendientes.forEach((r, index) => {
         try {
-          // Usar los nombres exactos de los headers
+          console.log(`🔍 Procesando registro ${index}:`, r);
+          
           const clave = r["Cliente/Proveedor"] || "Sin nombre";
+          // CORRECCIÓN CRÍTICA: Asegurar que tipo siempre sea string
           const tipo = r["Tipo (A cobrar/A pagar)"] || "";
           const importe = UTILS.parseNumber(r["Importe"] || 0);
           const fechaEmision = UTILS.parseDate(r["Fecha Emisión"]);
           
+          console.log(`📊 Registro ${index} - Clave: "${clave}", Tipo: "${tipo}"`);
+          
           if (!resumen[clave]) {
             resumen[clave] = {
               nombre: clave,
-              tipo: tipo,
+              tipo: tipo, // Ahora siempre es string
               cantidad: 0,
               total: 0,
               fechas: [],
@@ -105,7 +125,6 @@ ComponentSystem.registrar('cuentasPendientes', {
             item.masAntiguo = new Date(Math.min(...item.fechas.map(d => d.getTime())));
             item.masReciente = new Date(Math.max(...item.fechas.map(d => d.getTime())));
           } else {
-            // Fechas por defecto si hay problemas
             item.masAntiguo = new Date();
             item.masReciente = new Date();
           }
@@ -117,13 +136,21 @@ ComponentSystem.registrar('cuentasPendientes', {
       // Convertir a array y ordenar por total (mayor a menor)
       const resumenArray = Object.values(resumen).sort((a, b) => b.total - a.total);
 
-      // Renderizar tabla
+      // Renderizar tabla - CORRECCIÓN COMPLETA DE LAS LÍNEAS PROBLEMÁTICAS
       const tbody = element.querySelector('tbody');
       tbody.innerHTML = '';
       
       resumenArray.forEach(item => {
         try {
-          const tipoNormalizado = (item.tipo || '').toLowerCase();
+          // VERIFICACIÓN EXTRA: Asegurar que item existe y tiene tipo
+          if (!item) {
+            console.warn('⚠️ Item undefined en resumenArray');
+            return;
+          }
+          
+          // CORRECCIÓN CRÍTICA: Manejo seguro de tipo
+          const tipoSeguro = (item.tipo && typeof item.tipo === 'string') ? item.tipo : '';
+          const tipoNormalizado = tipoSeguro.toLowerCase();
           const esCobrar = tipoNormalizado.includes('cobrar');
           const color = esCobrar ? '#28a745' : '#dc3545';
           const tipoFiltro = esCobrar ? 'cobrar' : 'pagar';
@@ -134,7 +161,7 @@ ComponentSystem.registrar('cuentasPendientes', {
             <td><strong>${item.nombre}</strong></td>
             <td>
               <span style="color:${color}; font-weight:600">
-                ${item.tipo || 'Sin tipo'}
+                ${tipoSeguro || 'Sin tipo'}
               </span>
             </td>
             <td style="text-align:center">${item.cantidad}</td>
@@ -149,18 +176,18 @@ ComponentSystem.registrar('cuentasPendientes', {
           `;
           tbody.appendChild(fila);
         } catch (error) {
-          console.error('Error renderizando fila:', error, item);
+          console.error('❌ Error renderizando fila:', error, item);
         }
       });
 
-      // Calcular totales generales
+      // Calcular totales generales - CON CORRECCIÓN DE SEGURIDAD
       const totalCobrar = resumenArray
-        .filter(item => (item.tipo || '').toLowerCase().includes('cobrar'))
-        .reduce((sum, item) => sum + item.total, 0);
+        .filter(item => item && (item.tipo || '').toLowerCase().includes('cobrar'))
+        .reduce((sum, item) => sum + (item?.total || 0), 0);
       
       const totalPagar = resumenArray
-        .filter(item => (item.tipo || '').toLowerCase().includes('pagar'))
-        .reduce((sum, item) => sum + item.total, 0);
+        .filter(item => item && (item.tipo || '').toLowerCase().includes('pagar'))
+        .reduce((sum, item) => sum + (item?.total || 0), 0);
 
       const saldoNeto = totalCobrar - totalPagar;
 
@@ -182,13 +209,14 @@ ComponentSystem.registrar('cuentasPendientes', {
       console.log('✅ Componente cuentasPendientes renderizado correctamente');
 
     } catch (error) {
-      console.error('❌ Error crítico en cuentasPendientes:', error);
+      console.error('💥 ERROR CRÍTICO en cuentasPendientes:', error);
+      console.error('🔍 Stack trace:', error.stack);
       element.querySelector('tbody').innerHTML = `
         <tr>
           <td colspan="7" style="color: #dc3545; text-align: center; padding: 20px;">
             <h4>Error al cargar los datos</h4>
             <p>${error.message}</p>
-            <button class="btn small" onclick="console.log('Datos:', ${JSON.stringify(data).slice(0, 500)})">Ver datos en consola</button>
+            <button class="btn small" onclick="console.log('Datos completos:', ${JSON.stringify(data).slice(0, 500)})">Ver datos en consola</button>
           </td>
         </tr>
       `;
