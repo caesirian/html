@@ -3,31 +3,31 @@ ComponentSystem.registrar('cuentasPendientes', {
   grid: 'full',
   html: `
     <h2>Resumen de Compromisos Pendientes</h2>
-    <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-      <button class="btn small active" data-filter="todos">Todos</button>
-      <button class="btn small secondary" data-filter="cobrar">A Cobrar</button>
-      <button class="btn small secondary" data-filter="pagar">A Pagar</button>
-    </div>
-    <div class="tabla-container" style="max-height:400px; overflow-y:auto; margin-top:12px;">
-      <table id="tabla-pendientes" class="tabla-datos" style="width:100%; border-collapse:collapse;">
-        <thead>
-          <tr style="background:#0d1b2a; color:#fff;">
-            <th>Cliente / Proveedor</th>
-            <th>Tipo</th>
-            <th>Cantidad</th>
-            <th>Total Pendiente</th>
-            <th>Promedio</th>
-            <th>Más Antiguo</th>
-            <th>Más Reciente</th>
-          </tr>
-        </thead>
-        <tbody style="background:#ffffff10; color:#e0e0e0;"></tbody>
-      </table>
-    </div>
-    <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center;">
-      <div class="text-muted" id="resumen-totales"></div>
-      <button id="btn-ver-detalle" class="btn small secondary">Ver Detalle Completo</button>
-    </div>
+  <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+    <button class="btn small active" data-filter="todos">Todos</button>
+    <button class="btn small secondary" data-filter="cobrar">A Cobrar</button>
+    <button class="btn small secondary" data-filter="pagar">A Pagar</button>
+  </div>
+  <div style="width: 100%; max-height: 400px; overflow-y: auto;">
+    <table id="tabla-pendientes" style="width: 100%; min-width: 1000px; border-collapse: collapse;">
+      <thead>
+        <tr style="background:#0d1b2a; color:#fff;">
+          <th style="padding: 8px 12px;">Cliente / Proveedor</th>
+          <th style="padding: 8px 12px;">Tipo</th>
+          <th style="padding: 8px 12px;">Cantidad</th>
+          <th style="padding: 8px 12px;">Total Pendiente</th>
+          <th style="padding: 8px 12px;">Promedio</th>
+          <th style="padding: 8px 12px;">Más Antiguo</th>
+          <th style="padding: 8px 12px;">Más Reciente</th>
+        </tr>
+      </thead>
+      <tbody style="background:#ffffff10; color:#e0e0e0;"></tbody>
+    </table>
+  </div>
+  <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center;">
+    <div class="text-muted" id="resumen-totales"></div>
+    <button id="btn-ver-detalle" class="btn small secondary">Ver Detalle Completo</button>
+  </div>
   `,
   async render(data, element) {
     try {
