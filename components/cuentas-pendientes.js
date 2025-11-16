@@ -91,16 +91,16 @@ ComponentSystem.registrar('cuentasPendientes', {
     
     resumenArray.forEach(item => {
       const fila = document.createElement('tr');
-      fila.setAttribute('data-tipo', item.tipo.toLowerCase().includes('cobrar') ? 'cobrar' : 'pagar');
+      fila.setAttribute('data-tipo', (item.tipo || '').toLowerCase().includes('cobrar') ? 'cobrar' : 'pagar');
       fila.innerHTML = `
         <td><strong>${item.nombre}</strong></td>
         <td>
-          <span style="color:${item.tipo.includes('cobrar') ? '#28a745' : '#dc3545'}; font-weight:600">
+          <span style="color:${(item.tipo || '').includes('cobrar') ? '#28a745' : '#dc3545'}; font-weight:600">
             ${item.tipo}
           </span>
         </td>
         <td style="text-align:center">${item.cantidad}</td>
-        <td style="text-align:right; font-weight:700; color:${item.tipo.includes('cobrar') ? '#28a745' : '#dc3545'}">
+        <td style="text-align:right; font-weight:700; color:${(item.tipo || '').includes('cobrar') ? '#28a745' : '#dc3545'}">
           $ ${item.total.toLocaleString("es-AR",{minimumFractionDigits:2})}
         </td>
         <td style="text-align:right">
