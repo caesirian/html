@@ -1,0 +1,1108 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gestión de Ventas - HG Soluciones</title>
+  
+  <!-- CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/datatables.net-dt@1.13.6/css/jquery.dataTables.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/datatables.net-buttons-dt@2.4.1/css/buttons.dataTables.min.css" rel="stylesheet"/>
+  <link href="css/styles.css" rel="stylesheet">
+  
+  <style>
+    .form-section {
+      margin-bottom: 24px;
+    }
+    .form-section h3 {
+      color: var(--accent);
+      margin-bottom: 12px;
+      font-size: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 8px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .form-field {
+      display: flex;
+      flex-direction: column;
+    }
+    .form-field label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-size: 14px;
+    }
+    .form-field input:focus,
+    .form-field select:focus,
+    .form-field textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .required label::after {
+      content: " *";
+      color: #dc3545;
+    }
+    .checkbox-field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .checkbox-field input {
+      margin: 0;
+    }
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .venta-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .status-cobrada {
+      background: rgba(40, 167, 69, 0.2);
+      color: #28a745;
+    }
+    .status-pendiente {
+      background: rgba(255, 193, 7, 0.2);
+      color: #ffc107;
+    }
+    .status-cancelada {
+      background: rgba(108, 117, 125, 0.2);
+      color: #6c757d;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 6px;
+    }
+    .btn-small {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+    .loader {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: var(--accent);
+      animation: spin 1s ease-in-out infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .fade-in {
+      animation: fadeIn 0.5s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* ====== PANTALLA DE CARGA ====== */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(11, 18, 32, 0.85);
+      backdrop-filter: blur(10px);
+      z-index: 10000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease-in-out;
+    }
+    
+    .loading-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .loading-content {
+      text-align: center;
+      max-width: 400px;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(15px);
+      animation: fadeInUp 0.4s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .loading-spinner {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .spinner-circle {
+      width: 10px;
+      height: 10px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: bounce 1.4s infinite ease-in-out;
+    }
+    
+    .spinner-circle:nth-child(1) { animation-delay: -0.32s; }
+    .spinner-circle:nth-child(2) { animation-delay: -0.16s; }
+    
+    @keyframes bounce {
+      0%, 80%, 100% {
+        transform: scale(0.8);
+        opacity: 0.5;
+      }
+      40% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    
+    .loading-title {
+      color: var(--text);
+      font-size: 22px;
+      font-weight: 700;
+      margin: 0 0 10px 0;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .loading-message {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <!-- Pantalla de carga - SOLO PARA OPERACIONES CRÍTICAS -->
+  <div id="loading-overlay" class="loading-overlay">
+    <div class="loading-content">
+      <div class="loading-spinner">
+        <div class="spinner-circle"></div>
+        <div class="spinner-circle"></div>
+        <div class="spinner-circle"></div>
+      </div>
+      <h3 class="loading-title">Procesando información</h3>
+      <p class="loading-message" id="loading-message">Por favor espere...</p>
+    </div>
+  </div>
+
+  <div class="app">
+    <aside class="sidebar" role="navigation">
+      <h1>HG - Gestión de Ventas</h1>
+      <div class="nav">
+        <button id="nav-dashboard" onclick="location.href='dash_beta.html'">Dashboard</button>
+        <button id="nav-carga-datos" onclick="location.href='carga_datos.html'">Carga de Datos</button>
+        <button id="nav-clientes" onclick="location.href='abmclients2.html'">Gestión de Clientes</button>
+        <button id="nav-proveedores" onclick="location.href='proveedores.html'">Gestión de Proveedores</button>
+        <button id="nav-compras" onclick="location.href='compras.html'">Gestión de Compras</button>
+        <button id="nav-ventas" class="active">Ventas</button>
+        <button id="nav-finanzas">Finanzas</button>
+        <button id="nav-simulador">Simulador</button>
+        <button id="nav-tablas">Tablas</button>
+      </div>
+      <footer style="margin-top:14px;color:var(--muted);font-size:12px">
+        <div>Conexión: <span id="conn-status">sin iniciar</span></div>
+        <div style="margin-top:8px"><button class="btn small" id="refresh-data">Actualizar datos</button></div>
+      </footer>
+    </aside>
+
+    <main>
+      <header class="topbar header-hg" style="display:flex; align-items:center; gap:12px;">
+        <button id="menu-toggle" class="menu-toggle">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 12H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M3 6H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M3 18H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        
+        <div style="flex: 1;">
+          <h1 style="margin:0;">Gestión de Ventas</h1>
+          <p style="margin:0; color:var(--muted); font-size:13px">Registro y seguimiento de ventas e ingresos</p>
+        </div>
+        
+        <div style="display:flex; gap:8px; align-items:center;">
+          <div id="estado" class="text-muted">Esperando datos...</div>
+        </div>
+      </header>
+
+      <!-- Overlay para móviles -->
+      <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+      <!-- FORMULARIO DE VENTA -->
+      <div class="card" data-grid="full" style="margin-bottom: 20px;">
+        <h2 style="margin-top: 0; margin-bottom: 20px;" id="form-title">Nueva Venta</h2>
+        
+        <form id="form-venta">
+          <!-- Sección: Información Básica -->
+          <div class="form-section">
+            <h3>Información Básica</h3>
+            <div class="form-grid">
+              <div class="form-field required">
+                <label for="fecha">Fecha</label>
+                <input type="date" id="fecha" name="fecha" required>
+              </div>
+              
+              <div class="form-field required">
+                <label for="cliente">Cliente</label>
+                <select id="cliente" name="cliente" required>
+                  <option value="">Seleccionar cliente...</option>
+                  <!-- Se llenará dinámicamente con clientes activos -->
+                </select>
+              </div>
+              
+              <div class="form-field required">
+                <label for="descripcion">Descripción</label>
+                <input type="text" id="descripcion" name="descripcion" required placeholder="Descripción de la venta">
+              </div>
+              
+              <div class="form-field">
+                <label for="comprobante">N° Comprobante</label>
+                <input type="text" id="comprobante" name="comprobante" placeholder="Número de factura/recibo">
+              </div>
+            </div>
+          </div>
+
+          <!-- Sección: Monto y Categorización -->
+          <div class="form-section">
+            <h3>Monto y Categorización</h3>
+            <div class="form-grid">
+              <div class="form-field required">
+                <label for="monto">Monto</label>
+                <input type="number" id="monto" name="monto" min="0" step="0.01" required placeholder="0.00">
+              </div>
+              
+              <div class="form-field required">
+                <label for="categoria">Categoría</label>
+                <select id="categoria" name="categoria" required>
+                  <option value="">Seleccionar categoría...</option>
+                  <option value="Productos">Productos</option>
+                  <option value="Servicios">Servicios</option>
+                  <option value="Consultoría">Consultoría</option>
+                  <option value="Desarrollo">Desarrollo</option>
+                  <option value="Mantenimiento">Mantenimiento</option>
+                  <option value="Licencias">Licencias</option>
+                  <option value="Alquileres">Alquileres</option>
+                  <option value="Honorarios">Honorarios</option>
+                  <option value="Intereses">Intereses</option>
+                  <option value="Otros">Otros</option>
+                </select>
+              </div>
+              
+              <div class="form-field">
+                <label for="subcategoria">Subcategoría</label>
+                <input type="text" id="subcategoria" name="subcategoria" placeholder="Subcategoría específica">
+              </div>
+              
+              <div class="form-field">
+                <label for="proyecto">Proyecto</label>
+                <input type="text" id="proyecto" name="proyecto" placeholder="Proyecto relacionado">
+              </div>
+            </div>
+          </div>
+
+          <!-- Sección: Información de Cobro -->
+          <div class="form-section">
+            <h3>Información de Cobro</h3>
+            <div class="form-grid">
+              <div class="form-field required">
+                <label for="medioPago">Medio de Pago</label>
+                <select id="medioPago" name="medioPago" required>
+                  <option value="">Seleccionar medio...</option>
+                  <option value="Efectivo">Efectivo</option>
+                  <option value="Transferencia">Transferencia</option>
+                  <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
+                  <option value="Tarjeta de Débito">Tarjeta de Débito</option>
+                  <option value="Cheque">Cheque</option>
+                  <option value="Mercado Pago">Mercado Pago</option>
+                  <option value="Otro">Otro</option>
+                </select>
+              </div>
+              
+              <div class="form-field required">
+                <label for="estadoCobro">Estado del Cobro</label>
+                <select id="estadoCobro" name="estadoCobro" required>
+                  <option value="Cobrado">Cobrado</option>
+                  <option value="Pendiente">Pendiente</option>
+                  <option value="Cancelado">Cancelado</option>
+                </select>
+              </div>
+              
+              <div class="form-field">
+                <label for="fechaCobro">Fecha de Cobro</label>
+                <input type="date" id="fechaCobro" name="fechaCobro">
+              </div>
+              
+              <div class="checkbox-field">
+                <input type="checkbox" id="reflejarEnCaja" name="reflejarEnCaja" checked>
+                <label for="reflejarEnCaja">Reflejar en Caja</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sección: Información Adicional -->
+          <div class="form-section">
+            <h3>Información Adicional</h3>
+            <div class="form-grid">
+              <div class="form-field" style="grid-column: span 2;">
+                <label for="observaciones">Observaciones</label>
+                <textarea id="observaciones" name="observaciones" rows="3" placeholder="Información adicional sobre la venta"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn" id="btn-guardar">Registrar Venta</button>
+            <button type="button" class="btn secondary" id="btn-cancelar" style="display:none;">Cancelar</button>
+            <button type="reset" class="btn secondary">Limpiar Formulario</button>
+            <div style="flex: 1;"></div>
+            <span class="text-muted" style="font-size: 12px;">* Campos obligatorios</span>
+          </div>
+        </form>
+      </div>
+
+      <!-- TABLA DE VENTAS -->
+      <div class="card" data-grid="full">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h2 style="margin: 0;">Ventas Registradas</h2>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="text" id="buscar-venta" placeholder="Buscar..." 
+                   style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); color: var(--text); padding: 6px 10px; border-radius: 6px; min-width: 200px;">
+            <select id="filtro-estado" class="btn small">
+              <option value="">Todos los estados</option>
+              <option value="Cobrado">Cobradas</option>
+              <option value="Pendiente">Pendientes</option>
+              <option value="Cancelado">Canceladas</option>
+            </select>
+            <select id="filtro-categoria" class="btn small">
+              <option value="">Todas las categorías</option>
+              <option value="Productos">Productos</option>
+              <option value="Servicios">Servicios</option>
+              <option value="Consultoría">Consultoría</option>
+              <option value="Desarrollo">Desarrollo</option>
+              <option value="Mantenimiento">Mantenimiento</option>
+              <option value="Licencias">Licencias</option>
+              <option value="Alquileres">Alquileres</option>
+              <option value="Honorarios">Honorarios</option>
+              <option value="Intereses">Intereses</option>
+              <option value="Otros">Otros</option>
+            </select>
+            <select id="filtro-mes" class="btn small">
+              <option value="">Todos los meses</option>
+              <!-- Se llenará dinámicamente -->
+            </select>
+          </div>
+        </div>
+
+        <div class="tabla-container">
+          <table id="tabla-ventas" class="tabla-datos" style="width: 100%;">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Descripción</th>
+                <th>Monto</th>
+                <th>Categoría</th>
+                <th>Medio Pago</th>
+                <th>Estado</th>
+                <th>Comprobante</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Se llenará dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <footer class="footer-hg">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div class="text-muted">Última sincronización: <span id="last-sync">nunca</span></div>
+          <div class="text-muted">Total ventas: <span id="total-ventas">0</span> | 
+            Total ingresos: <span id="total-ingresos">$0</span></div>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- JS Libraries -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/datatables.net-buttons@2.4.1/js/dataTables.buttons.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/datatables.net-buttons@2.4.1/js/buttons.html5.min.js"></script>
+
+  <!-- Nuestra aplicación -->
+  <script src="js/core/config.js"></script>
+  <script src="js/core/utils.js"></script>
+  <script src="js/core/data-manager.js"></script>
+  
+  <!-- Script específico para esta página -->
+  <script>
+    // js/ventas.js - ADAPTACIÓN PARA VENTAS
+    const VentasApp = {
+      currentData: null,
+      editingVentaId: null,
+      dataTable: null,
+
+      async init() {
+        console.log('🚀 Iniciando app de gestión de ventas...');
+        
+        this.setupEventListeners();
+        await this.loadData();
+      },
+
+      async loadData(forceRefresh = true) {
+        try {
+          console.log('📡 Cargando datos de ventas...');
+          this.mostrarEstado('Cargando datos...', 'loading');
+
+          const data = await DataManager.fetchData(forceRefresh);
+          console.log('✅ Datos recibidos:', data);
+          
+          this.currentData = data;
+          this.mostrarEstado('Datos actualizados', 'success');
+          this.renderizarTabla(data);
+          this.actualizarFiltros(data);
+          this.cargarClientes(data);
+
+          // Actualizar última sincronización
+          const now = new Date();
+          document.getElementById('last-sync').textContent = now.toLocaleTimeString();
+
+        } catch(error) {
+          console.error('❌ Error cargando datos:', error);
+          this.mostrarEstado('Error: ' + error.message, 'error');
+        }
+      },
+
+      mostrarEstado(mensaje, tipo = 'info') {
+        const estadoElement = document.getElementById('estado');
+        if (!estadoElement) return;
+
+        const iconos = {
+          loading: '<span class="loader"></span> ',
+          success: '<span style="color: #28a745;">✓</span> ',
+          error: '<span style="color: #dc3545;">✗</span> ',
+          info: ''
+        };
+
+        estadoElement.innerHTML = (iconos[tipo] || '') + mensaje;
+      },
+
+      // Función para mostrar pantalla de carga - SOLO PARA OPERACIONES CRÍTICAS
+      mostrarLoading(mensaje = 'Estoy procesando info, por favor espera...') {
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const loadingMessage = document.getElementById('loading-message');
+        
+        if (loadingOverlay && loadingMessage) {
+          loadingMessage.textContent = mensaje;
+          loadingOverlay.classList.add('active');
+        }
+      },
+
+      // Función para ocultar pantalla de carga
+      ocultarLoading() {
+        const loadingOverlay = document.getElementById('loading-overlay');
+        if (loadingOverlay) {
+          loadingOverlay.classList.remove('active');
+        }
+      },
+
+      // Cargar lista de clientes en el select
+      cargarClientes(data) {
+        const clientes = data.Clientes || [];
+        const selectCliente = document.getElementById('cliente');
+        
+        if (!selectCliente) return;
+        
+        // Mantener la opción por defecto y limpiar las demás
+        selectCliente.innerHTML = '<option value="">Seleccionar cliente...</option>';
+        
+        // Filtrar solo clientes activos
+        const clientesActivos = clientes.filter(c => c.Estado === 'Activo');
+        
+        clientesActivos.forEach(cliente => {
+          const option = document.createElement('option');
+          option.value = cliente.Nombre || '';
+          option.textContent = cliente.Nombre || '';
+          selectCliente.appendChild(option);
+        });
+        
+        console.log(`✅ ${clientesActivos.length} clientes cargados`);
+      },
+
+      renderizarTabla(data) {
+        // Filtrar solo los ingresos (ventas) de Finanzas_RegistroDiario
+        const finanzas = data.Finanzas_RegistroDiario || [];
+        const ventas = finanzas.filter(item => item.Tipo === 'Ingreso');
+        
+        const tbody = document.querySelector('#tabla-ventas tbody');
+        
+        if (!tbody) {
+          console.error('❌ No se encontró el tbody de la tabla');
+          return;
+        }
+
+        tbody.innerHTML = '';
+
+        if (ventas.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--muted); padding: 20px;">No hay ventas registradas</td></tr>';
+          this.inicializarDataTable([]);
+          document.getElementById('total-ventas').textContent = '0';
+          document.getElementById('total-ingresos').textContent = '$0';
+          return;
+        }
+
+        // Ordenar por fecha descendente (más recientes primero)
+        const ventasOrdenadas = [...ventas].sort((a, b) => {
+          const fechaA = UTILS.parseDate(a.Fecha || '');
+          const fechaB = UTILS.parseDate(b.Fecha || '');
+          return fechaB - fechaA; // Más reciente primero
+        });
+
+        // Calcular total de ingresos
+        let totalIngresos = 0;
+        
+        ventasOrdenadas.forEach(venta => {
+          const fila = document.createElement('tr');
+          
+          const id = venta.ID || '';
+          const fecha = venta.Fecha || '';
+          const cliente = venta['Cliente/Proveedor'] || '';
+          const descripcion = venta.Descripción || '';
+          const monto = venta.Monto || 0;
+          const categoria = venta.Categoría || '';
+          const medioPago = venta['Medio de Pago'] || '';
+          const estado = venta.Estado || 'Pendiente';
+          const comprobante = venta.Comprobante || '';
+          
+          // Sumar al total de ingresos
+          if (estado === 'Cobrado') {
+            totalIngresos += parseFloat(monto) || 0;
+          }
+          
+          const estadoClass = estado === 'Cobrado' ? 'status-cobrada' : 
+                             estado === 'Pendiente' ? 'status-pendiente' : 'status-cancelada';
+
+          // Usar data-order para ordenamiento correcto en DataTables
+          const fechaOrden = new Date(fecha).getTime();
+          
+          fila.innerHTML = `
+            <td>${id}</td>
+            <td data-order="${fechaOrden}">${UTILS.formatDate(fecha)}</td>
+            <td style="font-weight: 600;">${cliente}</td>
+            <td>${descripcion}</td>
+            <td data-order="${monto}">${UTILS.formatCurrency(monto)}</td>
+            <td>${categoria}</td>
+            <td>${medioPago}</td>
+            <td><span class="venta-status ${estadoClass}">${estado}</span></td>
+            <td>${comprobante}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn small" onclick="VentasApp.editarVenta('${id}')">Editar</button>
+                <button class="btn small secondary" onclick="VentasApp.eliminarVenta('${id}', '${this.escapeString(descripcion)}')">Eliminar</button>
+              </div>
+            </td>
+          `;
+          tbody.appendChild(fila);
+        });
+
+        this.inicializarDataTable(ventasOrdenadas);
+        document.getElementById('total-ventas').textContent = ventasOrdenadas.length;
+        document.getElementById('total-ingresos').textContent = UTILS.formatCurrency(totalIngresos);
+      },
+
+      escapeString(str) {
+        return str ? str.replace(/'/g, "\\'").replace(/"/g, '\\"') : '';
+      },
+
+      inicializarDataTable(ventas) {
+        const table = $('#tabla-ventas');
+        
+        if ($.fn.dataTable.isDataTable(table)) {
+          table.DataTable().destroy();
+          console.log('🔄 DataTable anterior destruido');
+        }
+
+        if (ventas.length === 0) {
+          console.log('📊 Tabla vacía, no se inicializa DataTable');
+          return;
+        }
+
+        try {
+          const dataTable = table.DataTable({
+            pageLength: 10,
+            lengthMenu: [10, 25, 50, 100],
+            order: [[1, 'desc']], // Ordenar por fecha descendente (columna 1)
+            language: {
+              search: "Buscar:",
+              lengthMenu: "Mostrar _MENU_ registros",
+              info: "Mostrando _START_ a _END_ de _TOTAL_ ventas",
+              paginate: {
+                first: "Primero",
+                last: "Último", 
+                next: "Siguiente",
+                previous: "Anterior"
+              }
+            },
+            columnDefs: [
+              { 
+                targets: [1], // Columna de fecha
+                type: 'num', // Tipo numérico para ordenamiento correcto
+                width: '120px'
+              },
+              { 
+                targets: [4], // Columna de monto
+                type: 'num', // Tipo numérico para ordenamiento correcto
+                width: '120px'
+              },
+              { targets: [3], width: '200px' },
+              { targets: [7], width: '100px' },
+              { targets: [9], width: '140px', orderable: false },
+              { targets: '_all', className: 'dt-body-left' }
+            ],
+            responsive: true,
+            stateSave: false
+          });
+
+          console.log('✅ DataTable inicializado correctamente');
+          this.dataTable = dataTable;
+          
+        } catch (error) {
+          console.error('❌ Error inicializando DataTable:', error);
+        }
+      },
+
+      actualizarFiltros(data) {
+        const finanzas = data.Finanzas_RegistroDiario || [];
+        const ventas = finanzas.filter(item => item.Tipo === 'Ingreso');
+        
+        const filtroEstado = document.getElementById('filtro-estado');
+        const filtroCategoria = document.getElementById('filtro-categoria');
+        const filtroMes = document.getElementById('filtro-mes');
+        
+        const categorias = [...new Set(ventas.map(v => v.Categoría).filter(Boolean))].sort();
+        const meses = [...new Set(ventas.map(v => {
+          const fecha = UTILS.parseDate(v.Fecha);
+          if (!isNaN(fecha.getTime())) {
+            return `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
+          }
+          return '';
+        }).filter(Boolean))].sort().reverse();
+
+        filtroCategoria.innerHTML = '<option value="">Todas las categorías</option>';
+        categorias.forEach(cat => {
+          const option = document.createElement('option');
+          option.value = cat;
+          option.textContent = cat;
+          filtroCategoria.appendChild(option);
+        });
+
+        filtroMes.innerHTML = '<option value="">Todos los meses</option>';
+        meses.forEach(mes => {
+          const [year, month] = mes.split('-');
+          const monthName = UTILS.getMonthName(parseInt(month), true);
+          const option = document.createElement('option');
+          option.value = mes;
+          option.textContent = `${monthName} ${year}`;
+          filtroMes.appendChild(option);
+        });
+
+        filtroEstado.addEventListener('change', () => this.aplicarFiltros());
+        filtroCategoria.addEventListener('change', () => this.aplicarFiltros());
+        filtroMes.addEventListener('change', () => this.aplicarFiltros());
+        document.getElementById('buscar-venta').addEventListener('input', () => this.aplicarFiltros());
+      },
+
+      aplicarFiltros() {
+        const tabla = $('#tabla-ventas').DataTable();
+        if (!tabla) return;
+
+        const filtroEstado = document.getElementById('filtro-estado').value;
+        const filtroCategoria = document.getElementById('filtro-categoria').value;
+        const filtroMes = document.getElementById('filtro-mes').value;
+        const busqueda = document.getElementById('buscar-venta').value;
+
+        tabla.column(7).search(filtroEstado);
+        tabla.column(5).search(filtroCategoria);
+        
+        // Filtro por mes (necesita lógica especial)
+        if (filtroMes) {
+          tabla.column(1).search(filtroMes, true, false);
+        } else {
+          tabla.column(1).search('');
+        }
+        
+        tabla.search(busqueda).draw();
+      },
+
+      setupEventListeners() {
+        const form = document.getElementById('form-venta');
+        if (form) {
+          form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.guardarVenta();
+          });
+        }
+
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        
+        if (menuToggle && sidebar && overlay) {
+          menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+          });
+          
+          overlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+          });
+        }
+
+        const refreshBtn = document.getElementById('refresh-data');
+        if (refreshBtn) {
+          refreshBtn.addEventListener('click', () => {
+            this.mostrarLoading('Actualizando datos...');
+            this.loadData(true).finally(() => {
+              this.ocultarLoading();
+            });
+          });
+        }
+
+        const btnCancelar = document.getElementById('btn-cancelar');
+        if (btnCancelar) {
+          btnCancelar.addEventListener('click', () => {
+            this.cancelarEdicion();
+          });
+        }
+
+        // Fecha actual por defecto
+        const fechaInput = document.getElementById('fecha');
+        if (fechaInput) {
+          fechaInput.value = UTILS.getCurrentDateForInput();
+        }
+
+        // Fecha de cobro por defecto (igual a fecha de venta)
+        const fechaCobroInput = document.getElementById('fechaCobro');
+        if (fechaCobroInput) {
+          fechaCobroInput.value = UTILS.getCurrentDateForInput();
+        }
+      },
+
+      async guardarVenta() {
+        const form = document.getElementById('form-venta');
+        const formData = new FormData(form);
+
+        const fecha = formData.get('fecha');
+        const cliente = formData.get('cliente');
+        const descripcion = formData.get('descripcion');
+        const monto = formData.get('monto');
+
+        if (!fecha || !cliente || !descripcion || !monto) {
+          alert('Por favor complete los campos obligatorios: Fecha, Cliente, Descripción y Monto.');
+          return;
+        }
+
+        try {
+          this.mostrarLoading('Registrando venta...');
+
+          // Usar los nombres exactos de los campos del GAS
+          const venta = {
+            // Campos básicos para Finanzas_RegistroDiario
+            Fecha: fecha,
+            'Tipo (Ingreso/Egreso)': 'Ingreso', // Siempre será ingreso para ventas
+            Categoría: formData.get('categoria') || '',
+            Subcategoría: formData.get('subcategoria') || '',
+            Monto: parseFloat(monto) || 0,
+            'Medio de Pago': formData.get('medioPago') || '',
+            Comprobante: formData.get('comprobante') || '',
+            Descripción: descripcion,
+            Proyecto: formData.get('proyecto') || '',
+            'Cliente/Proveedor': cliente,
+            Observaciones: formData.get('observaciones') || '',
+            'Reflejar en Caja': formData.get('reflejarEnCaja') ? 'Sí' : 'No',
+            Mes: fecha.substring(0, 7), // Formato YYYY-MM
+            Estado: formData.get('estadoCobro') || 'Pendiente',
+            'Fecha Pago': formData.get('fechaCobro') || ''
+          };
+
+          console.log('💾 Venta a guardar:', venta);
+
+          let resultado;
+          if (this.editingVentaId) {
+            resultado = await this.actualizarVenta(this.editingVentaId, venta);
+          } else {
+            resultado = await this.crearVenta(venta);
+          }
+
+          this.mostrarEstado('✓ Venta registrada exitosamente', 'success');
+          
+          // Recargar datos y actualizar tabla
+          await this.loadData(true);
+          
+          this.ocultarLoading();
+          alert('✅ Venta registrada correctamente');
+          this.cancelarEdicion();
+
+        } catch (error) {
+          console.error('❌ Error registrando venta:', error);
+          this.ocultarLoading();
+          
+          let mensajeError = 'Error al registrar la venta. ';
+          
+          if (error.message.includes('429')) {
+            mensajeError += 'Demasiadas solicitudes. Espere unos segundos e intente nuevamente.';
+          } else if (error.message.includes('404') || error.message.includes('Failed to fetch')) {
+            mensajeError += 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
+          } else {
+            mensajeError += error.message;
+          }
+          
+          alert(mensajeError);
+          this.mostrarEstado('✗ Error al registrar', 'error');
+        }
+      },
+
+      async crearVenta(venta) {
+        try {
+          console.log('📤 CREANDO NUEVA VENTA:', venta);
+          
+          const datosEnvio = {
+            action: 'insert',
+            sheet: 'Finanzas_RegistroDiario',
+            ...venta
+          };
+
+          const url = CONFIG.GAS_ENDPOINT + '?' + new URLSearchParams(datosEnvio);
+          console.log('🔗 URL final:', url);
+
+          const response = await fetch(url);
+          const responseText = await response.text();
+
+          if (!response.ok) {
+            throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
+          }
+
+          const result = JSON.parse(responseText);
+          console.log('✅ Resultado parseado:', result);
+
+          if (!result.success) {
+            throw new Error(result.error || 'Error desconocido del servidor');
+          }
+
+          return result;
+
+        } catch (error) {
+          console.error('❌ ERROR CREANDO VENTA:', error);
+          throw error;
+        }
+      },
+
+      async actualizarVenta(id, venta) {
+        try {
+          console.log('📤 ACTUALIZANDO VENTA:', id, venta);
+          
+          const datosEnvio = {
+            action: 'update',
+            sheet: 'Finanzas_RegistroDiario',
+            id: id,
+            ...venta
+          };
+
+          const url = CONFIG.GAS_ENDPOINT + '?' + new URLSearchParams(datosEnvio);
+          console.log('🔗 URL final:', url);
+
+          const response = await fetch(url);
+          const responseText = await response.text();
+
+          if (!response.ok) {
+            throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
+          }
+
+          const result = JSON.parse(responseText);
+          console.log('✅ Resultado parseado:', result);
+
+          if (!result.success) {
+            throw new Error(result.error || 'Error desconocido del servidor');
+          }
+
+          return result;
+
+        } catch (error) {
+          console.error('❌ ERROR ACTUALIZANDO VENTA:', error);
+          throw error;
+        }
+      },
+
+      async eliminarVenta(id, descripcion) {
+        if (!id) {
+          alert('❌ Error: No se pudo identificar la venta a eliminar');
+          return;
+        }
+
+        if (!confirm(`¿Está seguro que desea eliminar la venta "${descripcion}"? Esta acción no se puede deshacer.`)) {
+          return;
+        }
+
+        try {
+          this.mostrarLoading('Eliminando venta...');
+
+          const datosEnvio = {
+            action: 'delete',
+            sheet: 'Finanzas_RegistroDiario',
+            id: id
+          };
+
+          console.log('🗑️ ELIMINANDO VENTA:', id);
+
+          const url = CONFIG.GAS_ENDPOINT + '?' + new URLSearchParams(datosEnvio);
+          console.log('🔗 URL final:', url);
+
+          const response = await fetch(url);
+          const responseText = await response.text();
+
+          if (!response.ok) {
+            throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
+          }
+
+          const result = JSON.parse(responseText);
+          console.log('✅ Resultado parseado:', result);
+
+          if (!result.success) {
+            throw new Error(result.error || 'Error desconocido del servidor');
+          }
+
+          this.mostrarEstado('✓ Venta eliminada', 'success');
+          
+          // Recargar datos y actualizar tabla
+          await this.loadData(true);
+          
+          this.ocultarLoading();
+          alert('✅ Venta eliminada correctamente');
+
+        } catch (error) {
+          console.error('❌ ERROR ELIMINANDO VENTA:', error);
+          this.ocultarLoading();
+          
+          let mensajeError = 'Error al eliminar la venta. ';
+          
+          if (error.message.includes('429')) {
+            mensajeError += 'Demasiadas solicitudes. Espere unos segundos e intente nuevamente.';
+          } else if (error.message.includes('404') || error.message.includes('Failed to fetch')) {
+            mensajeError += 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
+          } else {
+            mensajeError += error.message;
+          }
+          
+          alert(mensajeError);
+          this.mostrarEstado('✗ Error al eliminar', 'error');
+        }
+      },
+
+      editarVenta(id) {
+        const finanzas = this.currentData?.Finanzas_RegistroDiario || [];
+        const venta = finanzas.find(v => v.ID === id && v.Tipo === 'Ingreso');
+        
+        if (!venta) {
+          alert('Venta no encontrada');
+          return;
+        }
+
+        // Llenar formulario con datos de la venta
+        document.getElementById('fecha').value = venta.Fecha ? UTILS.formatDateForInput(venta.Fecha) : '';
+        document.getElementById('cliente').value = venta['Cliente/Proveedor'] || '';
+        document.getElementById('descripcion').value = venta.Descripción || '';
+        document.getElementById('comprobante').value = venta.Comprobante || '';
+        document.getElementById('monto').value = venta.Monto || '';
+        document.getElementById('categoria').value = venta.Categoría || '';
+        document.getElementById('subcategoria').value = venta.Subcategoría || '';
+        document.getElementById('proyecto').value = venta.Proyecto || '';
+        document.getElementById('medioPago').value = venta['Medio de Pago'] || '';
+        document.getElementById('estadoCobro').value = venta.Estado || 'Pendiente';
+        document.getElementById('fechaCobro').value = venta['Fecha Pago'] ? UTILS.formatDateForInput(venta['Fecha Pago']) : '';
+        document.getElementById('reflejarEnCaja').checked = venta['Reflejar en Caja'] === 'Sí';
+        document.getElementById('observaciones').value = venta.Observaciones || '';
+
+        // Cambiar interfaz para edición
+        this.editingVentaId = id;
+        document.getElementById('form-title').textContent = 'Editando Venta';
+        document.getElementById('btn-guardar').textContent = 'Actualizar Venta';
+        document.getElementById('btn-cancelar').style.display = 'inline-block';
+
+        // Desplazar hacia el formulario
+        document.querySelector('#form-venta').scrollIntoView({ behavior: 'smooth' });
+      },
+
+      cancelarEdicion() {
+        this.editingVentaId = null;
+        document.getElementById('form-title').textContent = 'Nueva Venta';
+        document.getElementById('btn-guardar').textContent = 'Registrar Venta';
+        document.getElementById('btn-cancelar').style.display = 'none';
+        document.getElementById('form-venta').reset();
+        
+        // Restaurar fechas por defecto
+        const fechaInput = document.getElementById('fecha');
+        const fechaCobroInput = document.getElementById('fechaCobro');
+        if (fechaInput) fechaInput.value = UTILS.getCurrentDateForInput();
+        if (fechaCobroInput) fechaCobroInput.value = UTILS.getCurrentDateForInput();
+      }
+    };
+
+    // Inicialización
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        VentasApp.init();
+      });
+    } else {
+      VentasApp.init();
+    }
+  </script>
+</body>
+</html>
