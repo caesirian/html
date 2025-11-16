@@ -846,7 +846,7 @@
           const compra = {
             // Campos básicos para Finanzas_RegistroDiario
             Fecha: fecha,
-            Tipo: 'Egreso', // Siempre será egreso para compras
+            'Tipo (Ingreso/Egreso)': 'Egreso', // Siempre será egreso para compras
             Categoría: formData.get('categoria') || '',
             Subcategoría: formData.get('subcategoria') || '',
             Monto: parseFloat(monto) || 0,
