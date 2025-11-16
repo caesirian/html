@@ -1,4 +1,8 @@
 // Componente: Resumen de Pendientes (VERSIÓN COMPLETAMENTE CORREGIDA)
+// Componente: Resumen de Pendientes (VERSIÓN COMPLETAMENTE CORREGIDA)
+// Componente: Resumen de Pendientes (VERSIÓN COMPLETAMENTE CORREGIDA)
+// Componente: Resumen de Pendientes (VERSIÓN COMPLETAMENTE CORREGIDA)
+// Componente: Resumen de Pendientes (VERSIÓN COMPLETAMENTE CORREGIDA)
 ComponentSystem.registrar('cuentasPendientes', {
   grid: 'full',
   html: `
