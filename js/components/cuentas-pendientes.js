@@ -1,4 +1,4 @@
-// Componente: Resumen de Pendientes (VERSIÓN COMPLETAMENTE CORREGIDA)
+// Componente: Resumen de Pendientes (VERSIÓN CON NOMBRES DE COLUMNAS CORRECTOS)
 ComponentSystem.registrar('cuentasPendientes', {
   grid: 'full',
   html: `
@@ -33,18 +33,9 @@ ComponentSystem.registrar('cuentasPendientes', {
     try {
       console.log('🟢 INICIANDO cuentasPendientes.render()');
       
-      // VERIFICACIÓN EXTRA DE SEGURIDAD
-      if (!data || typeof data !== 'object') {
-        console.error('❌ Datos no válidos recibidos:', data);
-        element.querySelector('tbody').innerHTML = '<tr><td colspan="7">Error: Datos no válidos</td></tr>';
-        return;
-      }
-
       const hoja = data["Cuentas_Pendientes"];
-      console.log('📊 Hoja Cuentas_Pendientes:', hoja);
       
       if(!hoja || !Array.isArray(hoja)) {
-        console.error('❌ No hay hoja o no es array');
         element.querySelector('tbody').innerHTML = '<tr><td colspan="7">No se encontraron datos de cuentas pendientes</td></tr>';
         return;
       }
@@ -55,33 +46,12 @@ ComponentSystem.registrar('cuentasPendientes', {
       if (hoja.length > 0) {
         console.log('👀 Primer registro:', hoja[0]);
         console.log('🔑 Keys del primer registro:', Object.keys(hoja[0]));
-        
-        // Verificar valores específicos del primer registro
-        console.log('📋 Valores específicos del primer registro:');
-        console.log('   - Cliente/Proveedor:', hoja[0]["Cliente/Proveedor"]);
-        console.log('   - Tipo:', hoja[0]["Tipo (A cobrar/A pagar)"]);
-        console.log('   - Importe:', hoja[0]["Importe"]);
-        console.log('   - Importe parseado:', UTILS.parseNumber(hoja[0]["Importe"]));
-        console.log('   - Estado:', hoja[0]["Estado (Pendiente/Pagado)"]);
       }
 
-      // Filtrado SEGURO con verificación completa
+      // Filtrado usando el nombre CORRECTO de la columna
       const pendientes = hoja.filter(r => {
-        try {
-          const estado = r["Estado (Pendiente/Pagado)"];
-          const esPendiente = estado && String(estado).toLowerCase().includes("pendiente");
-          if (esPendiente) {
-            console.log('✅ Registro pendiente encontrado:', {
-              cliente: r["Cliente/Proveedor"],
-              tipo: r["Tipo (A cobrar/A pagar)"],
-              importe: r["Importe"]
-            });
-          }
-          return esPendiente;
-        } catch (error) {
-          console.warn('⚠️ Error filtrando registro:', error, r);
-          return false;
-        }
+        const estado = r["Estado (Pendiente/Pagado)"];
+        return estado && String(estado).toLowerCase().includes("pendiente");
       });
       
       console.log('✅ Total pendientes filtrados:', pendientes.length);
@@ -92,16 +62,16 @@ ComponentSystem.registrar('cuentasPendientes', {
         return;
       }
 
-      // Procesar datos para agrupar por cliente/proveedor
+      // Procesar datos para agrupar por cliente/proveedor - USANDO NOMBRES CORRECTOS
       const resumen = {};
       
       pendientes.forEach((r, index) => {
         try {
+          // USAR LOS NOMBRES CORRECTOS DE LAS COLUMNAS
           const clave = r["Cliente/Proveedor"] || "Sin nombre";
-          // CORRECCIÓN CRÍTICA: Asegurar que tipo siempre sea string
-          const tipo = r["Tipo (A cobrar/A pagar)"] || "";
+          const tipo = r["Tipo"] || ""; // COLUMNA CORRECTA: "Tipo" no "Tipo (A cobrar/A pagar)"
           const importe = UTILS.parseNumber(r["Importe"]);
-          const fechaEmision = UTILS.parseDate(r["Fecha Emisión"]);
+          const fechaEmision = UTILS.parseDate(r["Fecha"]);
           
           console.log(`📊 Procesando ${index}: "${clave}" - Tipo: "${tipo}" - Importe: ${importe}`);
           
@@ -146,19 +116,12 @@ ComponentSystem.registrar('cuentasPendientes', {
       // Convertir a array y ordenar por total (mayor a menor)
       const resumenArray = Object.values(resumen).sort((a, b) => b.total - a.total);
 
-      // Renderizar tabla - CORRECCIÓN COMPLETA DE LAS LÍNEAS PROBLEMÁTICAS
+      // Renderizar tabla
       const tbody = element.querySelector('tbody');
       tbody.innerHTML = '';
       
       resumenArray.forEach(item => {
         try {
-          // VERIFICACIÓN EXTRA: Asegurar que item existe
-          if (!item) {
-            console.warn('⚠️ Item undefined en resumenArray');
-            return;
-          }
-          
-          // CORRECCIÓN CRÍTICA: Manejo seguro de tipo
           const tipoSeguro = (item.tipo && typeof item.tipo === 'string') ? item.tipo : '';
           const tipoNormalizado = tipoSeguro.toLowerCase();
           const esCobrar = tipoNormalizado.includes('cobrar');
@@ -192,7 +155,7 @@ ComponentSystem.registrar('cuentasPendientes', {
         }
       });
 
-      // Calcular totales generales - CON CORRECCIÓN DE SEGURIDAD
+      // Calcular totales generales
       const totalCobrar = resumenArray
         .filter(item => item && (item.tipo || '').toLowerCase().includes('cobrar'))
         .reduce((sum, item) => sum + (item?.total || 0), 0);
@@ -239,7 +202,6 @@ ComponentSystem.registrar('cuentasPendientes', {
 
     } catch (error) {
       console.error('💥 ERROR CRÍTICO en cuentasPendientes:', error);
-      console.error('🔍 Stack trace:', error.stack);
       element.querySelector('tbody').innerHTML = `
         <tr>
           <td colspan="7" style="color: #dc3545; text-align: center; padding: 20px;">
@@ -261,12 +223,10 @@ ComponentSystem.registrar('cuentasPendientes', {
 
     const table = $(element).find('#tabla-pendientes');
     
-    // Destruir DataTable existente
     if ($.fn.dataTable.isDataTable(table)) {
       table.DataTable().destroy();
     }
     
-    // Inicializar nuevo DataTable
     const dataTable = table.DataTable({
       pageLength: 10,
       dom: 'Bfrtip',
@@ -286,7 +246,7 @@ ComponentSystem.registrar('cuentasPendientes', {
           previous: "Anterior"
         }
       },
-      order: [[3, 'desc']], // Ordenar por Total Pendiente descendente
+      order: [[3, 'desc']],
       columnDefs: [
         { targets: [2,3,4], className: 'dt-body-right' },
         { targets: [0], className: 'dt-body-left' }
@@ -301,7 +261,6 @@ ComponentSystem.registrar('cuentasPendientes', {
     
     filterButtons.forEach(button => {
       button.addEventListener('click', () => {
-        // Actualizar estado activo de botones
         filterButtons.forEach(btn => {
           btn.classList.toggle('active', btn === button);
           btn.classList.toggle('secondary', btn !== button);
@@ -315,7 +274,6 @@ ComponentSystem.registrar('cuentasPendientes', {
         } else if (filter === 'pagar') {
           searchValue = 'pagar';
         }
-        // Si es 'todos', searchValue queda vacío
         
         dataTable.column(1).search(searchValue).draw();
       });
@@ -328,7 +286,6 @@ ComponentSystem.registrar('cuentasPendientes', {
     
     filterButtons.forEach(button => {
       button.addEventListener('click', () => {
-        // Actualizar estado activo de botones
         filterButtons.forEach(btn => {
           btn.classList.toggle('active', btn === button);
           btn.classList.toggle('secondary', btn !== button);
@@ -360,7 +317,6 @@ ComponentSystem.registrar('cuentasPendientes', {
   },
 
   mostrarDetalleCompleto(pendientes) {
-    // Crear modal para mostrar el detalle completo
     const modal = document.createElement('div');
     modal.style.cssText = `
       position: fixed;
@@ -410,11 +366,11 @@ ComponentSystem.registrar('cuentasPendientes', {
           </thead>
           <tbody style="background:#ffffff10; color:#e0e0e0;">
             ${pendientes.map(p => {
-              const tipo = p["Tipo (A cobrar/A pagar)"] || '';
+              const tipo = p["Tipo"] || ''; // COLUMNA CORRECTA
               const color = tipo.includes('cobrar') ? "#28a745" : (tipo.includes('pagar') ? "#dc3545" : "#ffc107");
               return `
               <tr>
-                <td style="padding: 10px 8px;">${UTILS.formatDate(p["Fecha Emisión"])}</td>
+                <td style="padding: 10px 8px;">${UTILS.formatDate(p["Fecha"])}</td> <!-- COLUMNA CORRECTA -->
                 <td style="padding: 10px 8px; color:${color}; font-weight:600">${tipo || 'Sin tipo'}</td>
                 <td style="padding: 10px 8px;">${p["Cliente/Proveedor"] || ""}</td>
                 <td style="padding: 10px 8px;">${p["ID Relacionado"] || ""}</td>
@@ -434,7 +390,6 @@ ComponentSystem.registrar('cuentasPendientes', {
     modal.appendChild(modalContent);
     document.body.appendChild(modal);
     
-    // Cerrar modal
     const closeModal = () => {
       document.body.removeChild(modal);
       document.removeEventListener('keydown', modal._escHandler);
@@ -447,13 +402,11 @@ ComponentSystem.registrar('cuentasPendientes', {
     const cerrarBtn = modalContent.querySelector('#cerrar-modal');
     cerrarBtn.addEventListener('click', closeModal);
     
-    // Cerrar con ESC
     const handleEsc = (e) => {
       if (e.key === 'Escape') closeModal();
     };
     document.addEventListener('keydown', handleEsc);
     
-    // Limpiar event listener cuando se cierre el modal
     modal._escHandler = handleEsc;
   }
 });
