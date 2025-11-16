@@ -443,6 +443,38 @@
         width: 18px; /* Reducido de 20px */
         font-size: 14px; /* Ajuste para mantener proporción */
     }
+
+        /* Nuevo contenedor flexible */
+.content-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 120px); /* Ajusta según la altura de tu header */
+    flex: 1;
+}
+
+#content-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.content-frame {
+    flex: 1;
+    border: none;
+    border-radius: 12px;
+    background: white;
+    min-height: 400px; /* Altura mínima */
+}
+
+.footer-hg {
+    margin-top: auto; /* Esto empuja el footer hacia abajo */
+    padding: 12px 0;
+    color: var(--muted);
+    font-size: 13px;
+    border-top: 1px solid rgba(255,255,255,0.02);
+    text-align: center;
+    width: 100%;
+}
 </style>
 </head>
 <body>
@@ -508,11 +540,14 @@
             </div>
         </div>
 
+    <!-- Contenedor flexible para el contenido -->
+    <div class="content-wrapper">
         <!-- Contenedor para todas las páginas -->
         <div id="content-container">
             <!-- El dashboard se cargará aquí por defecto -->
             <iframe id="content-frame" class="content-frame" src="dash_beta.html"></iframe>
         </div>
+        
 
         <div class="footer-hg">
             <p>Sistema de Gestión &copy; 2023 - Todos los derechos reservados</p>
