@@ -4,563 +4,467 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plataforma de Gestión</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #3498db;
-            --secondary-color: #2c3e50;
-            --accent-color: #1abc9c;
-            --light-color: #ecf0f1;
-            --dark-color: #34495e;
-            --sidebar-width: 250px;
-            --header-height: 60px;
-            --transition-speed: 0.3s;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            display: flex;
-            min-height: 100vh;
-            background-color: #f5f7fa;
-            overflow-x: hidden;
-        }
-        
-        /* Sidebar */
-        .sidebar {
-            width: var(--sidebar-width);
-            background: linear-gradient(to bottom, var(--secondary-color), var(--dark-color));
-            color: white;
-            height: 100vh;
-            position: fixed;
-            overflow-y: auto;
-            transition: all var(--transition-speed);
-            z-index: 1000;
-            box-shadow: 3px 0 10px rgba(0, 0, 0, 0.1);
-        }
-        
-        .logo {
-            padding: 20px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            background-color: rgba(0, 0, 0, 0.2);
-        }
-        
-        .logo h2 {
-            font-size: 1.5rem;
-            color: var(--light-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .logo i {
-            color: var(--accent-color);
-        }
-        
-        .menu {
-            padding: 20px 0;
-        }
-        
-        .menu-item {
-            margin-bottom: 5px;
-        }
-        
-        .menu-item > a {
-            display: flex;
-            align-items: center;
-            padding: 12px 20px;
-            color: var(--light-color);
-            text-decoration: none;
-            transition: all var(--transition-speed);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .menu-item > a:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            padding-left: 25px;
-        }
-        
-        .menu-item.active > a {
-            background-color: var(--primary-color);
-            box-shadow: inset 3px 0 0 var(--accent-color);
-        }
-        
-        .menu-item i {
-            margin-right: 10px;
-            width: 20px;
-            text-align: center;
-            font-size: 1.1rem;
-        }
-        
-        .menu-item > a::after {
-            content: '';
-            position: absolute;
-            right: 15px;
-            transform: translateY(-50%);
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background-color: var(--accent-color);
-            opacity: 0;
-            transition: opacity var(--transition-speed);
-        }
-        
-        .menu-item.active > a::after {
-            opacity: 1;
-        }
-        
-        .submenu {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height var(--transition-speed) ease-out;
-            background-color: rgba(0, 0, 0, 0.2);
-        }
-        
-        .menu-item.active .submenu {
-            max-height: 200px;
-        }
-        
-        .submenu a {
-            display: block;
-            padding: 10px 20px 10px 50px;
-            color: var(--light-color);
-            text-decoration: none;
-            transition: all var(--transition-speed);
-            position: relative;
-        }
-        
-        .submenu a:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            padding-left: 55px;
-        }
-        
-        .submenu a.active {
-            color: var(--accent-color);
-            font-weight: bold;
-        }
-        
-        .submenu a::before {
-            content: '';
-            position: absolute;
-            left: 30px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            background-color: currentColor;
-            opacity: 0.7;
-        }
-        
-        /* Contenido principal */
-        .main-content {
-            flex: 1;
-            margin-left: var(--sidebar-width);
-            padding: 20px;
-            transition: all var(--transition-speed);
-        }
-        
-        .header {
-            background: linear-gradient(to right, white, #f8f9fa);
-            padding: 15px 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            margin-bottom: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-left: 4px solid var(--primary-color);
-        }
-        
-        .header h1 {
-            color: var(--secondary-color);
-            font-size: 1.8rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .header h1 i {
-            color: var(--primary-color);
-        }
-        
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background-color: var(--light-color);
-            padding: 8px 15px;
-            border-radius: 20px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        
-        .user-info i {
-            color: var(--primary-color);
-        }
-        
-        .content {
-            background: linear-gradient(to bottom right, white, #f8f9fa);
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            min-height: 500px;
-            border: 1px solid #eaeaea;
-        }
-        
-        .content-placeholder {
-            text-align: center;
-            padding: 40px 20px;
-            color: #7f8c8d;
-        }
-        
-        .content-placeholder i {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            color: var(--primary-color);
-        }
-        
-        .content-placeholder h2 {
-            margin-bottom: 15px;
-            color: var(--secondary-color);
-        }
-        
-        .content-placeholder p {
-            max-width: 600px;
-            margin: 0 auto 25px;
-            line-height: 1.6;
-        }
-        
-        .content-iframe {
-            width: 100%;
-            height: 600px;
-            border: none;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        
-        /* Responsive */
-        .menu-toggle {
-            display: none;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            font-size: 1.3rem;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            transition: all var(--transition-speed);
-        }
-        
-        .menu-toggle:hover {
-            background: var(--accent-color);
-            transform: scale(1.05);
-        }
-        
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-            display: none;
-        }
-        
-        /* Dashboard Cards */
-        .dashboard-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        
-        .card {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-            border-top: 4px solid var(--primary-color);
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        }
-        
-        .card i {
-            font-size: 2rem;
-            color: var(--primary-color);
-            margin-bottom: 15px;
-        }
-        
-        .card h3 {
-            margin-bottom: 10px;
-            color: var(--secondary-color);
-        }
-        
-        .card p {
-            color: #7f8c8d;
-            font-size: 0.9rem;
-        }
-        
-        /* Footer */
-        .footer {
-            margin-top: 30px;
-            text-align: center;
-            padding: 15px;
-            color: #7f8c8d;
-            font-size: 0.9rem;
-            border-top: 1px solid #eaeaea;
-        }
-        
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            
-            .sidebar.active {
-                transform: translateX(0);
-            }
-            
-            .main-content {
-                margin-left: 0;
-                padding: 15px;
-            }
-            
-            .menu-toggle {
-                display: block;
-            }
-            
-            .overlay.active {
-                display: block;
-            }
-            
-            .header h1 {
-                font-size: 1.5rem;
-            }
-            
-            .dashboard-cards {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
 </head>
 <body>
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-        <div class="logo">
-            <h2><i class="fas fa-chart-line"></i> SistemaGestión</h2>
-        </div>
-        <div class="menu">
-            <div class="menu-item active" id="dashboard-item">
-                <a href="dash_beta.html" data-title="Dashboard">
+    <div class="app">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h1><i class="fas fa-chart-line"></i> SistemaGestión</h1>
+            <nav class="nav">
+                <button class="nav-link active" data-page="dashboard">
                     <i class="fas fa-tachometer-alt"></i> Dashboard
-                </a>
-            </div>
-            <div class="menu-item" id="compras-item">
-                <a href="#" data-title="Gestor de Compras">
-                    <i class="fas fa-shopping-cart"></i> Gestor de Compras
-                </a>
-                <div class="submenu">
-                    <a href="compras.html" class="submenu-link" data-title="Carga Compra">Carga Compra</a>
-                    <a href="abmprov.html" class="submenu-link" data-title="Proveedores">Proveedores</a>
-                </div>
-            </div>
-            <div class="menu-item" id="ventas-item">
-                <a href="#" data-title="Gestor de Ventas">
-                    <i class="fas fa-cash-register"></i> Gestor de Ventas
-                </a>
-                <div class="submenu">
-                    <a href="ventas.html" class="submenu-link" data-title="Carga Venta">Carga Venta</a>
-                    <a href="abmclients2.html" class="submenu-link" data-title="Clientes">Clientes</a>
-                </div>
-            </div>
-            <div class="menu-item" id="caja-item">
-                <a href="carga_datos.html" data-title="Gestor de Caja">
-                    <i class="fas fa-calculator"></i> Gestor de Caja
-                </a>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Overlay para móviles -->
-    <div class="overlay" id="overlay"></div>
-    
-    <!-- Contenido principal -->
-    <div class="main-content">
-        <div class="header">
-            <button class="menu-toggle" id="menuToggle">
-                <i class="fas fa-bars"></i>
-            </button>
-            <h1><i class="fas fa-tachometer-alt"></i> <span id="page-title">Dashboard</span></h1>
-            <div class="user-info">
-                <i class="fas fa-user-circle"></i>
-                <span>Usuario Admin</span>
-            </div>
-        </div>
-        <div class="content">
-            <div class="content-placeholder" id="content-placeholder">
-                <i class="fas fa-tachometer-alt"></i>
-                <h2>Bienvenido al Dashboard</h2>
-                <p>Selecciona una opción del menú para comenzar a gestionar tu negocio. Desde aquí puedes acceder a todas las funcionalidades del sistema.</p>
+                </button>
                 
-                <div class="dashboard-cards">
-                    <div class="card">
-                        <i class="fas fa-shopping-cart"></i>
-                        <h3>Gestor de Compras</h3>
-                        <p>Gestiona tus compras y proveedores de forma eficiente.</p>
+                <div class="nav-group">
+                    <button class="nav-link" data-page="compras">
+                        <i class="fas fa-shopping-cart"></i> Gestor de Compras
+                        <i class="fas fa-chevron-down dropdown-icon"></i>
+                    </button>
+                    <div class="subnav">
+                        <button class="subnav-link" data-page="carga-compra">Carga Compra</button>
+                        <button class="subnav-link" data-page="proveedores">Proveedores</button>
                     </div>
-                    <div class="card">
-                        <i class="fas fa-cash-register"></i>
-                        <h3>Gestor de Ventas</h3>
-                        <p>Administra ventas y clientes con herramientas integradas.</p>
+                </div>
+                
+                <div class="nav-group">
+                    <button class="nav-link" data-page="ventas">
+                        <i class="fas fa-cash-register"></i> Gestor de Ventas
+                        <i class="fas fa-chevron-down dropdown-icon"></i>
+                    </button>
+                    <div class="subnav">
+                        <button class="subnav-link" data-page="carga-venta">Carga Venta</button>
+                        <button class="subnav-link" data-page="clientes">Clientes</button>
                     </div>
-                    <div class="card">
-                        <i class="fas fa-calculator"></i>
-                        <h3>Gestor de Caja</h3>
-                        <p>Controla el flujo de caja y movimientos financieros.</p>
+                </div>
+                
+                <button class="nav-link" data-page="caja">
+                    <i class="fas fa-calculator"></i> Gestor de Caja
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main>
+            <div class="header-hg">
+                <div>
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 id="page-title">Dashboard</h1>
+                    <p id="page-description">Resumen general del sistema</p>
+                </div>
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Usuario Admin</span>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Contenido dinámico se cargará aquí -->
+                <div id="content-area">
+                    <!-- Dashboard por defecto -->
+                    <div class="card" data-grid="span-6">
+                        <h2>Resumen General</h2>
+                        <div class="kpi-grande">$ 125,430</div>
+                        <p class="text-muted">Ventas del mes actual</p>
                     </div>
-                    <div class="card">
-                        <i class="fas fa-chart-bar"></i>
-                        <h3>Reportes</h3>
-                        <p>Genera reportes detallados de tu negocio.</p>
+                    
+                    <div class="card" data-grid="span-3">
+                        <h2>Clientes</h2>
+                        <div class="kpi-grande">342</div>
+                        <p class="text-muted">Clientes activos</p>
+                    </div>
+                    
+                    <div class="card" data-grid="span-3">
+                        <h2>Proveedores</h2>
+                        <div class="kpi-grande">28</div>
+                        <p class="text-muted">Proveedores registrados</p>
+                    </div>
+                    
+                    <div class="card" data-grid="span-4">
+                        <h2>Ventas por Categoría</h2>
+                        <div class="chart-container">
+                            <canvas id="salesChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="card" data-grid="span-4">
+                        <h2>Tendencias Mensuales</h2>
+                        <div class="chart-container">
+                            <canvas id="trendsChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="card" data-grid="span-4">
+                        <h2>Estado de Inventario</h2>
+                        <div class="chart-container">
+                            <canvas id="inventoryChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="card" data-grid="full">
+                        <h2>Actividad Reciente</h2>
+                        <div class="tabla-container">
+                            <table class="display">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Usuario</th>
+                                        <th>Acción</th>
+                                        <th>Detalles</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>15/11/2023</td>
+                                        <td>admin</td>
+                                        <td>Nueva venta</td>
+                                        <td>Venta #1245 - $2,450</td>
+                                    </tr>
+                                    <tr>
+                                        <td>15/11/2023</td>
+                                        <td>maria.g</td>
+                                        <td>Actualización de stock</td>
+                                        <td>Producto: Monitor LED 24"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>14/11/2023</td>
+                                        <td>admin</td>
+                                        <td>Nuevo proveedor</td>
+                                        <td>Proveedor: Tecnología Global S.A.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>14/11/2023</td>
+                                        <td>carlos.r</td>
+                                        <td>Registro de cliente</td>
+                                        <td>Cliente: Distribuidora Norte</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
-            <iframe class="content-iframe" id="content-frame" style="display: none;"></iframe>
-        </div>
-        
-        <div class="footer">
-            <p>Sistema de Gestión &copy; 2023 - Todos los derechos reservados</p>
-        </div>
+
+            <div class="footer-hg">
+                <p>Sistema de Gestión &copy; 2023 - Todos los derechos reservados</p>
+            </div>
+        </main>
     </div>
+
+    <!-- Overlay para móviles -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const menuItems = document.querySelectorAll('.menu-item');
-            const submenuLinks = document.querySelectorAll('.submenu-link');
+            // Elementos del DOM
             const menuToggle = document.getElementById('menuToggle');
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-            const contentFrame = document.getElementById('content-frame');
-            const contentPlaceholder = document.getElementById('content-placeholder');
+            const sidebar = document.querySelector('.sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            const navGroups = document.querySelectorAll('.nav-group');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const subnavLinks = document.querySelectorAll('.subnav-link');
             const pageTitle = document.getElementById('page-title');
-            
-            // Función para cargar contenido en el iframe
-            function loadContent(url, title) {
-                contentPlaceholder.style.display = 'none';
-                contentFrame.style.display = 'block';
-                contentFrame.src = url;
-                pageTitle.textContent = title;
-                
-                // Cerrar sidebar en móviles
-                if (window.innerWidth <= 768) {
-                    sidebar.classList.remove('active');
-                    overlay.classList.remove('active');
+            const pageDescription = document.getElementById('page-description');
+            const contentArea = document.getElementById('content-area');
+
+            // Mapeo de páginas a URLs y descripciones
+            const pageMap = {
+                'dashboard': {
+                    title: 'Dashboard',
+                    description: 'Resumen general del sistema',
+                    url: 'dash_beta.html'
+                },
+                'compras': {
+                    title: 'Gestor de Compras',
+                    description: 'Gestión de compras y proveedores',
+                    url: '#'
+                },
+                'carga-compra': {
+                    title: 'Carga Compra',
+                    description: 'Registrar nueva compra',
+                    url: 'compras.html'
+                },
+                'proveedores': {
+                    title: 'Proveedores',
+                    description: 'Administración de proveedores',
+                    url: 'abmprov.html'
+                },
+                'ventas': {
+                    title: 'Gestor de Ventas',
+                    description: 'Gestión de ventas y clientes',
+                    url: '#'
+                },
+                'carga-venta': {
+                    title: 'Carga Venta',
+                    description: 'Registrar nueva venta',
+                    url: 'ventas.html'
+                },
+                'clientes': {
+                    title: 'Clientes',
+                    description: 'Administración de clientes',
+                    url: 'abmclients2.html'
+                },
+                'caja': {
+                    title: 'Gestor de Caja',
+                    description: 'Control de flujo de caja',
+                    url: 'carga_datos.html'
                 }
-            }
-            
-            // Manejar clic en elementos del menú con submenús
-            menuItems.forEach(item => {
-                if (item.querySelector('.submenu')) {
-                    item.addEventListener('click', function(e) {
-                        if (!e.target.classList.contains('submenu-link')) {
-                            // Cerrar otros submenús
-                            menuItems.forEach(otherItem => {
-                                if (otherItem !== item && otherItem.classList.contains('active')) {
-                                    otherItem.classList.remove('active');
-                                }
-                            });
-                            
-                            // Alternar submenú actual
-                            this.classList.toggle('active');
-                        }
-                    });
-                }
-            });
-            
-            // Manejar clic en enlaces del submenú
-            submenuLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const href = this.getAttribute('href');
-                    const title = this.getAttribute('data-title');
-                    
-                    // Actualizar estado activo del menú
-                    menuItems.forEach(item => {
-                        item.classList.remove('active');
-                    });
-                    
-                    this.closest('.menu-item').classList.add('active');
-                    
-                    // Cargar contenido
-                    loadContent(href, title);
-                });
-            });
-            
-            // Manejar clic en elementos del menú sin submenús
-            const mainMenuLinks = document.querySelectorAll('.menu-item > a[href]');
-            mainMenuLinks.forEach(link => {
-                if (!link.parentElement.querySelector('.submenu')) {
-                    link.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        const href = this.getAttribute('href');
-                        const title = this.getAttribute('data-title');
-                        
-                        // Actualizar estado activo del menú
-                        menuItems.forEach(item => {
-                            item.classList.remove('active');
-                        });
-                        
-                        this.parentElement.classList.add('active');
-                        
-                        // Cargar contenido
-                        loadContent(href, title);
-                    });
-                }
-            });
-            
-            // Manejar toggle del menú en móviles
+            };
+
+            // Toggle del menú en móviles
             menuToggle.addEventListener('click', function() {
                 sidebar.classList.toggle('active');
-                overlay.classList.toggle('active');
+                sidebarOverlay.classList.toggle('active');
             });
-            
+
             // Cerrar menú al hacer clic en el overlay
-            overlay.addEventListener('click', function() {
+            sidebarOverlay.addEventListener('click', function() {
                 sidebar.classList.remove('active');
-                overlay.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
             });
-            
-            // Detectar cambios en el iframe para actualizar título
-            contentFrame.addEventListener('load', function() {
-                try {
-                    const iframeDoc = this.contentDocument || this.contentWindow.document;
-                    const iframeTitle = iframeDoc.title;
-                    if (iframeTitle) {
-                        pageTitle.textContent = iframeTitle;
+
+            // Manejar grupos de navegación (submenús)
+            navGroups.forEach(group => {
+                const button = group.querySelector('.nav-link');
+                const subnav = group.querySelector('.subnav');
+                const dropdownIcon = group.querySelector('.dropdown-icon');
+
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    // Cerrar otros grupos abiertos
+                    navGroups.forEach(otherGroup => {
+                        if (otherGroup !== group) {
+                            otherGroup.classList.remove('active');
+                            otherGroup.querySelector('.dropdown-icon').classList.remove('fa-chevron-up');
+                            otherGroup.querySelector('.dropdown-icon').classList.add('fa-chevron-down');
+                        }
+                    });
+
+                    // Alternar grupo actual
+                    group.classList.toggle('active');
+                    
+                    // Alternar icono
+                    if (group.classList.contains('active')) {
+                        dropdownIcon.classList.remove('fa-chevron-down');
+                        dropdownIcon.classList.add('fa-chevron-up');
+                    } else {
+                        dropdownIcon.classList.remove('fa-chevron-up');
+                        dropdownIcon.classList.add('fa-chevron-down');
                     }
-                } catch (e) {
-                    // Evitar errores de CORS
-                }
+                });
             });
+
+            // Manejar clic en enlaces de navegación principales
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    const page = this.getAttribute('data-page');
+                    
+                    // Si no es un grupo con submenú, cargar la página
+                    if (!this.parentElement.classList.contains('nav-group')) {
+                        loadPage(page);
+                        
+                        // Actualizar estado activo
+                        navLinks.forEach(l => l.classList.remove('active'));
+                        this.classList.add('active');
+                    }
+                });
+            });
+
+            // Manejar clic en enlaces de subnavegación
+            subnavLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    const page = this.getAttribute('data-page');
+                    loadPage(page);
+                    
+                    // Actualizar estado activo
+                    subnavLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Cerrar sidebar en móviles
+                    if (window.innerWidth <= 900) {
+                        sidebar.classList.remove('active');
+                        sidebarOverlay.classList.remove('active');
+                    }
+                });
+            });
+
+            // Función para cargar páginas
+            function loadPage(pageKey) {
+                const page = pageMap[pageKey];
+                if (!page) return;
+                
+                // Actualizar título y descripción
+                pageTitle.textContent = page.title;
+                pageDescription.textContent = page.description;
+                
+                // Simular carga de contenido
+                contentArea.innerHTML = `
+                    <div class="card" data-grid="full">
+                        <div class="modern-spinner"></div>
+                        <h2 style="text-align: center; margin-top: 20px;">Cargando ${page.title}...</h2>
+                    </div>
+                `;
+                
+                // Simular carga asíncrona
+                setTimeout(() => {
+                    // En una implementación real, aquí cargarías el contenido real
+                    // Para este ejemplo, mostramos un placeholder
+                    contentArea.innerHTML = `
+                        <div class="card" data-grid="full">
+                            <h2>${page.title}</h2>
+                            <p>Contenido de ${page.title} cargado correctamente.</p>
+                            <p>En una implementación real, aquí se cargaría el contenido desde: <strong>${page.url}</strong></p>
+                            <div style="margin-top: 20px;">
+                                <button class="btn" onclick="simularAccion()">Simular acción</button>
+                            </div>
+                        </div>
+                    `;
+                }, 800);
+            }
+
+            // Inicializar gráficos del dashboard
+            initializeCharts();
             
-            // Cargar dashboard por defecto
-            const dashboardLink = document.querySelector('#dashboard-item > a');
-            dashboardLink.click();
+            // Función para inicializar gráficos (solo en dashboard)
+            function initializeCharts() {
+                // Gráfico de ventas por categoría
+                const salesCtx = document.getElementById('salesChart').getContext('2d');
+                new Chart(salesCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Electrónicos', 'Ropa', 'Hogar', 'Deportes', 'Otros'],
+                        datasets: [{
+                            data: [35, 25, 20, 15, 5],
+                            backgroundColor: [
+                                'rgba(62, 166, 255, 0.8)',
+                                'rgba(123, 97, 255, 0.8)',
+                                'rgba(40, 199, 111, 0.8)',
+                                'rgba(255, 159, 64, 0.8)',
+                                'rgba(108, 117, 125, 0.8)'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#e6eef8',
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Gráfico de tendencias mensuales
+                const trendsCtx = document.getElementById('trendsChart').getContext('2d');
+                new Chart(trendsCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov'],
+                        datasets: [{
+                            label: 'Ventas',
+                            data: [65, 59, 80, 81, 56, 55, 70, 75, 82, 78, 85],
+                            borderColor: 'rgba(62, 166, 255, 1)',
+                            backgroundColor: 'rgba(62, 166, 255, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#e6eef8'
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.05)'
+                                },
+                                ticks: {
+                                    color: '#9aa8ba'
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.05)'
+                                },
+                                ticks: {
+                                    color: '#9aa8ba'
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Gráfico de estado de inventario
+                const inventoryCtx = document.getElementById('inventoryChart').getContext('2d');
+                new Chart(inventoryCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Alto', 'Medio', 'Bajo', 'Agotado'],
+                        datasets: [{
+                            label: 'Productos',
+                            data: [12, 19, 8, 3],
+                            backgroundColor: [
+                                'rgba(40, 199, 111, 0.8)',
+                                'rgba(255, 193, 7, 0.8)',
+                                'rgba(255, 159, 64, 0.8)',
+                                'rgba(220, 53, 69, 0.8)'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.05)'
+                                },
+                                ticks: {
+                                    color: '#9aa8ba'
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.05)'
+                                },
+                                ticks: {
+                                    color: '#9aa8ba'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
         });
+
+        // Función global para simular acciones
+        function simularAccion() {
+            alert('Acción simulada ejecutada correctamente');
+        }
     </script>
 </body>
 </html>
