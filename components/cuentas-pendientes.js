@@ -33,15 +33,21 @@ ComponentSystem.registrar('cuentasPendientes', {
     const hoja = data["Cuentas_Pendientes"];
     if(!hoja || !Array.isArray(hoja)) return;
 
-    const pendientes = hoja.filter(r => 
-      String(r["Estado (Pendiente/Pagado)"]).toLowerCase().includes("pendiente")
-    );
+  const pendientes = hoja.filter(r => {
+  const estado = r["Estado (Pendiente/Pagado)"];
+  return estado && String(estado).toLowerCase().includes("pendiente");
+});
     
     if(pendientes.length === 0) {
       element.querySelector('tbody').innerHTML = '<tr><td colspan="7">No hay compromisos pendientes</td></tr>';
       element.querySelector('#resumen-totales').innerText = '';
       return;
     }
+
+
+
+
+    
 
     // Procesar datos para agrupar por cliente/proveedor
     const resumen = {};
