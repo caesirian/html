@@ -23,7 +23,7 @@ html,body{
 
 /* Sidebar basic (kept from your layout) */
 .app{display:flex; min-height:100vh;}
-aside.sidebar{width:260px; background:linear-gradient(180deg, rgba(11,18,32,0.9), rgba(6,10,18,0.85)); padding:18px; box-shadow: 0 6px 24px rgba(2,6,12,0.6);}
+aside.sidebar{width:190px; background:linear-gradient(180deg, rgba(11,18,32,0.9), rgba(6,10,18,0.85)); padding:18px; box-shadow: 0 6px 24px rgba(2,6,12,0.6);}
 aside h1{font-size:18px; margin:0 0 12px; letter-spacing:0.6px; color:var(--accent);}
 aside .nav{display:flex; flex-direction:column; gap:8px;}
 aside .nav button{background:transparent; border:0; color:var(--muted); text-align:left; padding:10px; border-radius:8px; cursor:pointer;}
