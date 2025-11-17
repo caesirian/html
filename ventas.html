@@ -1,3 +1,5 @@
+[file name]: ventas.html
+[file content begin]
 <!doctype html>
 <html lang="es">
 <head>
@@ -14,11 +16,10 @@
   /* ... TODO tu CSS actual ... (mantén todo lo que tienes) ... */
 
   /* ====== AGREGAR AL FINAL DEL CSS ====== */
-  /* Estilos para actualización en tiempo real */
+  /* Estilos para actualización en tiempo real - MEJORADOS */
   .pending-record {
-    background: linear-gradient(90deg, rgba(62, 166, 255, 0.1), transparent) !important;
+    background: linear-gradient(90deg, rgba(62, 166, 255, 0.05), transparent) !important;
     border-left: 3px solid var(--accent) !important;
-    opacity: 0.8;
   }
 
   .pending-cell {
@@ -27,15 +28,26 @@
   }
 
   .confirmed-record {
-    animation: highlightConfirm 2s ease;
+    animation: highlightConfirm 1.5s ease;
   }
 
   @keyframes highlightConfirm {
-    0% { background: rgba(40, 167, 69, 0.3); }
+    0% { background: rgba(40, 167, 69, 0.2); }
+    50% { background: rgba(40, 167, 69, 0.1); }
     100% { background: transparent; }
   }
 
-  /* Notificaciones Toast */
+  /* Notificaciones Toast - MEJORADAS */
+  #toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
   .toast-notification {
     background: var(--card);
     border: 1px solid rgba(255,255,255,0.1);
@@ -78,7 +90,7 @@
     font-size: 16px;
   }
 
-  /* Loader pequeño para botones */
+  /* Loader pequeño para botones - MEJORADO */
   .btn .loader {
     display: inline-block;
     width: 14px;
@@ -90,14 +102,27 @@
     margin-right: 6px;
   }
 
-  /* Animación de entrada para nuevas filas */
+  /* Animación de entrada para nuevas filas - MEJORADA */
   .fade-in {
-    animation: fadeInUp 0.5s ease-out;
+    animation: fadeInUp 0.4s ease-out;
   }
 
   @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { 
+      opacity: 0; 
+      transform: translateY(-8px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
+  }
+
+  /* Estado de botón deshabilitado */
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
   }
 </style>
 </head>
@@ -370,7 +395,7 @@
   <!-- Script específico para esta página -->
   <!-- ====== REEMPLAZAR DESDE AQUÍ HACIA ABAJO ====== -->
 <script>
-// ====== SISTEMA DE ACTUALIZACIÓN EN TIEMPO REAL ======
+// ====== SISTEMA DE ACTUALIZACIÓN EN TIEMPO REAL - CORREGIDO ======
 class RealTimeManager {
     constructor() {
         this.pendingUpdates = new Map();
@@ -398,31 +423,79 @@ class RealTimeManager {
 
     updateTableUI(tableId, record, action) {
         const table = document.getElementById(tableId);
-        if (!table) return;
+        if (!table) {
+            console.warn('Tabla no encontrada:', tableId);
+            return;
+        }
 
-        if (action === 'add') {
-            this.addRowToTable(table, record);
-        } else if (action === 'update') {
-            this.updateRowInTable(table, record);
-        } else if (action === 'remove') {
-            this.removeRowFromTable(table, record._tempId);
+        try {
+            if (action === 'add') {
+                this.addRowToTable(table, record);
+            } else if (action === 'update') {
+                this.updateRowInTable(table, record);
+            } else if (action === 'remove') {
+                this.removeRowFromTable(table, record._tempId);
+            }
+        } catch (error) {
+            console.error('Error actualizando tabla:', error);
         }
     }
 
     addRowToTable(table, record) {
+        // Si hay DataTable, usar su API
+        if ($.fn.dataTable.isDataTable(table)) {
+            this.addRowWithDataTable(table, record);
+        } else {
+            this.addRowDirect(table, record);
+        }
+    }
+
+    addRowWithDataTable(table, record) {
+        const dataTable = $(table).DataTable();
+        
+        // Crear array de datos en el orden correcto
+        const rowData = [
+            record._tempId || '',
+            record.Fecha ? UTILS.formatDate(record.Fecha) : '',
+            record['Cliente/Proveedor'] || '',
+            record.Descripción || '',
+            UTILS.formatCurrency(record.Monto || 0),
+            record.Categoría || '',
+            record['Medio de Pago'] || '',
+            this.getEstadoHtml(record.Estado),
+            record.Comprobante || '',
+            this.getAccionesHtml(record, true)
+        ];
+
+        // Agregar fila al principio
+        const rowNode = dataTable.row.add(rowData).draw(false).node();
+        
+        // Aplicar estilos
+        $(rowNode).attr('data-temp-id', record._tempId);
+        $(rowNode).addClass('pending-record fade-in');
+        
+        // Aplicar data-order para ordenamiento
+        if (record.Fecha) {
+            $(rowNode).find('td:eq(1)').attr('data-order', new Date(record.Fecha).getTime());
+        }
+        if (record.Monto) {
+            $(rowNode).find('td:eq(4)').attr('data-order', record.Monto);
+        }
+    }
+
+    addRowDirect(table, record) {
         const tbody = table.querySelector('tbody');
         if (!tbody) return;
         
         const row = tbody.insertRow(0);
         row.setAttribute('data-temp-id', record._tempId);
-        if (record._isPending) {
-            row.classList.add('pending-record');
-        }
+        row.classList.add('pending-record', 'fade-in');
 
         const headers = ['ID', 'Fecha', 'Cliente', 'Descripción', 'Monto', 'Categoría', 'Medio Pago', 'Estado', 'Comprobante', 'Acciones'];
         
         headers.forEach((header, index) => {
             const cell = row.insertCell();
+            cell.classList.add('pending-cell');
             
             switch(header) {
                 case 'ID':
@@ -450,36 +523,38 @@ class RealTimeManager {
                     cell.textContent = record['Medio de Pago'] || '';
                     break;
                 case 'Estado':
-                    const estadoClass = record.Estado === 'Cobrado' ? 'status-cobrada' : 
-                                      record.Estado === 'Pendiente' ? 'status-pendiente' : 'status-cancelada';
-                    cell.innerHTML = `<span class="venta-status ${estadoClass}">${record.Estado}</span>`;
+                    cell.innerHTML = this.getEstadoHtml(record.Estado);
                     break;
                 case 'Comprobante':
                     cell.textContent = record.Comprobante || '';
                     break;
                 case 'Acciones':
-                    if (record._isPending) {
-                        cell.innerHTML = `<div class="action-buttons">
-                            <button class="btn small" disabled>Editar</button>
-                            <button class="btn small secondary" disabled>
-                                <span class="loader" style="width: 12px; height: 12px;"></span> Guardando...
-                            </button>
-                        </div>`;
-                    } else {
-                        cell.innerHTML = `<div class="action-buttons">
-                            <button class="btn small" onclick="VentasApp.editarVenta('${record.ID}')">Editar</button>
-                            <button class="btn small secondary" onclick="VentasApp.eliminarVenta('${record.ID}', '${this.escapeString(record.Descripción)}')">Eliminar</button>
-                        </div>`;
-                    }
+                    cell.innerHTML = this.getAccionesHtml(record, true);
                     break;
             }
-            
-            if (record._isPending) {
-                cell.classList.add('pending-cell');
-            }
         });
+    }
 
-        row.classList.add('fade-in');
+    getEstadoHtml(estado) {
+        const estadoClass = estado === 'Cobrado' ? 'status-cobrada' : 
+                          estado === 'Pendiente' ? 'status-pendiente' : 'status-cancelada';
+        return `<span class="venta-status ${estadoClass}">${estado}</span>`;
+    }
+
+    getAccionesHtml(record, isPending = false) {
+        if (isPending) {
+            return `<div class="action-buttons">
+                <button class="btn small" disabled>Editar</button>
+                <button class="btn small secondary" disabled>
+                    <span class="loader" style="width: 12px; height: 12px;"></span> Guardando...
+                </button>
+            </div>`;
+        } else {
+            return `<div class="action-buttons">
+                <button class="btn small" onclick="VentasApp.editarVenta('${record.ID}')">Editar</button>
+                <button class="btn small secondary" onclick="VentasApp.eliminarVenta('${record.ID}', '${this.escapeString(record.Descripción)}')">Eliminar</button>
+            </div>`;
+        }
     }
 
     updateRowInTable(table, record) {
@@ -489,38 +564,47 @@ class RealTimeManager {
             row.classList.remove('pending-record');
             
             const cells = row.cells;
+            
+            // Actualizar ID real
             cells[0].textContent = record.ID || '';
             
+            // Actualizar acciones
             if (record._isPending === false) {
-                cells[9].innerHTML = `<div class="action-buttons">
-                    <button class="btn small" onclick="VentasApp.editarVenta('${record.ID}')">Editar</button>
-                    <button class="btn small secondary" onclick="VentasApp.eliminarVenta('${record.ID}', '${this.escapeString(record.Descripción)}')">Eliminar</button>
-                </div>`;
+                cells[9].innerHTML = this.getAccionesHtml(record, false);
                 
-                Array.from(cells).forEach(cell => cell.classList.remove('pending-cell'));
+                // Remover clases de pending
+                Array.from(cells).forEach(cell => {
+                    cell.classList.remove('pending-cell');
+                    cell.style.fontStyle = 'normal';
+                });
             }
             
+            // Animación de confirmación
             row.classList.add('confirmed-record');
-            setTimeout(() => row.classList.remove('confirmed-record'), 2000);
+            setTimeout(() => row.classList.remove('confirmed-record'), 1500);
         }
     }
 
     removeRowFromTable(table, tempId) {
         const row = table.querySelector(`[data-temp-id="${tempId}"]`);
-        if (row) row.remove();
+        if (row) {
+            row.remove();
+        }
     }
 
     confirmRecord(tempId, serverData) {
         const pendingUpdate = this.pendingUpdates.get(tempId);
         if (pendingUpdate) {
             pendingUpdate.status = 'confirmed';
+            
             this.updateTableUI(pendingUpdate.tableId, {
                 ...serverData,
                 _tempId: tempId,
                 _isPending: false
             }, 'update');
+            
             this.pendingUpdates.delete(tempId);
-            this.showToastNotification('Venta confirmada en el servidor', 'success');
+            this.showToastNotification('✅ Venta confirmada en el servidor', 'success');
         }
     }
 
@@ -529,15 +613,6 @@ class RealTimeManager {
         if (!toastContainer) {
             toastContainer = document.createElement('div');
             toastContainer.id = 'toast-container';
-            toastContainer.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                z-index: 10000;
-                display: flex;
-                flex-direction: column;
-                gap: 10px;
-            `;
             document.body.appendChild(toastContainer);
         }
 
@@ -551,11 +626,17 @@ class RealTimeManager {
         `;
         
         toastContainer.appendChild(toast);
+        
         setTimeout(() => toast.classList.add('show'), 100);
+        
         setTimeout(() => {
             toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }, 4000);
     }
 
     escapeString(str) {
@@ -565,7 +646,7 @@ class RealTimeManager {
 
 const realTimeManager = new RealTimeManager();
 
-// ====== VENTAS APP CON TIEMPO REAL ======
+// ====== VENTAS APP CORREGIDA ======
 const VentasApp = {
     currentData: null,
     editingVentaId: null,
@@ -614,7 +695,7 @@ const VentasApp = {
         estadoElement.innerHTML = (iconos[tipo] || '') + mensaje;
     },
 
-    mostrarLoading(mensaje = 'Estoy procesando info, por favor espera...') {
+    mostrarLoading(mensaje = 'Procesando información...') {
         const loadingOverlay = document.getElementById('loading-overlay');
         const loadingMessage = document.getElementById('loading-message');
         
@@ -950,7 +1031,10 @@ const VentasApp = {
             }
 
             this.mostrarEstado('✓ Venta registrada exitosamente', 'success');
+            
+            // Recargar datos para sincronización completa
             await this.loadData(true);
+            
             alert('✅ Venta registrada correctamente');
             this.cancelarEdicion();
 
@@ -975,6 +1059,8 @@ const VentasApp = {
                 realTimeManager.updateTableUI('tabla-ventas', { _tempId: tempId }, 'remove');
             }
         } finally {
+            // CORRECCIÓN: Siempre ocultar loading y rehabilitar botón
+            this.ocultarLoading();
             const btnGuardar = document.getElementById('btn-guardar');
             btnGuardar.disabled = false;
             btnGuardar.textContent = this.editingVentaId ? 'Actualizar Venta' : 'Registrar Venta';
@@ -1174,3 +1260,4 @@ if (document.readyState === 'loading') {
 </script>
 </body>
 </html>
+[file content end]
