@@ -1,0 +1,521 @@
+<script>
+// ====== SISTEMA DE ACTUALIZACIÓN EN TIEMPO REAL ======
+class RealTimeManager {
+    constructor() {
+        this.pendingUpdates = new Map();
+        this.dataCache = new Map();
+        this.eventSource = null;
+    }
+
+    // Agregar registro temporal
+    addTemporaryRecord(tableId, recordData) {
+        const tempId = 'temp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        const tempRecord = {
+            ...recordData,
+            _tempId: tempId,
+            _isPending: true,
+            _timestamp: Date.now()
+        };
+
+        // Guardar en cache de actualizaciones pendientes
+        this.pendingUpdates.set(tempId, {
+            tableId,
+            record: tempRecord,
+            status: 'pending'
+        });
+
+        // Actualizar UI inmediatamente
+        this.updateTableUI(tableId, tempRecord, 'add');
+        
+        return tempId;
+    }
+
+    // Actualizar UI de la tabla
+    updateTableUI(tableId, record, action) {
+        const table = document.getElementById(tableId);
+        
+        if (!table) {
+            console.warn('Tabla no encontrada:', tableId);
+            return;
+        }
+
+        if (action === 'add') {
+            this.addRowToTable(table, record);
+        } else if (action === 'update') {
+            this.updateRowInTable(table, record);
+        } else if (action === 'remove') {
+            this.removeRowFromTable(table, record._tempId);
+        }
+    }
+
+    // Agregar fila a la tabla
+    addRowToTable(table, record) {
+        const tbody = table.querySelector('tbody') || table.createTBody();
+        const row = tbody.insertRow(0); // Insertar al principio
+        
+        row.setAttribute('data-temp-id', record._tempId);
+        if (record._isPending) {
+            row.classList.add('pending-record');
+        }
+
+        // Crear celdas basadas en las claves del registro
+        const headers = ['ID', 'Fecha', 'Cliente/Proveedor', 'Descripción', 'Monto', 'Categoría', 'Medio de Pago', 'Estado', 'Comprobante', 'Acciones'];
+        
+        headers.forEach((header, index) => {
+            const cell = row.insertCell();
+            
+            switch(header) {
+                case 'ID':
+                    cell.textContent = record._tempId || '';
+                    break;
+                case 'Fecha':
+                    cell.textContent = record.Fecha ? UTILS.formatDate(record.Fecha) : '';
+                    cell.setAttribute('data-order', new Date(record.Fecha).getTime());
+                    break;
+                case 'Cliente/Proveedor':
+                    cell.textContent = record['Cliente/Proveedor'] || '';
+                    cell.style.fontWeight = '600';
+                    break;
+                case 'Descripción':
+                    cell.textContent = record.Descripción || '';
+                    break;
+                case 'Monto':
+                    cell.textContent = UTILS.formatCurrency(record.Monto || 0);
+                    cell.setAttribute('data-order', record.Monto || 0);
+                    break;
+                case 'Categoría':
+                    cell.textContent = record.Categoría || '';
+                    break;
+                case 'Medio de Pago':
+                    cell.textContent = record['Medio de Pago'] || '';
+                    break;
+                case 'Estado':
+                    const estadoClass = record.Estado === 'Cobrado' ? 'status-cobrada' : 
+                                      record.Estado === 'Pendiente' ? 'status-pendiente' : 'status-cancelada';
+                    cell.innerHTML = `<span class="venta-status ${estadoClass}">${record.Estado}</span>`;
+                    break;
+                case 'Comprobante':
+                    cell.textContent = record.Comprobante || '';
+                    break;
+                case 'Acciones':
+                    if (record._isPending) {
+                        cell.innerHTML = `<div class="action-buttons">
+                            <button class="btn small" disabled>Editar</button>
+                            <button class="btn small secondary" disabled>
+                                <span class="loader" style="width: 12px; height: 12px;"></span> Guardando...
+                            </button>
+                        </div>`;
+                    } else {
+                        cell.innerHTML = `<div class="action-buttons">
+                            <button class="btn small" onclick="VentasApp.editarVenta('${record.ID}')">Editar</button>
+                            <button class="btn small secondary" onclick="VentasApp.eliminarVenta('${record.ID}', '${this.escapeString(record.Descripción)}')">Eliminar</button>
+                        </div>`;
+                    }
+                    break;
+            }
+            
+            if (record._isPending) {
+                cell.classList.add('pending-cell');
+            }
+        });
+
+        // Aplicar estilos de animación
+        row.classList.add('fade-in');
+    }
+
+    // Actualizar fila existente
+    updateRowInTable(table, record) {
+        const row = table.querySelector(`[data-temp-id="${record._tempId}"]`);
+        if (row) {
+            row.removeAttribute('data-temp-id');
+            row.classList.remove('pending-record');
+            
+            // Actualizar celdas
+            const cells = row.cells;
+            
+            // ID real
+            cells[0].textContent = record.ID || '';
+            
+            // Estado confirmado
+            if (record._isPending === false) {
+                cells[9].innerHTML = `<div class="action-buttons">
+                    <button class="btn small" onclick="VentasApp.editarVenta('${record.ID}')">Editar</button>
+                    <button class="btn small secondary" onclick="VentasApp.eliminarVenta('${record.ID}', '${this.escapeString(record.Descripción)}')">Eliminar</button>
+                </div>`;
+                
+                // Remover clases de pending
+                Array.from(cells).forEach(cell => cell.classList.remove('pending-cell'));
+            }
+            
+            // Animación de confirmación
+            row.classList.add('confirmed-record');
+            setTimeout(() => row.classList.remove('confirmed-record'), 2000);
+        }
+    }
+
+    // Remover fila temporal
+    removeRowFromTable(table, tempId) {
+        const row = table.querySelector(`[data-temp-id="${tempId}"]`);
+        if (row) {
+            row.remove();
+        }
+    }
+
+    // Confirmar registro desde el servidor
+    confirmRecord(tempId, serverData) {
+        const pendingUpdate = this.pendingUpdates.get(tempId);
+        if (pendingUpdate) {
+            pendingUpdate.status = 'confirmed';
+            
+            // Actualizar UI para remover estado temporal
+            this.updateTableUI(pendingUpdate.tableId, {
+                ...serverData,
+                _tempId: tempId,
+                _isPending: false
+            }, 'update');
+            
+            this.pendingUpdates.delete(tempId);
+            this.showToastNotification('Venta confirmada en el servidor', 'success');
+        }
+    }
+
+    // Mostrar notificación toast
+    showToastNotification(message, type = 'info') {
+        // Crear contenedor de toasts si no existe
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            toastContainer.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 10000;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            `;
+            document.body.appendChild(toastContainer);
+        }
+
+        const toast = document.createElement('div');
+        toast.className = `toast-notification ${type}`;
+        toast.innerHTML = `
+            <div class="toast-content">
+                <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'}"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        
+        toastContainer.appendChild(toast);
+        
+        // Animación de entrada
+        setTimeout(() => toast.classList.add('show'), 100);
+        
+        // Remover después de 3 segundos
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    escapeString(str) {
+        return str ? str.replace(/'/g, "\\'").replace(/"/g, '\\"') : '';
+    }
+}
+
+// Inicializar el manager de tiempo real
+const realTimeManager = new RealTimeManager();
+
+// ====== MODIFICACIONES A VENTASAPP ======
+const VentasApp = {
+    currentData: null,
+    editingVentaId: null,
+    dataTable: null,
+
+    async init() {
+        console.log('🚀 Iniciando app de gestión de ventas...');
+        
+        this.setupEventListeners();
+        await this.loadData();
+    },
+
+    async loadData(forceRefresh = true) {
+        try {
+            console.log('📡 Cargando datos de ventas...');
+            this.mostrarEstado('Cargando datos...', 'loading');
+
+            const data = await DataManager.fetchData(forceRefresh);
+            console.log('✅ Datos recibidos:', data);
+            
+            this.currentData = data;
+            this.mostrarEstado('Datos actualizados', 'success');
+            this.renderizarTabla(data);
+            this.actualizarFiltros(data);
+            this.cargarClientes(data);
+
+            // Actualizar última sincronización
+            const now = new Date();
+            document.getElementById('last-sync').textContent = now.toLocaleTimeString();
+
+        } catch(error) {
+            console.error('❌ Error cargando datos:', error);
+            this.mostrarEstado('Error: ' + error.message, 'error');
+        }
+    },
+
+    async guardarVenta() {
+        const form = document.getElementById('form-venta');
+        const formData = new FormData(form);
+
+        const fecha = formData.get('fecha');
+        const cliente = formData.get('cliente');
+        const descripcion = formData.get('descripcion');
+        const monto = formData.get('monto');
+
+        if (!fecha || !cliente || !descripcion || !monto) {
+            alert('Por favor complete los campos obligatorios: Fecha, Cliente, Descripción y Monto.');
+            return;
+        }
+
+        try {
+            // Deshabilitar botón para evitar doble envío
+            const btnGuardar = document.getElementById('btn-guardar');
+            const originalText = btnGuardar.textContent;
+            btnGuardar.disabled = true;
+            btnGuardar.innerHTML = '<span class="loader"></span> Guardando...';
+
+            // Usar los nombres exactos de los campos del GAS
+            const venta = {
+                // Campos básicos para Finanzas_RegistroDiario
+                Fecha: fecha,
+                'Tipo (Ingreso/Egreso)': 'Ingreso', // Siempre será ingreso para ventas
+                Categoría: formData.get('categoria') || '',
+                Subcategoría: formData.get('subcategoria') || '',
+                Monto: parseFloat(monto) || 0,
+                'Medio de Pago': formData.get('medioPago') || '',
+                Comprobante: formData.get('comprobante') || '',
+                Descripción: descripcion,
+                Proyecto: formData.get('proyecto') || '',
+                'Cliente/Proveedor': cliente,
+                Observaciones: formData.get('observaciones') || '',
+                'Reflejar en Caja': formData.get('reflejarEnCaja') ? 'Sí' : 'No',
+                Mes: fecha.substring(0, 7), // Formato YYYY-MM
+                Estado: formData.get('estadoCobro') || 'Pendiente',
+                'Fecha Pago': formData.get('fechaCobro') || ''
+            };
+
+            console.log('💾 Venta a guardar:', venta);
+
+            // ====== ACTUALIZACIÓN EN TIEMPO REAL ======
+            // Agregar registro temporal inmediatamente
+            const tempId = realTimeManager.addTemporaryRecord('tabla-ventas', venta);
+            realTimeManager.showToastNotification('Venta agregada temporalmente', 'info');
+
+            let resultado;
+            if (this.editingVentaId) {
+                resultado = await this.actualizarVenta(this.editingVentaId, venta);
+            } else {
+                resultado = await this.crearVenta(venta, tempId);
+            }
+
+            // Confirmar registro con el servidor
+            if (resultado && resultado.record) {
+                realTimeManager.confirmRecord(tempId, resultado.record);
+            }
+
+            this.mostrarEstado('✓ Venta registrada exitosamente', 'success');
+            
+            // Recargar datos para sincronización completa
+            await this.loadData(true);
+            
+            alert('✅ Venta registrada correctamente');
+            this.cancelarEdicion();
+
+        } catch (error) {
+            console.error('❌ Error registrando venta:', error);
+            
+            let mensajeError = 'Error al registrar la venta. ';
+            
+            if (error.message.includes('429')) {
+                mensajeError += 'Demasiadas solicitudes. Espere unos segundos e intente nuevamente.';
+            } else if (error.message.includes('404') || error.message.includes('Failed to fetch')) {
+                mensajeError += 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
+            } else {
+                mensajeError += error.message;
+            }
+            
+            realTimeManager.showToastNotification(mensajeError, 'error');
+            this.mostrarEstado('✗ Error al registrar', 'error');
+            
+            // Remover registro temporal en caso de error
+            const tempId = error.tempId;
+            if (tempId) {
+                realTimeManager.updateTableUI('tabla-ventas', { _tempId: tempId }, 'remove');
+            }
+        } finally {
+            // Rehabilitar botón
+            const btnGuardar = document.getElementById('btn-guardar');
+            btnGuardar.disabled = false;
+            btnGuardar.textContent = this.editingVentaId ? 'Actualizar Venta' : 'Registrar Venta';
+        }
+    },
+
+    async crearVenta(venta, tempId) {
+        try {
+            console.log('📤 CREANDO NUEVA VENTA:', venta);
+            
+            const datosEnvio = {
+                action: 'insert',
+                sheet: 'Finanzas_RegistroDiario',
+                ...venta
+            };
+
+            // Incluir tempId para referencia del servidor
+            if (tempId) {
+                datosEnvio.tempId = tempId;
+            }
+
+            const url = CONFIG.GAS_ENDPOINT + '?' + new URLSearchParams(datosEnvio);
+            console.log('🔗 URL final:', url);
+
+            const response = await fetch(url);
+            const responseText = await response.text();
+
+            if (!response.ok) {
+                throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const result = JSON.parse(responseText);
+            console.log('✅ Resultado parseado:', result);
+
+            if (!result.success) {
+                throw new Error(result.error || 'Error desconocido del servidor');
+            }
+
+            return result;
+
+        } catch (error) {
+            // Preservar tempId para manejo de errores
+            error.tempId = tempId;
+            throw error;
+        }
+    },
+
+    // ... el resto de los métodos de VentasApp se mantienen igual
+    // (renderizarTabla, inicializarDataTable, etc.)
+};
+
+// ====== ESTILOS ADICIONALES PARA ACTUALIZACIÓN EN TIEMPO REAL ======
+const realTimeStyles = `
+<style>
+    /* Estilos para registros temporales */
+    .pending-record {
+        background: linear-gradient(90deg, rgba(62, 166, 255, 0.1), transparent) !important;
+        border-left: 3px solid var(--accent) !important;
+        opacity: 0.8;
+    }
+
+    .pending-cell {
+        font-style: italic;
+        color: var(--muted) !important;
+    }
+
+    .confirmed-record {
+        animation: highlightConfirm 2s ease;
+    }
+
+    @keyframes highlightConfirm {
+        0% {
+            background: rgba(40, 167, 69, 0.3);
+        }
+        100% {
+            background: transparent;
+        }
+    }
+
+    /* Notificaciones Toast */
+    .toast-notification {
+        background: var(--card);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 8px;
+        padding: 12px 16px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        transform: translateX(400px);
+        opacity: 0;
+        transition: all 0.3s ease;
+        min-width: 280px;
+        max-width: 350px;
+    }
+
+    .toast-notification.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    .toast-notification.success {
+        border-left: 4px solid #28a745;
+    }
+
+    .toast-notification.error {
+        border-left: 4px solid #dc3545;
+    }
+
+    .toast-notification.info {
+        border-left: 4px solid var(--accent);
+    }
+
+    .toast-content {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--text);
+        font-size: 14px;
+    }
+
+    .toast-content i {
+        font-size: 16px;
+    }
+
+    /* Loader pequeño para botones */
+    .btn .loader {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: currentColor;
+        animation: spin 1s ease-in-out infinite;
+        margin-right: 6px;
+    }
+
+    /* Animación de entrada para nuevas filas */
+    .fade-in {
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+`;
+
+// Agregar estilos al documento
+document.head.insertAdjacentHTML('beforeend', realTimeStyles);
+
+// Inicialización
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        VentasApp.init();
+    });
+} else {
+    VentasApp.init();
+}
+</script>
