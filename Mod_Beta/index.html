@@ -4,34 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Gestión Empresarial</title>
+    
+    <!-- Styles -->
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>Cargando sistema...</p>
+        </div>
+    </div>
+
     <!-- Sidebar -->
     <aside class="sidebar">
-        <h1><i class="fas fa-chart-line"></i> SistemaGestión</h1>
+        <div class="sidebar-header">
+            <h1><i class="fas fa-chart-line"></i> SistemaGestión</h1>
+            <div class="sidebar-subtitle">v2.0</div>
+        </div>
+        
         <nav class="nav">
             <button class="nav-link active" data-page="dashboard">
                 <i class="fas fa-tachometer-alt"></i> Dashboard
             </button>
-            
-            <div class="nav-group">
-                <button class="nav-link" data-page="compras">
-                    <i class="fas fa-shopping-cart"></i> Compras
-                    <i class="fas fa-chevron-down dropdown-icon"></i>
-                </button>
-                <div class="subnav">
-                    <button class="subnav-link" data-page="carga-compra">
-                        <i class="fas fa-upload"></i> Carga Compra
-                    </button>
-                    <button class="subnav-link" data-page="proveedores">
-                        <i class="fas fa-truck"></i> Proveedores
-                    </button>
-                </div>
-            </div>
             
             <div class="nav-group">
                 <button class="nav-link" data-page="ventas">
@@ -40,22 +41,78 @@
                 </button>
                 <div class="subnav">
                     <button class="subnav-link" data-page="carga-venta">
-                        <i class="fas fa-file-invoice-dollar"></i> Carga Venta
+                        <i class="fas fa-file-invoice-dollar"></i> Registrar Venta
                     </button>
                     <button class="subnav-link" data-page="clientes">
                         <i class="fas fa-users"></i> Clientes
                     </button>
+                    <button class="subnav-link" data-page="cotizaciones">
+                        <i class="fas fa-file-contract"></i> Cotizaciones
+                    </button>
                 </div>
             </div>
+            
+            <div class="nav-group">
+                <button class="nav-link" data-page="compras">
+                    <i class="fas fa-shopping-cart"></i> Compras
+                    <i class="fas fa-chevron-down dropdown-icon"></i>
+                </button>
+                <div class="subnav">
+                    <button class="subnav-link" data-page="carga-compra">
+                        <i class="fas fa-receipt"></i> Registrar Compra
+                    </button>
+                    <button class="subnav-link" data-page="proveedores">
+                        <i class="fas fa-truck"></i> Proveedores
+                    </button>
+                </div>
+            </div>
+            
+            <button class="nav-link" data-page="inventario">
+                <i class="fas fa-boxes"></i> Inventario
+            </button>
             
             <button class="nav-link" data-page="caja">
                 <i class="fas fa-calculator"></i> Caja
             </button>
             
-            <button class="nav-link" data-page="inventario">
-                <i class="fas fa-boxes"></i> Inventario
+            <div class="nav-group">
+                <button class="nav-link" data-page="rrhh">
+                    <i class="fas fa-users-cog"></i> RRHH
+                    <i class="fas fa-chevron-down dropdown-icon"></i>
+                </button>
+                <div class="subnav">
+                    <button class="subnav-link" data-page="empleados">
+                        <i class="fas fa-user-tie"></i> Empleados
+                    </button>
+                    <button class="subnav-link" data-page="asistencia">
+                        <i class="fas fa-calendar-check"></i> Asistencia
+                    </button>
+                </div>
+            </div>
+            
+            <button class="nav-link" data-page="proyectos">
+                <i class="fas fa-tasks"></i> Proyectos
+            </button>
+            
+            <button class="nav-link" data-page="reportes">
+                <i class="fas fa-chart-bar"></i> Reportes
             </button>
         </nav>
+        
+        <div class="sidebar-footer">
+            <div class="system-status">
+                <div class="status-indicator online"></div>
+                <span>Sistema Online</span>
+            </div>
+            <div class="user-quick-actions">
+                <button class="btn btn-small" onclick="App.showSettings()">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <button class="btn btn-small" onclick="App.showHelp()">
+                    <i class="fas fa-question"></i>
+                </button>
+            </div>
+        </div>
     </aside>
 
     <!-- Main Content -->
@@ -65,25 +122,50 @@
                 <button class="menu-toggle" id="menuToggle">
                     <i class="fas fa-bars"></i>
                 </button>
-                <div>
+                <div class="header-titles">
                     <h1><i class="fas fa-tachometer-alt"></i> <span id="page-title">Dashboard</span></h1>
-                    <p id="page-description">Resumen general del sistema</p>
+                    <p id="page-description">Vista general del sistema</p>
                 </div>
             </div>
-            <div class="user-info">
-                <i class="fas fa-user-circle"></i>
-                <span>Usuario Admin</span>
+            <div class="header-actions">
+                <div class="quick-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Última actualización:</span>
+                        <span class="stat-value" id="last-update">Ahora</span>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="user-details">
+                        <span class="user-name">Administrador</span>
+                        <span class="user-role">Sistema</span>
+                    </div>
+                    <div class="user-menu">
+                        <button class="btn btn-icon">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Contenedor para el contenido -->
+        <!-- Content Container -->
         <div class="content-wrapper">
             <div id="content-container">
                 <!-- El contenido se carga dinámicamente aquí -->
             </div>
             
             <div class="footer-hg">
-                <p>Sistema de Gestión Empresarial &copy; 2024</p>
+                <div class="footer-content">
+                    <p>Sistema de Gestión Empresarial &copy; 2024 - v2.0</p>
+                    <div class="footer-links">
+                        <a href="#" onclick="App.showHelp()">Ayuda</a>
+                        <a href="#" onclick="App.showAbout()">Acerca de</a>
+                        <a href="#" onclick="App.showFeedback()">Feedback</a>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -91,9 +173,22 @@
     <!-- Overlay para móviles -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-    <!-- Scripts de la aplicación -->
+    <!-- Scripts Core -->
     <script src="js/core/config.js"></script>
     <script src="js/core/utils.js"></script>
+    <script src="js/core/app-state.js"></script>
+    <script src="js/core/data-manager.js"></script>
+    <script src="js/core/component-system.js"></script>
+    <script src="js/core/notifications.js"></script>
+    
+    <!-- Componentes -->
+    <script src="js/components/saldo-caja.js"></script>
+    <script src="js/components/ingresos-egresos.js"></script>
+    
+    <!-- Módulos -->
+    <script src="js/modules/clientes.js"></script>
+    
+    <!-- App Principal -->
     <script src="js/app.js"></script>
 </body>
 </html>
