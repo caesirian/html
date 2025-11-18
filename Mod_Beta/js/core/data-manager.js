@@ -1,187 +1,231 @@
-// Gestor de datos - Conexión con Google Sheets
-const DataManager = {
-  async fetchData(force = false) {
-    console.log('📡 Iniciando carga de datos...');
-    
-    // Verificar cache
-    if (!force) {
-      const cached = UTILS.loadCache();
-      if (cached) {
-        console.log('✅ Usando cache');
-        return cached;
-      }
+// Gestor de datos avanzado con cache inteligente
+class DataManager {
+    constructor() {
+        this.cache = new Map();
+        this.pendingRequests = new Map();
+        this.retryCount = 0;
+        this.maxRetries = 3;
     }
 
-    try {
-      const url = CONFIG.GAS_ENDPOINT + '?t=' + Date.now();
-      console.log('🌐 Conectando:', url);
-      
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error('Error: ' + response.status);
-      }
-      
-      const rawData = await response.json();
-      console.log('📦 Datos crudos recibidos');
-      
-      // Normalizar nombres de campos
-      const processedData = this.procesarDatos(rawData);
-      
-      UTILS.saveCache(processedData);
-      console.log('✅ Datos normalizados y guardados');
-      
-      return processedData;
-      
-    } catch(error) {
-      console.error('❌ Error:', error.message);
-      
-      // Intentar usar cache como fallback
-      const cached = UTILS.loadCache();
-      if (cached) {
-        console.log('🔄 Usando cache como fallback');
-        return cached;
-      }
-      
-      console.log('🔄 Usando datos de prueba');
-      return this.getDatosPrueba();
-    }
-  },
+    async fetchData(forceRefresh = false) {
+        const cacheKey = 'app_data';
+        
+        // Verificar cache primero
+        if (!forceRefresh) {
+            const cached = this.getCache(cacheKey);
+            if (cached) {
+                console.log('📦 Usando datos cacheados');
+                return cached;
+            }
+        }
 
-  // Normalizar nombres de campos
-  procesarDatos(rawData) {
-    const processed = {};
-    
-    for (const sheetName in rawData) {
-      if (Array.isArray(rawData[sheetName])) {
-        processed[sheetName] = rawData[sheetName].map(row => {
-          const newRow = {};
-          
-          for (const key in row) {
-            // Normalizar nombres de campos problemáticos
-            let newKey = key;
+        // Evitar requests duplicados
+        if (this.pendingRequests.has(cacheKey)) {
+            return this.pendingRequests.get(cacheKey);
+        }
+
+        try {
+            console.log('🌐 Solicitando datos del servidor...');
+            appState.addNotification('Actualizando datos...', 'info');
+
+            const requestPromise = this.makeRequest();
+            this.pendingRequests.set(cacheKey, requestPromise);
+
+            const data = await requestPromise;
             
-            if (key === 'Tipo (Ingreso/Egreso)' || key.toLowerCase().includes('tipo')) {
-              newKey = 'Tipo';
-            } else if (key === 'Fecha' || key.toLowerCase().includes('fecha')) {
-              newKey = 'Fecha';
-            } else if (key === 'Monto' || key.toLowerCase().includes('monto')) {
-              newKey = 'Monto';
-            } else {
-              newKey = key;
+            // Procesar y normalizar datos
+            const processedData = this.processData(data);
+            
+            // Guardar en cache
+            this.setCache(cacheKey, processedData);
+            
+            // Actualizar estado global
+            appState.updateData('lastUpdate', new Date());
+            appState.updateData('currentData', processedData);
+
+            appState.addNotification('Datos actualizados correctamente', 'success');
+            
+            return processedData;
+
+        } catch (error) {
+            console.error('❌ Error obteniendo datos:', error);
+            
+            // Reintentar si es posible
+            if (this.retryCount < this.maxRetries) {
+                this.retryCount++;
+                console.log(`🔄 Reintentando... (${this.retryCount}/${this.maxRetries})`);
+                return this.fetchData(forceRefresh);
             }
             
-            newRow[newKey] = row[key];
-          }
-          
-          return newRow;
+            // Usar datos de prueba como fallback
+            const fallbackData = this.getFallbackData();
+            appState.addNotification('Usando datos locales', 'warning');
+            return fallbackData;
+
+        } finally {
+            this.pendingRequests.delete(cacheKey);
+            this.retryCount = 0;
+        }
+    }
+
+    async makeRequest() {
+        const url = CONFIG.GAS_ENDPOINT + '?t=' + Date.now();
+        console.log('🔗 Conectando a:', url);
+
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            timeout: 10000
         });
-      } else {
-        processed[sheetName] = rawData[sheetName];
-      }
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('✅ Datos recibidos del servidor');
+        return data;
     }
-    
-    console.log('✅ Datos normalizados');
-    return processed;
-  },
 
-  // Datos de prueba para desarrollo
-  getDatosPrueba() {
-    const fecha = new Date().toISOString().split('T')[0];
-    const mesAnterior = new Date();
-    mesAnterior.setMonth(mesAnterior.getMonth() - 1);
-    const fechaAnterior = mesAnterior.toISOString().split('T')[0];
-    
-    return {
-      Finanzas_RegistroDiario: [
-        {
-          ID: '1',
-          Fecha: fecha,
-          Tipo: 'Ingreso',
-          Monto: 15000,
-          Categoría: 'Ventas',
-          Descripción: 'Venta de productos A',
-          'Cliente/Proveedor': 'Cliente XYZ',
-          Estado: 'Cobrado'
-        },
-        {
-          ID: '2',
-          Fecha: fecha,
-          Tipo: 'Egreso',
-          Monto: 5000,
-          Categoría: 'Compras',
-          Descripción: 'Compra de insumos',
-          'Cliente/Proveedor': 'Proveedor ABC',
-          Estado: 'Pagado'
+    processData(rawData) {
+        const processed = {};
+        
+        // Normalizar todas las hojas
+        for (const [sheetName, sheetData] of Object.entries(rawData)) {
+            if (Array.isArray(sheetData)) {
+                processed[sheetName] = sheetData.map(row => this.normalizeRow(row));
+            } else {
+                processed[sheetName] = sheetData;
+            }
         }
-      ],
-      Clientes: [
-        {
-          ID: '1',
-          Nombre: 'Cliente XYZ',
-          Tipo: 'Empresa',
-          Categoria: 'A - Premium',
-          Estado: 'Activo',
-          Email: 'contacto@clientexyz.com',
-          Telefono: '+54 11 1234-5678'
-        },
-        {
-          ID: '2', 
-          Nombre: 'Cliente Personal',
-          Tipo: 'Particular',
-          Categoria: 'B - Regular',
-          Estado: 'Activo',
-          Email: 'cliente@personal.com',
-          Telefono: '+54 11 8765-4321'
-        }
-      ],
-      Productos: [
-        {
-          ID: '1',
-          Nombre: 'Producto A',
-          Categoria: 'Electrónicos',
-          Precio: 1500,
-          Stock: 25,
-          'Stock Mínimo': 10
-        },
-        {
-          ID: '2',
-          Nombre: 'Producto B', 
-          Categoria: 'Oficina',
-          Precio: 500,
-          Stock: 8,
-          'Stock Mínimo': 15
-        }
-      ]
-    };
-  },
 
-  // Método para enviar datos al servidor
-  async enviarDatos(sheet, datos, accion = 'insert') {
-    try {
-      const datosEnvio = {
-        action: accion,
-        sheet: sheet,
-        ...datos
-      };
-
-      const url = CONFIG.GAS_ENDPOINT + '?' + new URLSearchParams(datosEnvio);
-      console.log('📤 Enviando datos:', datosEnvio);
-
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Respuesta del servidor:', result);
-
-      return result;
-
-    } catch (error) {
-      console.error('❌ Error enviando datos:', error);
-      throw error;
+        // Calcular métricas derivadas
+        processed.metrics = this.calculateMetrics(processed);
+        
+        return processed;
     }
-  }
-};
+
+    normalizeRow(row) {
+        const normalized = {};
+        
+        for (const [key, value] of Object.entries(row)) {
+            let newKey = key;
+            
+            // Normalizar nombres de campos
+            if (key.includes('Tipo') || key.includes('Ingreso') || key.includes('Egreso')) {
+                newKey = 'Tipo';
+            } else if (key.includes('Fecha') || key.includes('Date')) {
+                newKey = 'Fecha';
+            } else if (key.includes('Monto') || key.includes('Importe') || key.includes('Total')) {
+                newKey = 'Monto';
+            } else if (key.includes('Cliente') || key.includes('Proveedor')) {
+                newKey = 'ClienteProveedor';
+            }
+            
+            normalized[newKey] = value;
+        }
+        
+        return normalized;
+    }
+
+    calculateMetrics(data) {
+        const finanzas = data.Finanzas_RegistroDiario || [];
+        const hoy = new Date();
+        const mesActual = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}`;
+        
+        const ingresosMes = finanzas
+            .filter(item => item.Tipo === 'Ingreso' && item.Fecha?.includes(mesActual))
+            .reduce((sum, item) => sum + (Number(item.Monto) || 0), 0);
+
+        const egresosMes = finanzas
+            .filter(item => item.Tipo === 'Egreso' && item.Fecha?.includes(mesActual))
+            .reduce((sum, item) => sum + (Number(item.Monto) || 0), 0);
+
+        return {
+            ingresosMes,
+            egresosMes,
+            saldoCaja: ingresosMes - egresosMes,
+            totalVentas: finanzas.filter(item => item.Tipo === 'Ingreso').length,
+            totalClientes: (data.Clientes || []).length,
+            productosStockBajo: (data.Productos || []).filter(p => (p.Stock || 0) < (p.StockMinimo || 0)).length
+        };
+    }
+
+    getCache(key) {
+        const item = this.cache.get(key);
+        if (!item) return null;
+
+        // Verificar expiración (5 minutos)
+        if (Date.now() - item.timestamp > 5 * 60 * 1000) {
+            this.cache.delete(key);
+            return null;
+        }
+
+        return item.data;
+    }
+
+    setCache(key, data) {
+        this.cache.set(key, {
+            data,
+            timestamp: Date.now()
+        });
+    }
+
+    getFallbackData() {
+        return {
+            Finanzas_RegistroDiario: [],
+            Clientes: [],
+            Productos: [],
+            metrics: {
+                ingresosMes: 0,
+                egresosMes: 0,
+                saldoCaja: 0,
+                totalVentas: 0,
+                totalClientes: 0,
+                productosStockBajo: 0
+            }
+        };
+    }
+
+    // Método para enviar datos al servidor
+    async sendData(sheet, data, action = 'insert') {
+        try {
+            const payload = {
+                action,
+                sheet,
+                ...data
+            };
+
+            const url = CONFIG.GAS_ENDPOINT + '?' + new URLSearchParams(payload);
+            console.log('📤 Enviando datos:', payload);
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const result = await response.json();
+            console.log('✅ Respuesta del servidor:', result);
+
+            // Invalidar cache después de modificar datos
+            this.cache.delete('app_data');
+
+            return result;
+
+        } catch (error) {
+            console.error('❌ Error enviando datos:', error);
+            throw error;
+        }
+    }
+}
+
+const dataManager = new DataManager();
