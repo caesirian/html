@@ -1,10 +1,50 @@
-// Gestor de datos avanzado con cache inteligente
 class DataManager {
     constructor() {
         this.cache = new Map();
         this.pendingRequests = new Map();
         this.retryCount = 0;
         this.maxRetries = 3;
+        this.useProxy = true; // Activar proxy por defecto
+    }
+
+    async makeRequest() {
+        const targetUrl = CONFIG.GAS_ENDPOINT + '?t=' + Date.now();
+        let url = targetUrl;
+        
+        // Usar proxy si está activado
+        if (this.useProxy) {
+            const proxyUrl = 'https://api.allorigins.win/raw?url=';
+            url = proxyUrl + encodeURIComponent(targetUrl);
+        }
+        
+        console.log('🔗 Conectando a:', url);
+
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                timeout: 10000
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            console.log('✅ Datos recibidos del servidor');
+            return data;
+            
+        } catch (error) {
+            // Si falla con proxy, intentar sin proxy
+            if (this.useProxy && error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
+                console.log('🔄 Intentando sin proxy...');
+                this.useProxy = false;
+                return this.makeRequest();
+            }
+            throw error;
+        }
     }
 
     async fetchData(forceRefresh = false) {
@@ -54,12 +94,13 @@ class DataManager {
             if (this.retryCount < this.maxRetries) {
                 this.retryCount++;
                 console.log(`🔄 Reintentando... (${this.retryCount}/${this.maxRetries})`);
+                await this.delay(1000 * this.retryCount); // Backoff exponencial
                 return this.fetchData(forceRefresh);
             }
             
             // Usar datos de prueba como fallback
             const fallbackData = this.getFallbackData();
-            appState.addNotification('Usando datos locales', 'warning');
+            appState.addNotification('Usando datos locales - Modo offline', 'warning');
             return fallbackData;
 
         } finally {
@@ -68,27 +109,11 @@ class DataManager {
         }
     }
 
-    async makeRequest() {
-        const url = CONFIG.GAS_ENDPOINT + '?t=' + Date.now();
-        console.log('🔗 Conectando a:', url);
-
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            timeout: 10000
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        console.log('✅ Datos recibidos del servidor');
-        return data;
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
+    // ... el resto de tus métodos permanecen igual
     processData(rawData) {
         const processed = {};
         
@@ -189,7 +214,6 @@ class DataManager {
         };
     }
 
-    // Método para enviar datos al servidor
     async sendData(sheet, data, action = 'insert') {
         try {
             const payload = {
@@ -198,7 +222,14 @@ class DataManager {
                 ...data
             };
 
-            const url = CONFIG.GAS_ENDPOINT + '?' + new URLSearchParams(payload);
+            let url = CONFIG.GAS_ENDPOINT + '?' + new URLSearchParams(payload);
+            
+            // Usar proxy para POST también
+            if (this.useProxy) {
+                const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                url = proxyUrl + encodeURIComponent(url);
+            }
+            
             console.log('📤 Enviando datos:', payload);
 
             const response = await fetch(url, {
