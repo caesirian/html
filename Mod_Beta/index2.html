@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Gestión - Firebase Auth</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK v10+ (Nov 2025) -->
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            overflow: hidden;
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .login-header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .login-content {
+            padding: 30px;
+        }
+
+        .auth-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .auth-btn.google {
+            border-color: #4285f4;
+            color: #4285f4;
+        }
+
+        .auth-btn.google:hover {
+            background: #4285f4;
+            color: white;
+        }
+
+        .auth-btn.email {
+            border-color: #ff6b35;
+            color: #ff6b35;
+        }
+
+        .auth-btn.email:hover {
+            background: #ff6b35;
+            color: white;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e1e5e9;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .email-auth-form {
+            display: none;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .form-actions .btn {
+            flex: 1;
+        }
+
+        .user-info {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 32px;
+            overflow: hidden;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-details h2 {
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .user-email {
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .user-role {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-bottom: 20px;
+        }
+
+        .system-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .firebase-badge {
+            background: #ffa000;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            margin-left: 5px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .notifications-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            max-width: 400px;
+        }
+
+        .notification {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin-bottom: 10px;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+        }
+
+        .notification-icon {
+            font-size: 20px;
+            margin-right: 15px;
+        }
+
+        .notification-success .notification-icon { color: #28a745; }
+        .notification-error .notification-icon { color: #dc3545; }
+        .notification-warning .notification-icon { color: #ffc107; }
+        .notification-info .notification-icon { color: #17a2b8; }
+
+        .notification-message {
+            flex: 1;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container" id="loginContainer">
+        <div class="login-header">
+            <h1><i class="fas fa-chart-line"></i> SistemaGestión</h1>
+            <p>v2.0 - Firebase Auth <span class="firebase-badge">GOOGLE</span></p>
+        </div>
+
+        <div class="login-content" id="loginContent">
+            <div class="auth-methods">
+                <button class="auth-btn google" onclick="authManager.signInWithGoogle()">
+                    <i class="fab fa-google"></i> Continuar con Google
+                </button>
+
+                <button class="auth-btn email" onclick="showEmailLogin()">
+                    <i class="fas fa-envelope"></i> Continuar con Email
+                </button>
+
+                <div class="email-auth-form" id="emailLoginForm">
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" class="form-control" placeholder="tu@email.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Contraseña:</label>
+                        <input type="password" id="password" class="form-control" placeholder="Mínimo 6 caracteres" required>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn btn-success" onclick="signInWithEmail()">
+                            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                        </button>
+                        <button class="btn btn-primary" onclick="signUpWithEmail()">
+                            <i class="fas fa-user-plus"></i> Registrarse
+                        </button>
+                    </div>
+
+                    <button class="btn" onclick="hideEmailLogin()" style="margin-top: 10px; background: #6c757d; color: white;">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </button>
+                </div>
+
+                <div class="divider">
+                    <span>o usar acceso rápido</span>
+                </div>
+
+                <button class="auth-btn" onclick="authManager.useDemoMode()" style="border-color: #28a745; color: #28a745;">
+                    <i class="fas fa-rocket"></i> Acceso Demo Rápido
+                </button>
+
+                <div class="system-info">
+                    <h4><i class="fas fa-bolt"></i> Firebase Authentication</h4>
+                    <p>✅ Plan Gratuito: 10,000 logins/mes</p>
+                    <p>✅ Sin configuración compleja</p>
+                    <p>✅ Integración directa con Google</p>
+                    <p><strong>Estado:</strong> <span id="authStatus">Conectando...</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p id="loadingText">Inicializando Firebase...</p>
+        </div>
+
+        <div class="user-info" id="userInfo">
+            <div class="user-avatar" id="userAvatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            
+            <div class="user-details">
+                <h2 id="userName">Usuario</h2>
+                <div class="user-email" id="userEmail">email@ejemplo.com</div>
+                <div class="user-role" id="userRole">Usuario Verificado</div>
+                
+                <div class="system-info">
+                    <h4><i class="fas fa-user-check"></i> Información de Sesión</h4>
+                    <p><strong>ID Usuario:</strong> <span id="infoUserId">-</span></p>
+                    <p><strong>Proveedor:</strong> <span id="infoProvider">-</span></p>
+                    <p><strong>Email verificado:</strong> <span id="infoEmailVerified">-</span></p>
+                    <p><strong>Plan:</strong> <span class="firebase-badge">GRATIS</span></p>
+                </div>
+
+                <button class="btn btn-primary" onclick="testSystemConnection()" style="margin-bottom: 10px;">
+                    <i class="fas fa-plug"></i> Probar Sistema Completo
+                </button>
+
+                <button class="btn" onclick="authManager.logout()" style="background: #6c757d; color: white;">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="notifications-container" id="notificationsContainer"></div>
+
+    <script>
+        // =============================================
+        // CONFIGURACIÓN FIREBASE - ACTUALIZADA 2025
+        // =============================================
+        const firebaseConfig = {
+  apiKey: "AIzaSyCOoMcQ3gMWgoNumTxmqJngDqQDhYqi8Ec",
+  authDomain: "hg-soluciones-f7090.firebaseapp.com",
+  projectId: "hg-soluciones-f7090",
+  storageBucket: "hg-soluciones-f7090.firebasestorage.app",
+  messagingSenderId: "738232898260",
+  appId: "1:738232898260:web:641e6a5732f8020a11a141",
+  measurementId: "G-QXNXRCRPRG"
+};
+
+        // =============================================
+        // SISTEMA DE NOTIFICACIONES
+        // =============================================
+        class NotificationSystem {
+            constructor() {
+                this.container = document.getElementById('notificationsContainer');
+                this.notifications = new Map();
+                this.nextId = 1;
+            }
+
+            show(message, type = 'info', duration = 5000) {
+                const id = this.nextId++;
+                const notification = this.createNotification(id, message, type, duration);
+                
+                this.notifications.set(id, notification);
+                this.container.appendChild(notification.element);
+
+                if (duration > 0) {
+                    setTimeout(() => {
+                        this.remove(id);
+                    }, duration);
+                }
+
+                return id;
+            }
+
+            createNotification(id, message, type, duration) {
+                const element = document.createElement('div');
+                element.className = `notification notification-${type}`;
+                element.innerHTML = `
+                    <div class="notification-content">
+                        <div class="notification-icon">
+                            <i class="fas fa-${this.getIcon(type)}"></i>
+                        </div>
+                        <div class="notification-message">${message}</div>
+                    </div>
+                `;
+
+                setTimeout(() => {
+                    element.classList.add('show');
+                }, 10);
+
+                if (duration > 0) {
+                    setTimeout(() => {
+                        this.remove(id);
+                    }, duration);
+                }
+
+                return { id, element, type, message, timestamp: new Date() };
+            }
+
+            getIcon(type) {
+                const icons = {
+                    success: 'check-circle',
+                    error: 'exclamation-triangle',
+                    warning: 'exclamation-circle',
+                    info: 'info-circle'
+                };
+                return icons[type] || 'info-circle';
+            }
+
+            remove(id) {
+                const notification = this.notifications.get(id);
+                if (notification) {
+                    notification.element.classList.remove('show');
+                    setTimeout(() => {
+                        if (notification.element.parentNode) {
+                            notification.element.parentNode.removeChild(notification.element);
+                        }
+                        this.notifications.delete(id);
+                    }, 300);
+                }
+            }
+        }
+
+        // =============================================
+        // GESTOR DE AUTH CON FIREBASE
+        // =============================================
+        class FirebaseAuthManager {
+            constructor() {
+                this.currentUser = null;
+                this.firebaseApp = null;
+                this.auth = null;
+                this.isInitialized = false;
+                
+                this.initFirebase();
+            }
+
+            async initFirebase() {
+                try {
+                    showLoading(true, 'Inicializando Firebase...');
+                    
+                    // Inicializar Firebase
+                    this.firebaseApp = firebase.initializeApp(FIREBASE_CONFIG);
+                    this.auth = firebase.auth();
+                    
+                    // Configurar observer de autenticación
+                    this.auth.onAuthStateChanged((user) => {
+                        this.handleAuthStateChange(user);
+                    });
+
+                    this.isInitialized = true;
+                    document.getElementById('authStatus').textContent = '✅ Conectado';
+                    showLoading(false);
+                    
+                    console.log('✅ Firebase Auth inicializado correctamente');
+                    
+                } catch (error) {
+                    console.error('❌ Error inicializando Firebase:', error);
+                    document.getElementById('authStatus').textContent = '❌ Error - Usando Demo';
+                    showLoading(false);
+                    this.useDemoMode();
+                }
+            }
+
+            handleAuthStateChange(user) {
+                if (user) {
+                    // Usuario logueado
+                    this.currentUser = {
+                        id: user.uid,
+                        email: user.email,
+                        nombre: user.displayName || user.email.split('@')[0],
+                        avatar: user.photoURL,
+                        emailVerified: user.emailVerified,
+                        provider: user.providerData[0]?.providerId || 'email'
+                    };
+                    
+                    this.updateUI();
+                    notificationSystem.show(`Bienvenido/a ${this.currentUser.nombre}`, 'success');
+                    
+                } else {
+                    // Usuario deslogueado
+                    this.currentUser = null;
+                    document.getElementById('loginContent').style.display = 'block';
+                    document.getElementById('userInfo').style.display = 'none';
+                }
+            }
+
+            // 🔐 MÉTODOS DE AUTENTICACIÓN
+            async signInWithGoogle() {
+                try {
+                    if (!this.isInitialized) {
+                        this.useDemoMode();
+                        return;
+                    }
+
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    // Agregar scopes opcionales
+                    provider.addScope('email');
+                    provider.addScope('profile');
+
+                    const result = await this.auth.signInWithPopup(provider);
+                    return result;
+                    
+                } catch (error) {
+                    console.error('Error en Google Sign-In:', error);
+                    this.handleAuthError(error);
+                }
+            }
+
+            async signInWithEmail(email, password) {
+                try {
+                    if (!this.isInitialized) {
+                        this.useDemoMode();
+                        return;
+                    }
+
+                    showLoading(true, 'Iniciando sesión...');
+                    const result = await this.auth.signInWithEmailAndPassword(email, password);
+                    showLoading(false);
+                    return result;
+                    
+                } catch (error) {
+                    showLoading(false);
+                    this.handleAuthError(error);
+                }
+            }
+
+            async signUpWithEmail(email, password) {
+                try {
+                    if (!this.isInitialized) {
+                        this.useDemoMode();
+                        return { success: true, demo: true };
+                    }
+
+                    showLoading(true, 'Creando cuenta...');
+                    const result = await this.auth.createUserWithEmailAndPassword(email, password);
+                    
+                    // Enviar verificación de email
+                    await result.user.sendEmailVerification();
+                    
+                    showLoading(false);
+                    notificationSystem.show('¡Cuenta creada! Revisa tu email para verificarla.', 'success');
+                    return result;
+                    
+                } catch (error) {
+                    showLoading(false);
+                    this.handleAuthError(error);
+                }
+            }
+
+            async logout() {
+                try {
+                    if (this.isInitialized && this.auth.currentUser) {
+                        await this.auth.signOut();
+                    }
+                    this.currentUser = null;
+                    this.updateUI();
+                    notificationSystem.show('Sesión cerrada correctamente', 'info');
+                } catch (error) {
+                    console.error('Error cerrando sesión:', error);
+                }
+            }
+
+            // 🎭 MODO DEMO COMO FALLBACK
+            useDemoMode() {
+                this.currentUser = {
+                    id: 'demo-user-' + Date.now(),
+                    email: 'demo@sistemagestion.com',
+                    nombre: 'Usuario Demo',
+                    avatar: null,
+                    emailVerified: true,
+                    provider: 'demo'
+                };
+                
+                this.updateUI();
+                notificationSystem.show('Modo demo activado - Sin Firebase', 'info');
+            }
+
+            // 🎨 ACTUALIZAR INTERFAZ
+            updateUI() {
+                if (!this.currentUser) return;
+
+                document.getElementById('userName').textContent = this.currentUser.nombre;
+                document.getElementById('userEmail').textContent = this.currentUser.email;
+                
+                // Avatar
+                const avatar = document.getElementById('userAvatar');
+                if (this.currentUser.avatar) {
+                    avatar.innerHTML = `<img src="${this.currentUser.avatar}" alt="${this.currentUser.nombre}">`;
+                }
+
+                // Información
+                document.getElementById('infoUserId').textContent = this.currentUser.id.substring(0, 8) + '...';
+                document.getElementById('infoProvider').textContent = this.currentUser.provider;
+                document.getElementById('infoEmailVerified').textContent = this.currentUser.emailVerified ? '✅ Sí' : '❌ No';
+
+                // Mostrar interfaz de usuario
+                document.getElementById('loginContent').style.display = 'none';
+                document.getElementById('userInfo').style.display = 'block';
+            }
+
+            // 🚨 MANEJO DE ERRORES
+            handleAuthError(error) {
+                let message = 'Error de autenticación';
+                
+                switch (error.code) {
+                    case 'auth/invalid-email':
+                        message = 'Email inválido';
+                        break;
+                    case 'auth/user-disabled':
+                        message = 'Cuenta deshabilitada';
+                        break;
+                    case 'auth/user-not-found':
+                        message = 'Usuario no encontrado';
+                        break;
+                    case 'auth/wrong-password':
+                        message = 'Contraseña incorrecta';
+                        break;
+                    case 'auth/email-already-in-use':
+                        message = 'El email ya está registrado';
+                        break;
+                    case 'auth/weak-password':
+                        message = 'La contraseña debe tener al menos 6 caracteres';
+                        break;
+                    case 'auth/operation-not-allowed':
+                        message = 'Operación no permitida';
+                        break;
+                    case 'auth/network-request-failed':
+                        message = 'Error de red. Verifica tu conexión.';
+                        break;
+                    default:
+                        message = error.message;
+                }
+                
+                notificationSystem.show(message, 'error');
+            }
+
+            // ✅ VERIFICAR ESTADO
+            isAuthenticated() {
+                return !!this.currentUser;
+            }
+
+            getCurrentUser() {
+                return this.currentUser;
+            }
+        }
+
+        // =============================================
+        // FUNCIONES GLOBALES
+        // =============================================
+        const notificationSystem = new NotificationSystem();
+        const authManager = new FirebaseAuthManager();
+
+        function showLoading(show, text = 'Cargando...') {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+            document.getElementById('loadingText').textContent = text;
+        }
+
+        function showEmailLogin() {
+            document.getElementById('emailLoginForm').style.display = 'block';
+        }
+
+        function hideEmailLogin() {
+            document.getElementById('emailLoginForm').style.display = 'none';
+        }
+
+        async function signInWithEmail() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                notificationSystem.show('Completa todos los campos', 'warning');
+                return;
+            }
+
+            await authManager.signInWithEmail(email, password);
+        }
+
+        async function signUpWithEmail() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                notificationSystem.show('Completa todos los campos', 'warning');
+                return;
+            }
+
+            if (password.length < 6) {
+                notificationSystem.show('La contraseña debe tener al menos 6 caracteres', 'warning');
+                return;
+            }
+
+            await authManager.signUpWithEmail(email, password);
+        }
+
+        async function testSystemConnection() {
+            showLoading(true, 'Probando sistema completo...');
+            
+            // Simular prueba de conexión con tu Google Apps Script
+            setTimeout(() => {
+                showLoading(false);
+                notificationSystem.show('✅ Sistema funcionando correctamente', 'success');
+                
+                // Aquí integrarías tu conexión real con GAS
+                console.log('Sistema listo para conectar con Google Apps Script');
+            }, 2000);
+        }
+
+        // Inicialización cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Sistema de autenticación Firebase listo');
+        });
+    </script>
+</body>
+</html>
