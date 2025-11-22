@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ERP Modular</title>
+    <title>ERP Modular - HG Soluciones</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -372,6 +372,30 @@
             color: var(--danger);
         }
 
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-warning {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-danger {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
         /* Form Modal */
         .modal-overlay {
             position: fixed;
@@ -546,7 +570,7 @@
                 <button class="toggle-sidebar" id="toggle-sidebar">
                     <i class="fas fa-bars"></i>
                 </button>
-                <div class="app-title">ERP Modular</div>
+                <div class="app-title">ERP Modular - HG Soluciones</div>
             </div>
             <div class="user-info">
                 <div class="user-avatar" id="user-avatar">U</div>
@@ -590,7 +614,7 @@
                 <span>Configuración</span>
             </div>
 
-            <!-- Workspace -->
+            <!-- Workspace - Usuarios -->
             <div class="workspace">
                 <div class="workspace-header">
                     <div class="workspace-title">Usuarios del Sistema</div>
@@ -662,6 +686,7 @@
                 </div>
             </div>
 
+            <!-- Workspace - Empresas -->
             <div class="workspace">
                 <div class="workspace-header">
                     <div class="workspace-title">Empresas</div>
@@ -742,10 +767,12 @@
         </div>
     </div>
 
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    
     <script>
-        // Configuración de Firebase
+        // Configuración de Firebase para HG Soluciones
         const FIREBASE_CONFIG = {
             apiKey: "AIzaSyCOoMcQ3gMWgoNumTxmqJngDqQDhYqi8Ec",
             authDomain: "hg-soluciones-f7090.firebaseapp.com",
@@ -757,7 +784,7 @@
         };
 
         // Inicializar Firebase
-        firebase.initializeApp(firebaseConfig);
+        firebase.initializeApp(FIREBASE_CONFIG);
 
         // Estructura del ERP
         const ERP_STRUCTURE = {
@@ -946,19 +973,27 @@
 
             async signInWithGoogle() {
                 const provider = new firebase.auth.GoogleAuthProvider();
+                provider.addScope('email');
+                provider.addScope('profile');
+                
                 try {
-                    await firebase.auth().signInWithPopup(provider);
+                    const result = await firebase.auth().signInWithPopup(provider);
+                    console.log("Usuario autenticado:", result.user);
+                    return result;
                 } catch (error) {
                     console.error("Error durante el login:", error);
                     alert("Error durante el inicio de sesión: " + error.message);
+                    throw error;
                 }
             }
 
             async signOut() {
                 try {
                     await firebase.auth().signOut();
+                    console.log("Sesión cerrada exitosamente");
                 } catch (error) {
                     console.error("Error durante el logout:", error);
+                    throw error;
                 }
             }
 
@@ -968,6 +1003,10 @@
                     const displayName = this.user.displayName || 'Usuario';
                     avatar.textContent = displayName.charAt(0).toUpperCase();
                     avatar.title = displayName;
+                    
+                    // Actualizar información del usuario en la UI
+                    const userEmail = this.user.email;
+                    console.log("Usuario actual:", displayName, userEmail);
                 }
             }
 
@@ -977,6 +1016,10 @@
 
             isAuthenticated() {
                 return this.user !== null;
+            }
+
+            getCurrentUser() {
+                return this.user;
             }
         }
 
@@ -996,11 +1039,17 @@
                 let url = `${this.scriptURL}?action=${action}&sheet=${sheet}&token=${token}`;
 
                 if (data) {
-                    const params = new URLSearchParams(data);
+                    const params = new URLSearchParams();
+                    for (const key in data) {
+                        if (data[key] !== null && data[key] !== undefined) {
+                            params.append(key, data[key]);
+                        }
+                    }
                     url += `&${params.toString()}`;
                 }
 
                 try {
+                    console.log("Realizando solicitud a:", url);
                     const response = await fetch(url, {
                         method: 'GET',
                         headers: {
@@ -1051,6 +1100,13 @@
             }
 
             async create(data) {
+                // Validar datos antes de enviar
+                const fieldConfig = this.getFieldConfig();
+                for (const field of this.fields) {
+                    if (fieldConfig[field]?.required && !data[field]) {
+                        throw new Error(`El campo ${field} es requerido`);
+                    }
+                }
                 return this.erpConnector.insertData(this.sheetName, data);
             }
 
@@ -1064,6 +1120,10 @@
 
             getFieldConfig() {
                 return FIELD_MAPPING[this.sheetName] || {};
+            }
+
+            getFields() {
+                return this.fields;
             }
         }
 
@@ -1086,126 +1146,163 @@
             }
         }
 
-        // Inicialización de la aplicación
+        // Inicialización mejorada con manejo de errores
         document.addEventListener('DOMContentLoaded', function() {
-            // Inicializar AuthManager
-            const authManager = new AuthManager();
+            console.log("Inicializando aplicación ERP...");
             
-            // Inicializar ERPConnector
-            const erpConnector = new ERPConnector(ERP_STRUCTURE.scriptURL, authManager);
-            
-            // Inicializar managers
-            const usuariosManager = new UsuariosManager(erpConnector);
-            const clientesManager = new ClientesManager(erpConnector);
-            const productosManager = new ProductosManager(erpConnector);
-
-            // Event Listeners
-            document.getElementById('btn-google-login').addEventListener('click', () => {
-                authManager.signInWithGoogle();
-            });
-
-            document.getElementById('btn-logout').addEventListener('click', () => {
-                authManager.signOut();
-            });
-
-            document.getElementById('toggle-sidebar').addEventListener('click', () => {
-                const sidebar = document.getElementById('sidebar');
-                const mainContent = document.getElementById('main-content');
-                
-                sidebar.classList.toggle('collapsed');
-                mainContent.classList.toggle('expanded');
-                
-                // Para móviles
-                if (window.innerWidth <= 768) {
-                    sidebar.classList.toggle('mobile-open');
+            try {
+                // Verificar que Firebase esté cargado
+                if (typeof firebase === 'undefined') {
+                    throw new Error("Firebase no se cargó correctamente");
                 }
-            });
 
-            // Navegación entre módulos
-            document.querySelectorAll('.menu-item').forEach(item => {
-                item.addEventListener('click', function() {
-                    // Remover clase active de todos los items
-                    document.querySelectorAll('.menu-item').forEach(i => {
-                        i.classList.remove('active');
-                    });
-                    
-                    // Agregar clase active al item clickeado
-                    this.classList.add('active');
-                    
-                    // Cambiar el título del módulo
-                    const moduleName = this.getAttribute('data-module');
-                    const moduleTitle = document.querySelector('.module-title span');
-                    const moduleIcon = document.querySelector('.module-title i');
-                    
-                    switch(moduleName) {
-                        case 'core':
-                            moduleTitle.textContent = 'Configuración';
-                            moduleIcon.className = 'fas fa-cog';
-                            break;
-                        case 'ventas':
-                            moduleTitle.textContent = 'Ventas';
-                            moduleIcon.className = 'fas fa-shopping-cart';
-                            break;
-                        case 'inventario':
-                            moduleTitle.textContent = 'Inventario';
-                            moduleIcon.className = 'fas fa-boxes';
-                            break;
-                        case 'rrhh':
-                            moduleTitle.textContent = 'Recursos Humanos';
-                            moduleIcon.className = 'fas fa-users';
-                            break;
-                        case 'produccion':
-                            moduleTitle.textContent = 'Producción';
-                            moduleIcon.className = 'fas fa-industry';
-                            break;
+                // Inicializar AuthManager
+                const authManager = new AuthManager();
+                console.log("AuthManager inicializado");
+                
+                // Inicializar ERPConnector
+                const erpConnector = new ERPConnector(ERP_STRUCTURE.scriptURL, authManager);
+                console.log("ERPConnector inicializado");
+                
+                // Inicializar managers
+                const usuariosManager = new UsuariosManager(erpConnector);
+                const clientesManager = new ClientesManager(erpConnector);
+                const productosManager = new ProductosManager(erpConnector);
+                console.log("Managers inicializados");
+
+                // Event Listeners
+                document.getElementById('btn-google-login').addEventListener('click', async () => {
+                    try {
+                        console.log("Iniciando autenticación con Google...");
+                        await authManager.signInWithGoogle();
+                    } catch (error) {
+                        console.error("Error en autenticación:", error);
                     }
-                    
-                    // En una implementación real, aquí cargaríamos los datos del módulo
-                    console.log(`Cambiando al módulo: ${moduleName}`);
                 });
-            });
 
-            // Modal de usuario
-            document.getElementById('btn-add-user').addEventListener('click', () => {
-                document.getElementById('user-modal').classList.remove('hidden');
-            });
+                document.getElementById('btn-logout').addEventListener('click', async () => {
+                    try {
+                        console.log("Cerrando sesión...");
+                        await authManager.signOut();
+                    } catch (error) {
+                        console.error("Error al cerrar sesión:", error);
+                    }
+                });
 
-            document.getElementById('close-user-modal').addEventListener('click', () => {
-                document.getElementById('user-modal').classList.add('hidden');
-            });
+                document.getElementById('toggle-sidebar').addEventListener('click', () => {
+                    const sidebar = document.getElementById('sidebar');
+                    const mainContent = document.getElementById('main-content');
+                    
+                    sidebar.classList.toggle('collapsed');
+                    mainContent.classList.toggle('expanded');
+                    
+                    // Para móviles
+                    if (window.innerWidth <= 768) {
+                        sidebar.classList.toggle('mobile-open');
+                    }
+                });
 
-            document.getElementById('cancel-user-form').addEventListener('click', () => {
-                document.getElementById('user-modal').classList.add('hidden');
-            });
+                // Navegación entre módulos
+                document.querySelectorAll('.menu-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        // Remover clase active de todos los items
+                        document.querySelectorAll('.menu-item').forEach(i => {
+                            i.classList.remove('active');
+                        });
+                        
+                        // Agregar clase active al item clickeado
+                        this.classList.add('active');
+                        
+                        // Cambiar el título del módulo
+                        const moduleName = this.getAttribute('data-module');
+                        const moduleTitle = document.querySelector('.module-title span');
+                        const moduleIcon = document.querySelector('.module-title i');
+                        
+                        switch(moduleName) {
+                            case 'core':
+                                moduleTitle.textContent = 'Configuración';
+                                moduleIcon.className = 'fas fa-cog';
+                                break;
+                            case 'ventas':
+                                moduleTitle.textContent = 'Ventas';
+                                moduleIcon.className = 'fas fa-shopping-cart';
+                                break;
+                            case 'inventario':
+                                moduleTitle.textContent = 'Inventario';
+                                moduleIcon.className = 'fas fa-boxes';
+                                break;
+                            case 'rrhh':
+                                moduleTitle.textContent = 'Recursos Humanos';
+                                moduleIcon.className = 'fas fa-users';
+                                break;
+                            case 'produccion':
+                                moduleTitle.textContent = 'Producción';
+                                moduleIcon.className = 'fas fa-industry';
+                                break;
+                        }
+                        
+                        // En una implementación real, aquí cargaríamos los datos del módulo
+                        console.log(`Cambiando al módulo: ${moduleName}`);
+                    });
+                });
 
-            document.getElementById('user-form').addEventListener('submit', (e) => {
-                e.preventDefault();
-                
-                // En una implementación real, aquí enviaríamos los datos al backend
-                const formData = {
-                    ID_Usuario: document.getElementById('id_usuario').value,
-                    Username: document.getElementById('username').value,
-                    Email: document.getElementById('email').value,
-                    Nombre_Completo: document.getElementById('nombre_completo').value,
-                    Rol: document.getElementById('rol').value,
-                    Departamento: document.getElementById('departamento').value,
-                    Estado: document.getElementById('estado').value
-                };
-                
-                console.log('Datos del formulario:', formData);
-                
-                // Simular envío exitoso
-                alert('Usuario creado exitosamente');
-                document.getElementById('user-modal').classList.add('hidden');
-                document.getElementById('user-form').reset();
-            });
+                // Modal de usuario
+                document.getElementById('btn-add-user').addEventListener('click', () => {
+                    document.getElementById('user-modal').classList.remove('hidden');
+                });
 
-            // Cerrar modal al hacer clic fuera
-            document.getElementById('user-modal').addEventListener('click', (e) => {
-                if (e.target === document.getElementById('user-modal')) {
+                document.getElementById('close-user-modal').addEventListener('click', () => {
                     document.getElementById('user-modal').classList.add('hidden');
-                }
-            });
+                });
+
+                document.getElementById('cancel-user-form').addEventListener('click', () => {
+                    document.getElementById('user-modal').classList.add('hidden');
+                });
+
+                document.getElementById('user-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    // En una implementación real, aquí enviaríamos los datos al backend
+                    const formData = {
+                        ID_Usuario: document.getElementById('id_usuario').value,
+                        Username: document.getElementById('username').value,
+                        Email: document.getElementById('email').value,
+                        Nombre_Completo: document.getElementById('nombre_completo').value,
+                        Rol: document.getElementById('rol').value,
+                        Departamento: document.getElementById('departamento').value,
+                        Estado: document.getElementById('estado').value
+                    };
+                    
+                    console.log('Datos del formulario:', formData);
+                    
+                    // Simular envío exitoso
+                    alert('Usuario creado exitosamente');
+                    document.getElementById('user-modal').classList.add('hidden');
+                    document.getElementById('user-form').reset();
+                });
+
+                // Cerrar modal al hacer clic fuera
+                document.getElementById('user-modal').addEventListener('click', (e) => {
+                    if (e.target === document.getElementById('user-modal')) {
+                        document.getElementById('user-modal').classList.add('hidden');
+                    }
+                });
+
+                console.log("Aplicación ERP inicializada correctamente");
+
+            } catch (error) {
+                console.error("Error durante la inicialización:", error);
+                alert("Error al inicializar la aplicación: " + error.message);
+            }
+        });
+
+        // Manejo global de errores
+        window.addEventListener('error', function(event) {
+            console.error('Error global:', event.error);
+        });
+
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('Promesa rechazada no manejada:', event.reason);
         });
     </script>
 </body>
