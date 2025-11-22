@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP Modular</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --sidebar-width: 260px;
+            --header-height: 60px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Login Screen */
+        #login-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 32px;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .login-container h1 {
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .login-container p {
+            color: var(--secondary);
+            margin-bottom: 30px;
+        }
+
+        .btn-login {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .btn-login:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* App Screen */
+        #app-screen {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 1000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .toggle-sidebar {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--dark);
+        }
+
+        .app-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .btn-logout {
+            background: none;
+            border: none;
+            color: var(--secondary);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .btn-logout:hover {
+            background-color: #f1f5f9;
+            color: var(--danger);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            width: var(--sidebar-width);
+            height: calc(100vh - var(--header-height));
+            background: white;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            overflow-y: auto;
+            z-index: 999;
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+
+        .menu-title {
+            padding: 10px 20px;
+            font-size: 14px;
+            color: var(--secondary);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .menu-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--dark);
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .menu-item:hover {
+            background-color: #f1f5f9;
+            color: var(--primary);
+        }
+
+        .menu-item.active {
+            background-color: #e0f2fe;
+            color: var(--primary);
+            border-right: 3px solid var(--primary);
+        }
+
+        .menu-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            margin-top: var(--header-height);
+            padding: 20px;
+            transition: var(--transition);
+        }
+
+        .main-content.expanded {
+            margin-left: 0;
+        }
+
+        .module-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Workspace */
+        .workspace {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .workspace-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .workspace-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .workspace-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: var(--dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: #cbd5e1;
+        }
+
+        /* Data Table */
+        .data-table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background-color: #f8fafc;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--secondary);
+            padding: 5px;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .btn-icon:hover {
+            background-color: #f1f5f9;
+        }
+
+        .btn-edit:hover {
+            color: var(--primary);
+        }
+
+        .btn-delete:hover {
+            color: var(--danger);
+        }
+
+        /* Form Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            padding: 20px;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--secondary);
+            transition: var(--transition);
+        }
+
+        .btn-close:hover {
+            color: var(--danger);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-left: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--secondary);
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #cbd5e1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .workspace-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .workspace-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen">
+        <div class="login-container">
+            <div class="logo">
+                <i class="fas fa-cubes"></i>
+            </div>
+            <h1>ERP Modular</h1>
+            <p>Sistema de gestión empresarial integrado</p>
+            <button id="btn-google-login" class="btn-login">
+                <i class="fab fa-google"></i>
+                Iniciar sesión con Google
+            </button>
+        </div>
+    </div>
+
+    <!-- App Screen -->
+    <div id="app-screen" class="hidden">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <button class="toggle-sidebar" id="toggle-sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="app-title">ERP Modular</div>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar" id="user-avatar">U</div>
+                <button class="btn-logout" id="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                </button>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-menu">
+                <div class="menu-title">Módulos</div>
+                <a class="menu-item active" data-module="core">
+                    <i class="fas fa-cog"></i>
+                    <span>Configuración</span>
+                </a>
+                <a class="menu-item" data-module="ventas">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Ventas</span>
+                </a>
+                <a class="menu-item" data-module="inventario">
+                    <i class="fas fa-boxes"></i>
+                    <span>Inventario</span>
+                </a>
+                <a class="menu-item" data-module="rrhh">
+                    <i class="fas fa-users"></i>
+                    <span>Recursos Humanos</span>
+                </a>
+                <a class="menu-item" data-module="produccion">
+                    <i class="fas fa-industry"></i>
+                    <span>Producción</span>
+                </a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content" id="main-content">
+            <div class="module-title">
+                <i class="fas fa-cog"></i>
+                <span>Configuración</span>
+            </div>
+
+            <!-- Workspace -->
+            <div class="workspace">
+                <div class="workspace-header">
+                    <div class="workspace-title">Usuarios del Sistema</div>
+                    <div class="workspace-actions">
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-download"></i> Exportar
+                        </button>
+                        <button class="btn btn-primary" id="btn-add-user">
+                            <i class="fas fa-plus"></i> Nuevo Usuario
+                        </button>
+                    </div>
+                </div>
+
+                <div class="data-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Usuario</th>
+                                <th>Email</th>
+                                <th>Nombre Completo</th>
+                                <th>Rol</th>
+                                <th>Departamento</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>USR001</td>
+                                <td>admin</td>
+                                <td>admin@empresa.com</td>
+                                <td>Administrador del Sistema</td>
+                                <td><span class="badge">Administrador</span></td>
+                                <td>TI</td>
+                                <td><span class="badge badge-success">Activo</span></td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="btn-icon btn-edit">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn-icon btn-delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>USR002</td>
+                                <td>jperez</td>
+                                <td>jperez@empresa.com</td>
+                                <td>Juan Pérez</td>
+                                <td><span class="badge">Vendedor</span></td>
+                                <td>Ventas</td>
+                                <td><span class="badge badge-success">Activo</span></td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="btn-icon btn-edit">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn-icon btn-delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="workspace">
+                <div class="workspace-header">
+                    <div class="workspace-title">Empresas</div>
+                    <div class="workspace-actions">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Nueva Empresa
+                        </button>
+                    </div>
+                </div>
+
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- User Form Modal -->
+    <div class="modal-overlay hidden" id="user-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Agregar Usuario</div>
+                <button class="btn-close" id="close-user-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="user-form">
+                    <div class="form-group">
+                        <label class="form-label" for="id_usuario">ID Usuario</label>
+                        <input type="text" class="form-control" id="id_usuario" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="username">Usuario</label>
+                        <input type="text" class="form-control" id="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email</label>
+                        <input type="email" class="form-control" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="nombre_completo">Nombre Completo</label>
+                        <input type="text" class="form-control" id="nombre_completo" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="rol">Rol</label>
+                        <select class="form-control" id="rol" required>
+                            <option value="">Seleccionar rol</option>
+                            <option value="Administrador">Administrador</option>
+                            <option value="Vendedor">Vendedor</option>
+                            <option value="Supervisor">Supervisor</option>
+                            <option value="Operador">Operador</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="departamento">Departamento</label>
+                        <select class="form-control" id="departamento" required>
+                            <option value="">Seleccionar departamento</option>
+                            <option value="TI">TI</option>
+                            <option value="Ventas">Ventas</option>
+                            <option value="Producción">Producción</option>
+                            <option value="RRHH">RRHH</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="estado">Estado</label>
+                        <select class="form-control" id="estado" required>
+                            <option value="Activo">Activo</option>
+                            <option value="Inactivo">Inactivo</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="cancel-user-form">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script>
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDummyKeyReplaceWithYourOwn",
+            authDomain: "erp-modular.firebaseapp.com",
+            projectId: "erp-modular",
+            storageBucket: "erp-modular.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef123456"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Estructura del ERP
+        const ERP_STRUCTURE = {
+            scriptURL: "https://script.google.com/macros/s/ABCDEFG123456789/exec",
+            modules: {
+                core: {
+                    file: "ERP_Core",
+                    tables: {
+                        usuarios: [
+                            "ID_Usuario", "Username", "Email", "Nombre_Completo", "Rol", 
+                            "Departamento", "Fecha_Registro", "Estado", "Ultimo_Acceso"
+                        ],
+                        empresas: [
+                            "ID_Empresa", "RUT", "Razon_Social", "Nombre_Fantasia", "Giro",
+                            "Direccion", "Telefono", "Email", "Logo"
+                        ],
+                        configuracion: [
+                            "Clave", "Valor", "Descripcion", "Categoria", "Tipo_Dato"
+                        ]
+                    }
+                },
+                ventas: {
+                    file: "ERP_Ventas",
+                    tables: {
+                        clientes: [
+                            "ID_Cliente", "RUT", "Razon_Social", "Nombre_Comercial", "Giro",
+                            "Direccion", "Telefono", "Email", "Limite_Credito", "Categoria"
+                        ],
+                        cotizaciones: [
+                            "ID_Cotizacion", "ID_Cliente", "Fecha", "Estado", "Total", 
+                            "Validez_Dias", "Vendedor"
+                        ],
+                        pedidos: [
+                            "ID_Pedido", "ID_Cliente", "Fecha", "Estado", "Total", 
+                            "Prioridad", "Fecha_Entrega"
+                        ]
+                    }
+                },
+                inventario: {
+                    file: "ERP_Inventario", 
+                    tables: {
+                        productos: [
+                            "ID_Producto", "Codigo", "Nombre", "Descripcion", "Categoria",
+                            "Unidad_Medida", "Precio_Costo", "Precio_Venta", "Stock_Minimo",
+                            "Stock_Maximo", "Estado"
+                        ],
+                        categorias: [
+                            "ID_Categoria", "Nombre", "Descripcion", "Categoria_Padre"
+                        ],
+                        bodegas: [
+                            "ID_Bodega", "Nombre", "Ubicacion", "Responsable", "Capacidad", "Tipo"
+                        ]
+                    }
+                },
+                rrhh: {
+                    file: "ERP_RRHH",
+                    tables: {
+                        empleados: [
+                            "ID_Empleado", "RUT", "Nombres", "Apellidos", "Fecha_Nacimiento",
+                            "ID_Cargo", "Fecha_Contratacion", "Email", "Telefono", "Direccion",
+                            "Salario_Base", "Tipo_Contrato", "Activo", "Departamento"
+                        ],
+                        cargos: [
+                            "ID_Cargo", "Nombre", "Descripcion", "Salario_Base", "Nivel",
+                            "Departamento", "Beneficios_Asociados"
+                        ],
+                        nomina: [
+                            "ID_Nomina", "ID_Empleado", "Periodo", "Fecha_Pago", "Dias_Trabajados",
+                            "Salario_Bruto", "Horas_Extras", "Bonos", "Descuentos", "Salario_Neto", 
+                            "Estado", "Metodo_Pago"
+                        ]
+                    }
+                },
+                produccion: {
+                    file: "ERP_Produccion",
+                    tables: {
+                        ordenes_produccion: [
+                            "ID_Orden", "ID_Producto_Objetivo", "Cantidad", "Fecha_Inicio",
+                            "Fecha_Fin", "Estado", "Prioridad", "ID_Receta", "Notas"
+                        ],
+                        recetas: [
+                            "ID_Receta", "Producto_Final", "Version", "Estado", "Fecha_Creacion",
+                            "Costo_Estimado"
+                        ],
+                        recetas_detalle: [
+                            "ID_Receta_Detalle", "ID_Receta", "ID_Componente", "Cantidad",
+                            "Unidad_Medida", "Tipo", "Secuencia", "Costo_Unitario"
+                        ]
+                    }
+                }
+            }
+        };
+
+        // Mapeo de campos para formularios
+        const FIELD_MAPPING = {
+            usuarios: {
+                "ID_Usuario": { type: "text", required: true, label: "ID Usuario" },
+                "Username": { type: "text", required: true, label: "Usuario" },
+                "Email": { type: "email", required: true, label: "Email" },
+                "Nombre_Completo": { type: "text", required: true, label: "Nombre Completo" },
+                "Rol": { 
+                    type: "select", 
+                    required: true, 
+                    label: "Rol",
+                    options: ["Administrador", "Vendedor", "Supervisor", "Operador"]
+                },
+                "Departamento": { 
+                    type: "select", 
+                    required: true, 
+                    label: "Departamento",
+                    options: ["TI", "Ventas", "Producción", "RRHH", "Finanzas"]
+                },
+                "Estado": { 
+                    type: "select", 
+                    required: true, 
+                    label: "Estado",
+                    options: ["Activo", "Inactivo"]
+                }
+            },
+            clientes: {
+                "ID_Cliente": { type: "text", required: true, label: "ID Cliente" },
+                "RUT": { type: "text", required: true, label: "RUT" },
+                "Razon_Social": { type: "text", required: true, label: "Razón Social" },
+                "Nombre_Comercial": { type: "text", required: false, label: "Nombre Comercial" },
+                "Giro": { type: "text", required: false, label: "Giro" },
+                "Direccion": { type: "text", required: false, label: "Dirección" },
+                "Telefono": { type: "text", required: false, label: "Teléfono" },
+                "Email": { type: "email", required: false, label: "Email" },
+                "Limite_Credito": { type: "number", required: false, label: "Límite de Crédito" },
+                "Categoria": { 
+                    type: "select", 
+                    required: false, 
+                    label: "Categoría",
+                    options: ["A", "B", "C", "D"]
+                }
+            },
+            productos: {
+                "ID_Producto": { type: "text", required: true, label: "ID Producto" },
+                "Codigo": { type: "text", required: true, label: "Código" },
+                "Nombre": { type: "text", required: true, label: "Nombre" },
+                "Descripcion": { type: "textarea", required: false, label: "Descripción" },
+                "Categoria": { type: "text", required: false, label: "Categoría" },
+                "Unidad_Medida": { 
+                    type: "select", 
+                    required: true, 
+                    label: "Unidad de Medida",
+                    options: ["Unidad", "Kilogramo", "Litro", "Metro", "Caja"]
+                },
+                "Precio_Costo": { type: "number", required: true, label: "Precio Costo" },
+                "Precio_Venta": { type: "number", required: true, label: "Precio Venta" },
+                "Stock_Minimo": { type: "number", required: true, label: "Stock Mínimo" },
+                "Stock_Maximo": { type: "number", required: true, label: "Stock Máximo" },
+                "Estado": { 
+                    type: "select", 
+                    required: true, 
+                    label: "Estado",
+                    options: ["Activo", "Inactivo"]
+                }
+            }
+        };
+
+        // Clase para gestionar la autenticación
+        class AuthManager {
+            constructor() {
+                this.user = null;
+                this.token = null;
+                this.initAuthListener();
+            }
+
+            initAuthListener() {
+                firebase.auth().onAuthStateChanged((user) => {
+                    if (user) {
+                        this.user = user;
+                        this.token = user.accessToken;
+                        this.updateUI();
+                        document.getElementById('login-screen').classList.add('hidden');
+                        document.getElementById('app-screen').classList.remove('hidden');
+                    } else {
+                        this.user = null;
+                        this.token = null;
+                        document.getElementById('login-screen').classList.remove('hidden');
+                        document.getElementById('app-screen').classList.add('hidden');
+                    }
+                });
+            }
+
+            async signInWithGoogle() {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                try {
+                    await firebase.auth().signInWithPopup(provider);
+                } catch (error) {
+                    console.error("Error durante el login:", error);
+                    alert("Error durante el inicio de sesión: " + error.message);
+                }
+            }
+
+            async signOut() {
+                try {
+                    await firebase.auth().signOut();
+                } catch (error) {
+                    console.error("Error durante el logout:", error);
+                }
+            }
+
+            updateUI() {
+                if (this.user) {
+                    const avatar = document.getElementById('user-avatar');
+                    const displayName = this.user.displayName || 'Usuario';
+                    avatar.textContent = displayName.charAt(0).toUpperCase();
+                    avatar.title = displayName;
+                }
+            }
+
+            getToken() {
+                return this.token;
+            }
+
+            isAuthenticated() {
+                return this.user !== null;
+            }
+        }
+
+        // Clase para conectar con Google Sheets
+        class ERPConnector {
+            constructor(scriptURL, authManager) {
+                this.scriptURL = scriptURL;
+                this.authManager = authManager;
+            }
+
+            async makeRequest(action, sheet, data = null) {
+                if (!this.authManager.isAuthenticated()) {
+                    throw new Error("Usuario no autenticado");
+                }
+
+                const token = this.authManager.getToken();
+                let url = `${this.scriptURL}?action=${action}&sheet=${sheet}&token=${token}`;
+
+                if (data) {
+                    const params = new URLSearchParams(data);
+                    url += `&${params.toString()}`;
+                }
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Error ${response.status}: ${response.statusText}`);
+                    }
+
+                    const result = await response.json();
+                    return result;
+                } catch (error) {
+                    console.error("Error en la solicitud:", error);
+                    throw error;
+                }
+            }
+
+            async getData(sheet) {
+                return this.makeRequest('getData', sheet);
+            }
+
+            async insertData(sheet, data) {
+                return this.makeRequest('insert', sheet, data);
+            }
+
+            async updateData(sheet, id, data) {
+                return this.makeRequest('update', sheet, { id, ...data });
+            }
+
+            async deleteData(sheet, id) {
+                return this.makeRequest('delete', sheet, { id });
+            }
+        }
+
+        // Clase base para managers de hojas
+        class SheetManager {
+            constructor(sheetName, module, erpConnector) {
+                this.sheetName = sheetName;
+                this.module = module;
+                this.erpConnector = erpConnector;
+                this.fields = ERP_STRUCTURE.modules[module].tables[sheetName];
+            }
+
+            async getData() {
+                return this.erpConnector.getData(this.sheetName);
+            }
+
+            async create(data) {
+                return this.erpConnector.insertData(this.sheetName, data);
+            }
+
+            async update(id, data) {
+                return this.erpConnector.updateData(this.sheetName, id, data);
+            }
+
+            async delete(id) {
+                return this.erpConnector.deleteData(this.sheetName, id);
+            }
+
+            getFieldConfig() {
+                return FIELD_MAPPING[this.sheetName] || {};
+            }
+        }
+
+        // Managers específicos para cada hoja
+        class UsuariosManager extends SheetManager {
+            constructor(erpConnector) {
+                super('usuarios', 'core', erpConnector);
+            }
+        }
+
+        class ClientesManager extends SheetManager {
+            constructor(erpConnector) {
+                super('clientes', 'ventas', erpConnector);
+            }
+        }
+
+        class ProductosManager extends SheetManager {
+            constructor(erpConnector) {
+                super('productos', 'inventario', erpConnector);
+            }
+        }
+
+        // Inicialización de la aplicación
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar AuthManager
+            const authManager = new AuthManager();
+            
+            // Inicializar ERPConnector
+            const erpConnector = new ERPConnector(ERP_STRUCTURE.scriptURL, authManager);
+            
+            // Inicializar managers
+            const usuariosManager = new UsuariosManager(erpConnector);
+            const clientesManager = new ClientesManager(erpConnector);
+            const productosManager = new ProductosManager(erpConnector);
+
+            // Event Listeners
+            document.getElementById('btn-google-login').addEventListener('click', () => {
+                authManager.signInWithGoogle();
+            });
+
+            document.getElementById('btn-logout').addEventListener('click', () => {
+                authManager.signOut();
+            });
+
+            document.getElementById('toggle-sidebar').addEventListener('click', () => {
+                const sidebar = document.getElementById('sidebar');
+                const mainContent = document.getElementById('main-content');
+                
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('expanded');
+                
+                // Para móviles
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.toggle('mobile-open');
+                }
+            });
+
+            // Navegación entre módulos
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    // Remover clase active de todos los items
+                    document.querySelectorAll('.menu-item').forEach(i => {
+                        i.classList.remove('active');
+                    });
+                    
+                    // Agregar clase active al item clickeado
+                    this.classList.add('active');
+                    
+                    // Cambiar el título del módulo
+                    const moduleName = this.getAttribute('data-module');
+                    const moduleTitle = document.querySelector('.module-title span');
+                    const moduleIcon = document.querySelector('.module-title i');
+                    
+                    switch(moduleName) {
+                        case 'core':
+                            moduleTitle.textContent = 'Configuración';
+                            moduleIcon.className = 'fas fa-cog';
+                            break;
+                        case 'ventas':
+                            moduleTitle.textContent = 'Ventas';
+                            moduleIcon.className = 'fas fa-shopping-cart';
+                            break;
+                        case 'inventario':
+                            moduleTitle.textContent = 'Inventario';
+                            moduleIcon.className = 'fas fa-boxes';
+                            break;
+                        case 'rrhh':
+                            moduleTitle.textContent = 'Recursos Humanos';
+                            moduleIcon.className = 'fas fa-users';
+                            break;
+                        case 'produccion':
+                            moduleTitle.textContent = 'Producción';
+                            moduleIcon.className = 'fas fa-industry';
+                            break;
+                    }
+                    
+                    // En una implementación real, aquí cargaríamos los datos del módulo
+                    console.log(`Cambiando al módulo: ${moduleName}`);
+                });
+            });
+
+            // Modal de usuario
+            document.getElementById('btn-add-user').addEventListener('click', () => {
+                document.getElementById('user-modal').classList.remove('hidden');
+            });
+
+            document.getElementById('close-user-modal').addEventListener('click', () => {
+                document.getElementById('user-modal').classList.add('hidden');
+            });
+
+            document.getElementById('cancel-user-form').addEventListener('click', () => {
+                document.getElementById('user-modal').classList.add('hidden');
+            });
+
+            document.getElementById('user-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                // En una implementación real, aquí enviaríamos los datos al backend
+                const formData = {
+                    ID_Usuario: document.getElementById('id_usuario').value,
+                    Username: document.getElementById('username').value,
+                    Email: document.getElementById('email').value,
+                    Nombre_Completo: document.getElementById('nombre_completo').value,
+                    Rol: document.getElementById('rol').value,
+                    Departamento: document.getElementById('departamento').value,
+                    Estado: document.getElementById('estado').value
+                };
+                
+                console.log('Datos del formulario:', formData);
+                
+                // Simular envío exitoso
+                alert('Usuario creado exitosamente');
+                document.getElementById('user-modal').classList.add('hidden');
+                document.getElementById('user-form').reset();
+            });
+
+            // Cerrar modal al hacer clic fuera
+            document.getElementById('user-modal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('user-modal')) {
+                    document.getElementById('user-modal').classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
