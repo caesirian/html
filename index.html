@@ -566,7 +566,42 @@ flex-direction: column; /* Esta línea se añade */
     <!-- Contador de página fijo (mejorado) -->
     <div class="contador-pagina" id="contadorPagina">1 / 9</div>
     
-    <div class="presentacion-container">
+    <div class="presentacion-container"><div style="max-width:420px;margin:auto;padding:20px;border:1px solid #ccc;border-radius:10px">
+  <h3>Recibir archivo por email</h3>
+
+  <input type="email" id="email" placeholder="Tu email"
+  style="width:100%;padding:10px;margin-bottom:10px" required>
+
+  <button onclick="enviarArchivo()" style="width:100%;padding:10px">
+    Enviar archivo
+  </button>
+
+  <p id="mensaje"></p>
+</div>
+
+<script>
+function enviarArchivo() {
+  const email = document.getElementById("email").value;
+  const mensaje = document.getElementById("mensaje");
+
+  if (!email) {
+    mensaje.innerText = "⚠️ Ingresá un email válido";
+    return;
+  }
+
+  fetch("https://script.google.com/macros/s/AKfycbzooeZ_kIhzH-D6aOa1kRPYhx6lCEWMUMh1hP3-WJVxbSTI6KVuap8rPam72EkV1HYm/exec", {
+    method: "POST",
+    body: new URLSearchParams({ email })
+  })
+  .then(response => response.text())
+  .then(data => {
+    mensaje.innerText = "✅ Archivo enviado correctamente";
+  })
+  .catch(() => {
+    mensaje.innerText = "❌ Error al enviar el archivo";
+  });
+}
+</script>
         <div class="presentacion" id="presentacion">
             <!-- Página 1 -->
             <div class="pagina activa" id="pagina1">
