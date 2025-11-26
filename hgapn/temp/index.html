@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Exclusivo - Sistema</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+        }
+
+        .login-header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .login-content {
+            padding: 40px;
+        }
+
+        .google-btn {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3);
+        }
+
+        .google-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(66, 133, 244, 0.4);
+            background: #357ae8;
+        }
+
+        .google-btn:active {
+            transform: translateY(0);
+        }
+
+        .google-btn i {
+            font-size: 20px;
+            background: white;
+            color: #4285f4;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .google-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .divider {
+            margin: 30px 0;
+            position: relative;
+            text-align: center;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e1e5e9;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .security-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 25px;
+            text-align: left;
+        }
+
+        .security-info h4 {
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .security-info ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .security-info li {
+            padding: 5px 0;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .security-info li i {
+            color: #28a745;
+            font-size: 12px;
+        }
+
+        .access-denied {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 1px solid #f5c6cb;
+            display: none;
+        }
+
+        .access-denied h3 {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4285f4;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .authorized-user {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            overflow: hidden;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .redirect-message {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .firebase-status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            display: none;
+        }
+
+        .firebase-status.connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .firebase-status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px solid #f5c6cb;
+            display: none;
+        }
+
+        .error-message h4 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .retry-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+
+        .retry-btn:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1><i class="fas fa-shield-alt"></i> Acceso Exclusivo</h1>
+            <p>Autenticación requerida mediante Google</p>
+        </div>
+
+        <div class="login-content">
+            <!-- Estado de Firebase -->
+            <div class="firebase-status" id="firebaseStatus">
+                <span id="firebaseStatusText">Conectando con Firebase...</span>
+            </div>
+
+            <!-- Mensaje de redirección automática -->
+            <div class="redirect-message" id="redirectMessage">
+                <i class="fas fa-check-circle"></i>
+                <h3>¡Acceso autorizado!</h3>
+                <p>Redirigiendo al sistema...</p>
+            </div>
+
+            <!-- Información del usuario autorizado -->
+            <div class="authorized-user" id="authorizedUser">
+                <div class="user-avatar" id="userAvatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h3 id="userName">Usuario</h3>
+                <p id="userEmail">email@ejemplo.com</p>
+                <p><strong>Estado:</strong> <span style="color: #28a745;">Autorizado</span></p>
+            </div>
+
+            <!-- Botón principal de Google -->
+            <button class="google-btn" onclick="handleGoogleSignIn()" id="googleBtn">
+                <i class="fab fa-google"></i>
+                <span>Iniciar sesión con Google</span>
+            </button>
+
+            <div class="divider">
+                <span>Acceso Seguro</span>
+            </div>
+
+            <!-- Mensaje de error de autenticación -->
+            <div class="error-message" id="authError">
+                <h4><i class="fas fa-exclamation-triangle"></i> Error de Autenticación</h4>
+                <p id="authErrorText">Ha ocurrido un error durante el login.</p>
+                <button class="retry-btn" onclick="retryLogin()">
+                    <i class="fas fa-redo"></i> Intentar nuevamente
+                </button>
+            </div>
+
+            <!-- Mensaje de acceso denegado -->
+            <div class="access-denied" id="accessDenied">
+                <h3><i class="fas fa-exclamation-triangle"></i> Acceso Denegado</h3>
+                <p><strong>No tenés permiso para ingresar.</strong></p>
+                <p style="margin-top: 10px;">Si creés que deberías tener acceso, comunicate con el desarrollador.</p>
+                <div style="margin-top: 15px; padding: 10px; background: white; border-radius: 5px;">
+                    <small><strong>Información registrada:</strong></small><br>
+                    <small id="deniedInfo">Cuenta: No identificada</small>
+                </div>
+                <button class="logout-btn" onclick="logoutUser()">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar sesión y volver a intentar
+                </button>
+            </div>
+
+            <!-- Información de seguridad -->
+            <div class="security-info">
+                <h4><i class="fas fa-lock"></i> Seguridad del Sistema</h4>
+                <ul>
+                    <li><i class="fas fa-check"></i> Autenticación exclusiva con Google</li>
+                    <li><i class="fas fa-check"></i> Acceso restringido a cuentas autorizadas</li>
+                    <li><i class="fas fa-check"></i> Registro de todos los intentos de acceso</li>
+                    <li><i class="fas fa-check"></i> Protección contra accesos no autorizados</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p id="loadingText">Verificando acceso...</p>
+        </div>
+    </div>
+
+    <script>
+        // =============================================
+        // CONFIGURACIÓN FIREBASE
+        // =============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCOoMcQ3gMWgoNumTxmqJngDqQDhYqi8Ec",
+            authDomain: "hg-soluciones-f7090.firebaseapp.com",
+            projectId: "hg-soluciones-f7090",
+            storageBucket: "hg-soluciones-f7090.firebasestorage.app",
+            messagingSenderId: "738232898260",
+            appId: "1:738232898260:web:641e6a5732f8020a11a141",
+            measurementId: "G-QXNXRCRPRG"
+        };
+
+        // =============================================
+        // INICIALIZACIÓN FIREBASE
+        // =============================================
+        let auth = null;
+        let isInitialized = false;
+
+        function initializeFirebase() {
+            try {
+                // Verificar si Firebase está disponible
+                if (typeof firebase === 'undefined') {
+                    updateFirebaseStatus('❌ Firebase no está disponible', 'error');
+                    return false;
+                }
+
+                // Inicializar Firebase
+                firebase.initializeApp(firebaseConfig);
+                auth = firebase.auth();
+                isInitialized = true;
+                
+                updateFirebaseStatus('✅ Firebase conectado correctamente', 'connected');
+                console.log('✅ Firebase inicializado correctamente');
+                
+                // 🔥 NO VERIFICAMOS SESIONES ACTIVAS - SOLO MOSTRAMOS BOTÓN
+                console.log('🔐 Acceso VOLUNTARIO - Mostrando botón de login');
+                document.getElementById('googleBtn').style.display = 'flex';
+                
+                return true;
+                
+            } catch (error) {
+                console.error('❌ Error inicializando Firebase:', error);
+                updateFirebaseStatus('❌ Error conectando con Firebase', 'error');
+                return false;
+            }
+        }
+
+        function updateFirebaseStatus(message, type) {
+            const statusElement = document.getElementById('firebaseStatus');
+            const statusText = document.getElementById('firebaseStatusText');
+            
+            statusElement.style.display = 'block';
+            statusElement.className = `firebase-status ${type}`;
+            statusText.textContent = message;
+        }
+
+        // =============================================
+        // LOGIN CON GOOGLE - ACCESO 100% VOLUNTARIO
+        // =============================================
+        async function handleGoogleSignIn() {
+            console.log('🔄 Iniciando login con Google...');
+            
+            if (!isInitialized) {
+                showAuthError('Error: Firebase no está inicializado. Recarga la página.');
+                return;
+            }
+
+            try {
+                // Ocultar mensajes anteriores y botón
+                hideAllMessages();
+                document.getElementById('googleBtn').style.display = 'none';
+                
+                // Mostrar loading
+                showLoading(true, 'Abriendo ventana de Google...');
+                
+                const provider = new firebase.auth.GoogleAuthProvider();
+                provider.addScope('email');
+                provider.addScope('profile');
+                
+                // 🔥 FORZAR SELECCIÓN DE CUENTA CADA VEZ - OBLIGAR ELEGIR
+                provider.setCustomParameters({
+                    prompt: 'select_account', // Siempre pedir seleccionar cuenta
+                    login_hint: '' // Limpiar cualquier hint previo
+                });
+
+                console.log('🔑 Abriendo popup de Google para selección de cuenta...');
+                
+                const result = await auth.signInWithPopup(provider);
+                console.log('✅ Login Google exitoso:', result.user.email);
+                
+                // Verificar si el usuario está autorizado
+                if (result.user.email === 'hernan.garbarino@gmail.com') {
+                    // ✅ USUARIO AUTORIZADO
+                    showAuthorizedUser(result.user);
+                    
+                    // Redirigir después de 2 segundos
+                    setTimeout(() => {
+                        // Usar replace para evitar que el usuario vuelva al index con el botón "atrás"
+                        window.location.replace('mod_index7.html');
+                    }, 2000);
+                    
+                } else {
+                    // ❌ USUARIO NO AUTORIZADO
+                    showLoading(false);
+                    showAccessDenied(result.user.email);
+                    
+                    // Cerrar sesión inmediatamente
+                    await auth.signOut();
+                }
+                
+            } catch (error) {
+                console.error('❌ Error en login Google:', error);
+                showLoading(false);
+                
+                // Re-habilitar botón para nuevo intento
+                document.getElementById('googleBtn').style.display = 'flex';
+                
+                // Mostrar error específico y mantenerlo en pantalla
+                handleAuthError(error);
+            }
+        }
+
+        // =============================================
+        // MANEJO DE ERRORES - MANTIENE MENSAJES
+        // =============================================
+        function handleAuthError(error) {
+            let message = 'Error de autenticación';
+            
+            switch (error.code) {
+                case 'auth/popup-closed-by-user':
+                    message = 'Ventana de login cerrada. Haz clic en el botón de Google para volver a intentar.';
+                    break;
+                case 'auth/popup-blocked':
+                    message = 'El popup fue bloqueado. Permite ventanas emergentes para este sitio.';
+                    break;
+                case 'auth/network-request-failed':
+                    message = 'Error de red. Verifica tu conexión a internet e intenta nuevamente.';
+                    break;
+                case 'auth/unauthorized-domain':
+                    message = 'Dominio no autorizado. Contacta al administrador.';
+                    break;
+                default:
+                    message = error.message || 'Error desconocido durante la autenticación';
+            }
+            
+            showAuthError(message);
+        }
+
+        function showAuthError(message) {
+            document.getElementById('authErrorText').textContent = message;
+            document.getElementById('authError').style.display = 'block';
+            // El botón ya está oculto durante el proceso, se mostrará con retryLogin()
+        }
+
+        // =============================================
+        // FUNCIONES DE INTERFAZ - MENSAJES PERMANENTES
+        // =============================================
+        function showAuthorizedUser(user) {
+            showLoading(false);
+            hideAllMessages();
+            
+            document.getElementById('authorizedUser').style.display = 'block';
+            document.getElementById('redirectMessage').style.display = 'block';
+            
+            document.getElementById('userName').textContent = user.displayName || user.email.split('@')[0];
+            document.getElementById('userEmail').textContent = user.email;
+            
+            // Actualizar avatar si existe
+            const avatar = document.getElementById('userAvatar');
+            if (user.photoURL) {
+                avatar.innerHTML = `<img src="${user.photoURL}" alt="${user.displayName}">`;
+            }
+        }
+
+        function showAccessDenied(email) {
+            showLoading(false);
+            hideAllMessages();
+            
+            document.getElementById('accessDenied').style.display = 'block';
+            document.getElementById('deniedInfo').textContent = `Cuenta: ${email}`;
+            
+            // El botón de Google permanece oculto hasta que el usuario haga clic en "Cerrar sesión"
+        }
+
+        function hideAllMessages() {
+            document.getElementById('authError').style.display = 'none';
+            document.getElementById('accessDenied').style.display = 'none';
+            document.getElementById('authorizedUser').style.display = 'none';
+            document.getElementById('redirectMessage').style.display = 'none';
+        }
+
+        function resetUI() {
+            hideAllMessages();
+            document.getElementById('googleBtn').style.display = 'flex';
+        }
+
+        // =============================================
+        // BOTONES DE ACCIÓN
+        // =============================================
+        function retryLogin() {
+            hideAllMessages();
+            document.getElementById('googleBtn').style.display = 'flex';
+        }
+
+        async function logoutUser() {
+            try {
+                if (auth && auth.currentUser) {
+                    await auth.signOut();
+                }
+                resetUI();
+            } catch (error) {
+                console.error('Error cerrando sesión:', error);
+                showAuthError('Error al cerrar sesión');
+            }
+        }
+
+        function showLoading(show, text = 'Cargando...') {
+            const loading = document.getElementById('loading');
+            const loadingText = document.getElementById('loadingText');
+            
+            if (show) {
+                loading.style.display = 'block';
+                loadingText.textContent = text;
+            } else {
+                loading.style.display = 'none';
+            }
+        }
+
+        // =============================================
+        // INICIALIZACIÓN - SIN VERIFICACIÓN DE SESIÓN
+        // =============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Inicializando sistema de acceso VOLUNTARIO...');
+            console.log('🔐 NO se verifican sesiones activas - Acceso 100% voluntario');
+            initializeFirebase();
+        });
+
+        // Prevenir clics múltiples
+        let isProcessing = false;
+        
+        // Sobrescribir la función para prevenir múltiples clics
+        const originalHandleGoogleSignIn = handleGoogleSignIn;
+        handleGoogleSignIn = function() {
+            if (isProcessing) {
+                return;
+            }
+            
+            isProcessing = true;
+            originalHandleGoogleSignIn().finally(() => {
+                setTimeout(() => {
+                    isProcessing = false;
+                }, 2000);
+            });
+        };
+
+        // Función para mostrar notificaciones temporales
+        function showNotification(message, type = 'info', duration = 4000) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${getNotificationColor(type)};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                max-width: 300px;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+            `;
+            
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-${getNotificationIcon(type)}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animación de entrada
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Auto-eliminar después de la duración
+            if (duration > 0) {
+                setTimeout(() => {
+                    notification.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 300);
+                }, duration);
+            }
+        }
+
+        function getNotificationColor(type) {
+            const colors = {
+                success: '#28a745',
+                error: '#dc3545',
+                warning: '#ffc107',
+                info: '#17a2b8'
+            };
+            return colors[type] || '#17a2b8';
+        }
+
+        function getNotificationIcon(type) {
+            const icons = {
+                success: 'check-circle',
+                error: 'exclamation-triangle',
+                warning: 'exclamation-circle',
+                info: 'info-circle'
+            };
+            return icons[type] || 'info-circle';
+        }
+    </script>
+</body>
+</html>
