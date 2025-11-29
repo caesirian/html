@@ -21,8 +21,8 @@ body {
     background: #f4f9fb;
     color: #333;
     line-height: 1.6;
-    overflow: hidden;
-    height: 100vh;
+    overflow-x: hidden;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     touch-action: pan-y;
@@ -46,180 +46,191 @@ body {
     font-size: 15px;
     opacity: 0.9;
 }
+
 /* NUEVOS ESTILOS PARA LA COOPERATIVA */
-    .logo-cooperativa {
-        text-align: center;
-        margin: 20px 0;
-    }
-    
-    .logo-cooperativa h2 {
-        font-size: 2.5rem;
-        color: #BF9A56;
-        margin-bottom: 10px;
-        text-transform: uppercase;
-    }
-    
-    .logo-cooperativa p {
-        font-size: 1.2rem;
-        color: #568C30;
-        font-weight: 600;
-    }
-    
-    .info-legal {
-        background: #1a231a;
-        padding: 15px;
-        border-radius: 10px;
-        margin: 20px 0;
-        border-left: 4px solid #568C30;
-    }
-    
-    .info-item {
-        display: flex;
-        margin-bottom: 10px;
-    }
-    
-    .info-label {
-        font-weight: 600;
-        min-width: 180px;
-        color: #BF9A56;
-    }
-    
-    .info-value {
-        color: #d0d0d0;
-    }
-    
-    .articulo {
-        background: #1a231a;
-        padding: 20px;
-        border-radius: 10px;
-        margin: 20px 0;
-        border-left: 4px solid #0F5922;
-    }
-    
-    .articulo h3 {
-        color: #BF9A56;
-        margin-bottom: 15px;
-    }
-    
-    .unidad-productiva {
-        background: #1a231a;
-        border-radius: 10px;
-        padding: 20px;
-        margin: 20px 0;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        border: 1px solid #2c3b2c;
-    }
-    
-    .unidad-productiva h3 {
-        color: #BF9A56;
-        margin-bottom: 15px;
-        display: flex;
-        align-items: center;
-    }
-    
-    .unidad-productiva h3 i {
-        margin-right: 10px;
-        color: #568C30;
-    }
-    
-    .convenio-item {
-        background: #1a231a;
-        border-radius: 10px;
-        padding: 20px;
-        margin: 15px 0;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        border: 1px solid #2c3b2c;
-        transition: all 0.3s ease;
-    }
-    
-    .convenio-item:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 15px rgba(0,0,0,0.4);
-        background: #1e291e;
-    }
-    
-    .convenio-item h3 {
-        color: #BF9A56;
-        margin-bottom: 10px;
-        display: flex;
-        align-items: center;
-    }
-    
-    .convenio-item h3 i {
-        margin-right: 10px;
-        color: #568C30;
-    }
-    
-    .eslogan {
-        text-align: center;
-        padding: 30px;
-        background: linear-gradient(135deg, #1a231a, #1e291e);
-        border-radius: 10px;
-        margin: 30px 0;
-        border: 1px solid #2c3b2c;
-    }
-    
-    .eslogan h2 {
-        font-size: 2rem;
-        color: #BF9A56;
-        margin-bottom: 15px;
-    }
-    
-    .eslogan p {
-        font-size: 1.2rem;
-        color: #568C30;
-        font-weight: 600;
-    }
-    
-    .centrado {
-        text-align: center;
-    }
+.logo-cooperativa {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.logo-cooperativa h2 {
+    font-size: 2.5rem;
+    color: #BF9A56;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.logo-cooperativa p {
+    font-size: 1.2rem;
+    color: #568C30;
+    font-weight: 600;
+}
+
+.info-legal {
+    background: #1a231a;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 20px 0;
+    border-left: 4px solid #568C30;
+}
+
+.info-item {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.info-label {
+    font-weight: 600;
+    min-width: 180px;
+    color: #BF9A56;
+}
+
+.info-value {
+    color: #d0d0d0;
+}
+
+.articulo {
+    background: #1a231a;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+    border-left: 4px solid #0F5922;
+}
+
+.articulo h3 {
+    color: #BF9A56;
+    margin-bottom: 15px;
+}
+
+.unidad-productiva {
+    background: #1a231a;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    border: 1px solid #2c3b2c;
+}
+
+.unidad-productiva h3 {
+    color: #BF9A56;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.unidad-productiva h3 i {
+    margin-right: 10px;
+    color: #568C30;
+}
+
+.convenio-item {
+    background: #1a231a;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 15px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    border: 1px solid #2c3b2c;
+    transition: all 0.3s ease;
+}
+
+.convenio-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+    background: #1e291e;
+}
+
+.convenio-item h3 {
+    color: #BF9A56;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.convenio-item h3 i {
+    margin-right: 10px;
+    color: #568C30;
+}
+
+.eslogan {
+    text-align: center;
+    padding: 30px;
+    background: linear-gradient(135deg, #1a231a, #1e291e);
+    border-radius: 10px;
+    margin: 30px 0;
+    border: 1px solid #2c3b2c;
+}
+
+.eslogan h2 {
+    font-size: 2rem;
+    color: #BF9A56;
+    margin-bottom: 15px;
+}
+
+.eslogan p {
+    font-size: 1.2rem;
+    color: #568C30;
+    font-weight: 600;
+}
+
+.centrado {
+    text-align: center;
+}
 
 /* Estilos para el contenido de las páginas */
-    .contenido-pagina {
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-    
-    .tarjeta-con-imagen {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-        margin-bottom: 25px;
-    }
-    
-    .tarjeta-con-imagen .icono {
-        font-size: 2.5rem;
-        color: #568C30;
-        min-width: 60px;
-        text-align: center;
-    }
-    
-    .tarjeta-con-imagen .texto {
-        flex: 1;
-    }
-    
-    .lista-destacada {
-        list-style-type: none;
-        margin-left: 0;
-    }
-    
-    .lista-destacada li {
-        padding: 12px 15px;
-        margin-bottom: 10px;
-        background: rgba(191, 154, 86, 0.1);
-        border-left: 4px solid #BF9A56;
-        border-radius: 0 8px 8px 0;
-    }
+.contenido-pagina {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.tarjeta-con-imagen {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.tarjeta-con-imagen .icono {
+    font-size: 2.5rem;
+    color: #568C30;
+    min-width: 60px;
+    text-align: center;
+}
+
+.tarjeta-con-imagen .texto {
+    flex: 1;
+}
+
+.lista-destacada {
+    list-style-type: none;
+    margin-left: 0;
+}
+
+.lista-destacada li {
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    background: rgba(191, 154, 86, 0.1);
+    border-left: 4px solid #BF9A56;
+    border-radius: 0 8px 8px 0;
+}
+
+/* CONTENEDOR PRINCIPAL */
+.contenedor-principal {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
 /* PRESENTACION */
 .presentacion-container {
     flex: 1;
     position: relative;
-    overflow: hidden;
+    overflow-y: auto;
     background: #fff;
     margin: 15px;
     border-radius: 14px;
     box-shadow: 0 4px 30px rgba(0,0,0,0.08);
+    min-height: 0; /* Importante para que funcione flex correctamente */
 }
 
 .pagina {
@@ -298,39 +309,6 @@ ul { margin-left: 25px; margin-bottom: 18px; }
     min-width: 280px;
 }
 
-/* BOTONES */
-.navegacion {
-    display: flex;
-    justify-content: center;
-    padding: 15px;
-    background: linear-gradient(135deg, #C22F75, #27B4C3);
- z-index: 9999; /* asegura que quede por encima */
-    padding-bottom: env(safe-area-inset-bottom); /* iPhone notch y algunos Android */
-}
-@media (max-width: 768px) {
-    .navegacion {
-        /*display: none; */
-    }
-}
-.btn {
-    background: #2A9EB6;
-    color: #FFFFFF;
-    border: none;
-    padding: 12px 26px;
-    margin: 0 10px;
-    border-radius: 30px;
-    cursor: pointer;
-    font-size: 15px;
-    transition: all 0.3s ease;
-    font-weight: 600;
-}
-.btn:hover {
-    background: #D73E94;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-.btn:disabled { background: #ccc; cursor: not-allowed; }
-
 /* INDICADORES */
 .indicadores {
     display: flex;
@@ -393,7 +371,7 @@ ul { margin-left: 25px; margin-bottom: 18px; }
     align-items: center;
     cursor: pointer;
     box-shadow: 0 3px 12px rgba(0,0,0,0.25);
-flex-direction: column; /* Esta línea se añade */
+    flex-direction: column;
 }
 .bar {
     width: 25px;
@@ -441,6 +419,35 @@ flex-direction: column; /* Esta línea se añade */
     display: none;
 }
 
+/* FOOTER CORREGIDO */
+.navegacion {
+    display: flex;
+    justify-content: center;
+    padding: 15px;
+    background: linear-gradient(135deg, #C22F75, #27B4C3);
+    z-index: 9999;
+    padding-bottom: env(safe-area-inset-bottom);
+    margin-top: auto; /* Esto asegura que el footer se mantenga al fondo */
+}
+.btn {
+    background: #2A9EB6;
+    color: #FFFFFF;
+    border: none;
+    padding: 12px 26px;
+    margin: 0 10px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+.btn:hover {
+    background: #D73E94;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.btn:disabled { background: #ccc; cursor: not-allowed; }
+
 /* RESPONSIVE */
 @media (max-width: 768px) {
     .pagina { padding: 25px; }
@@ -454,6 +461,14 @@ flex-direction: column; /* Esta línea se añade */
         font-size: 13px;
         padding: 8px 14px;
     }
+    .navegacion {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .navegacion .btn {
+        flex: 1;
+        min-width: 120px;
+    }
 }
 </style>
 
@@ -463,93 +478,6 @@ flex-direction: column; /* Esta línea se añade */
    <div class="header">
         <h1>Propuestas de Colaboración - 2025</h1>
         <p>Pensado para el Fortalecimiento Interno en conjunto con IMDEL</p>
- <!--<div style="max-width:420px;margin:auto;padding:20px;border:1px solid #ccc;border-radius:10px">
-  <h3>Recibir archivo por email</h3>
-
-  <input type="email" id="email" placeholder="Tu email"
-  style="width:100%;padding:10px;margin-bottom:10px" required>
-
-  <button onclick="enviarArchivo()" style="width:100%;padding:10px">
-    Enviar archivo
-  </button>
-
-  <p id="mensaje"></p>
-</div>-->
-<script>
-!function(){
-    var e=atob,
-        t=e("NTQ5MTEzNDc5NjU2Mg=="),
-        n=e("MTg2NTYxMQ=="),
-        o=function(e){
-            // Primero verificar parámetros UTM de la URL actual
-            var urlParams = new URLSearchParams(window.location.search);
-            var utmSource = urlParams.get('utm_source');
-            var utmMedium = urlParams.get('utm_medium');
-            var utmCampaign = urlParams.get('utm_campaign');
-            
-            // Si hay UTM parameters, usarlos
-            if (utmSource) {
-                var utmText = utmSource;
-                if (utmMedium) utmText += ' - ' + utmMedium;
-                if (utmCampaign) utmText += ' - ' + utmCampaign;
-                return 'UTM: ' + utmText;
-            }
-            
-            // Si no hay UTM, usar la lógica original del referrer
-            if(!e) return "Acceso Directo";
-            if(e.includes("web.whatsapp.com")) return "WhatsApp Web";
-            if(e.includes("instagram.com/stories/")) return "Instagram Story";
-            if(e.includes("instagram.com")) return "Instagram";
-            if(e.includes("facebook.com")) return "Facebook";
-            if(e.includes("twitter.com")) return "Twitter";
-            if(e.includes("linkedin.com")) return "LinkedIn";
-            if(e.includes("tiktok.com")) return "TikTok";
-            if(e.includes("google.com")) return "Google";
-            if(e.includes("youtube.com")) return "YouTube";
-            if(e.includes("github.com")) return "GitHub";
-            try{
-                return "Web: "+new URL(e).hostname;
-            }catch(t){
-                return "Enlace Externo";
-            }
-        };
-    
-    fetch("https://ipapi.co/json/")
-        .then(function(e){return e.json();})
-        .then(function(ipData){
-            if("AR"===ipData.country){
-                var a=new Date(),
-                    r=a.toLocaleTimeString("es-AR"),
-                    c=o(document.referrer),
-                    i=encodeURIComponent("📱 NUEVO ACCESO A PROPUESTAS DE COLABORACION:\n📍 País: "+ipData.country_name+"\n🏙️ Ciudad: "+ipData.city+"\n📅 Fecha: "+a.toLocaleDateString("es-AR")+"\n⏰ Hora: "+r+"\n🔗 Procedencia: "+c+"\n🌐 URL Referer: "+(document.referrer||"Ninguna"));
-                
-                // Enviar a WhatsApp
-                fetch("https://api.callmebot.com/whatsapp.php?phone="+t+"&text="+i+"&apikey="+n).catch(function(e){});
-                
-                // Registrar en Google Sheets
-                var sheetData = {
-                    pais: ipData.country_name,
-                    ciudad: ipData.city,
-                    procedencia: c,
-                    referer: document.referrer || "Ninguna",
-                    userAgent: navigator.userAgent,
-                    ip: ipData.ip,
-                    utm_source: new URLSearchParams(window.location.search).get('utm_source') || '',
-                    utm_medium: new URLSearchParams(window.location.search).get('utm_medium') || '',
-                    utm_campaign: new URLSearchParams(window.location.search).get('utm_campaign') || '',
-                    url_completa: window.location.href
-                };
-                
-                // Reemplaza con tu URL de Apps Script
-                fetch('https://script.google.com/macros/s/AKfycbxk9flcVDzmpmP7j2vyM9Aj440LXI1I7RivD_wrb2SYBTL7uqo98hjN7anNj9gHLY-tAA/exec', {
-                    method: 'POST',
-                    body: JSON.stringify(sheetData)
-                }).catch(function(e){});
-            }
-        })
-        .catch(function(e){});
-}();
-</script>
     </div>
     
     <div class="menu-movil" id="menuMovil">
@@ -572,449 +500,417 @@ flex-direction: column; /* Esta línea se añade */
     
     <div class="overlay" id="overlay"></div>
     
-    <div class="progreso">
-        <div class="barra-progreso" id="barraProgreso"></div>
-    </div>
-    
-    <!-- Contador de página fijo (mejorado) -->
-    <div class="contador-pagina" id="contadorPagina">1 / 9</div>
-    <!-- 
-    <div class="presentacion-container"><div style="max-width:420px;margin:auto;padding:20px;border:1px solid #ccc;border-radius:10px">
-<h3>Recibir archivo por email</h3>
-
-  <input type="email" id="email" placeholder="Tu email"
-  style="width:100%;padding:10px;margin-bottom:10px" required>
-
-  <button onclick="enviarArchivo()" style="width:100%;padding:10px">
-    Enviar archivo
-  </button>
+    <!-- CONTENEDOR PRINCIPAL CORREGIDO -->
+    <div class="contenedor-principal">
+        <div class="progreso">
+            <div class="barra-progreso" id="barraProgreso"></div>
+        </div>
         
-  <p id="mensaje"></p>
-
-</div>-->
-
-<script>
-function enviarArchivo() {
-  const email = document.getElementById("email").value;
-  const mensaje = document.getElementById("mensaje");
-
-  if (!email) {
-    mensaje.innerText = "⚠️ Ingresá un email válido";
-    return;
-  }
-
-  fetch("https://script.google.com/macros/s/AKfycbzooeZ_kIhzH-D6aOa1kRPYhx6lCEWMUMh1hP3-WJVxbSTI6KVuap8rPam72EkV1HYm/exec", {
-    method: "POST",
-    body: new URLSearchParams({ email })
-  })
-  .then(response => response.text())
-  .then(data => {
-    mensaje.innerText = "✅ Archivo enviado correctamente";
-  })
-  .catch(() => {
-    mensaje.innerText = "❌ Error al enviar el archivo";
-  });
-}
-</script>
-        <div class="presentacion" id="presentacion">
-            <!-- Página 1 -->
-            <div class="pagina activa" id="pagina1">
-                <h1 class="centrado">PROGRAMA DE FORTALECIMIENTO ADMINISTRATIVO PARA ORGANIZACIONES DE LA ECONOMÍA POPULAR</h1>
-                <h2 class="centrado">"Asesoramiento Técnico: Fortaleciendo la Gestión Interna"</h2>
-                
-                <div class="destacado">
-                    <h3>Modalidad:</h3>
-                    <p>Asesorías personalizadas (presenciales o virtuales) por sesiones de 2 a 3 horas.</p>
+        <!-- Contador de página fijo -->
+        <div class="contador-pagina" id="contadorPagina">1 / 9</div>
+        
+        <div class="presentacion-container">
+            <div class="presentacion" id="presentacion">
+                <!-- Página 1 -->
+                <div class="pagina activa" id="pagina1">
+                    <h1 class="centrado">PROGRAMA DE FORTALECIMIENTO ADMINISTRATIVO PARA ORGANIZACIONES DE LA ECONOMÍA POPULAR</h1>
+                    <h2 class="centrado">"Asesoramiento Técnico: Fortaleciendo la Gestión Interna"</h2>
                     
-                    <h3>Público Objetivo:</h3>
-                    <p>Cooperativas, comedores comunitarios, merenderos, emprendedores con ventas consolidadas, asociaciones civiles.</p>
-                    
-                    <h3>Objetivo General:</h3>
-                    <p>Brindar herramientas administrativas básicas para mejorar la sostenibilidad, transparencia y capacidad de gestión de las organizaciones.</p>
-                </div>
-                
-                <div class="autores">
-                    <p>Hernán E. Garbarino</p>
-                    <p>Adm SR || Técnico Superior en Adm de RRHH</p>
-                </div>
-            </div>
-            
-            <!-- Página 2 -->
-            <div class="pagina" id="pagina2">
-                <h1>Módulos de Asesoramiento</h1>
-                <p class="centrado">Se adaptan a la necesidad específica de cada organización</p>
-                
-                <div class="tarjeta">
-                    <h2>Diagnóstico Organizacional Rápido</h2>
-                    <p>Análisis de los procesos actuales de administración, finanzas y documentación.</p>
-                </div>
-                
-                <div class="tarjeta">
-                    <h2>Sistema Básico de Caja y Bancos</h2>
-                    <p>Planilla unificada para registro diario de ingresos y egresos. Control de saldos.</p>
-                </div>
-                
-                <div class="tarjeta">
-                    <h2>Conciliación Básica</h2>
-                    <p>Cómo cuadrar los movimientos de dinero físico con los extractos bancarios o las anotaciones.</p>
-                </div>
-                
-                <div class="tarjeta">
-                    <h2>Diseño de Herramientas de Gestión</h2>
-                    <p>Creación de planillas a medida para control de inventario, costos, socios o asistencia.</p>
-                </div>
-                
-                <div class="tarjeta">
-                    <h2>Cumplimiento Laboral y Trámites Básicos</h2>
-                    <p>Asesoría sobre libro de sueldos, recibos, altas/bajas, y cómo acceder a programas específicos.</p>
-                </div>
-                
-                <div class="tarjeta">
-                    <h2>Organización Documental</h2>
-                    <p>Métodos simples para archivar facturas, comprobantes y documentación legal de manera ordenada.</p>
-                </div>
-                
-                <div class="metodologia">
-                    <h3>Metodología de Trabajo:</h3>
-                    <ul>
-                        <li>Sesión inicial de diagnóstico</li>
-                        <li>Propuesta de plan de trabajo con los módulos a cubrir</li>
-                        <li>Sesiones de trabajo prácticas ("hands-on")</li>
-                        <li>Entrega de material de apoyo (planillas modelo, guías, checklist)</li>
-                    </ul>
-                </div>
-            </div>
-            
-            <!-- Página 3 -->
-            <div class="pagina" id="pagina3">
-                <h1>Diagnóstico Organizacional Rápido</h1>
-                
-                <div class="objetivo">
-                    <h3>Objetivo:</h3>
-                    <p>Identificar la situación actual de la organización en materia administrativa, financiera y documental para detectar fortalezas, debilidades y oportunidades de mejora.</p>
-                </div>
-                
-                <div class="contenedor-flex">
-                    <div class="columna">
-                        <div class="modulo">
-                            <h3>Alcance:</h3>
-                            <ul>
-                                <li>Relevamiento de procesos internos de administración y finanzas</li>
-                                <li>Evaluación de prácticas actuales de control y registro</li>
-                                <li>Revisión del manejo de documentación legal y contable</li>
-                                <li>Análisis del nivel de digitalización y uso de herramientas tecnológicas</li>
-                            </ul>
-                        </div>
+                    <div class="destacado">
+                        <h3>Modalidad:</h3>
+                        <p>Asesorías personalizadas (presenciales o virtuales) por sesiones de 2 a 3 horas.</p>
+                        
+                        <h3>Público Objetivo:</h3>
+                        <p>Cooperativas, comedores comunitarios, merenderos, emprendedores con ventas consolidadas, asociaciones civiles.</p>
+                        
+                        <h3>Objetivo General:</h3>
+                        <p>Brindar herramientas administrativas básicas para mejorar la sostenibilidad, transparencia y capacidad de gestión de las organizaciones.</p>
                     </div>
                     
-                    <div class="columna">
-                        <div class="modulo">
-                            <h3>Metodología:</h3>
-                            <ul>
-                                <li>Entrevista inicial con referentes de la organización</li>
-                                <li>Revisión de registros contables, planillas y documentación existente</li>
-                                <li>Aplicación de un checklist diagnóstico diseñado para organizaciones de la economía popular</li>
-                            </ul>
-                        </div>
+                    <div class="autores">
+                        <p>Hernán E. Garbarino</p>
+                        <p>Adm SR || Técnico Superior en Adm de RRHH</p>
                     </div>
                 </div>
                 
-                <div class="consejo">
-                    <h3>Beneficios:</h3>
-                    <p>Permite comprender rápidamente la realidad administrativa de la organización y establecer un plan de acción realista.</p>
+                <!-- Página 2 -->
+                <div class="pagina" id="pagina2">
+                    <h1>Módulos de Asesoramiento</h1>
+                    <p class="centrado">Se adaptan a la necesidad específica de cada organización</p>
                     
-                    <h3>Entregables:</h3>
-                    <ul>
-                        <li>Informe breve de diagnóstico (1 a 2 páginas)</li>
-                        <li>Mapa de procesos básicos detectados</li>
-                        <li>Recomendaciones iniciales priorizadas</li>
-                    </ul>
-                </div>
-            </div>
-            
-            <!-- Página 4 -->
-            <div class="pagina" id="pagina4">
-                <h1>Sistema Básico de Caja y Bancos</h1>
-                
-                <div class="objetivo">
-                    <h3>Objetivo:</h3>
-                    <p>Implementar un sistema sencillo para registrar, controlar y proyectar los movimientos financieros diarios.</p>
-                </div>
-                
-                <div class="contenedor-flex">
-                    <div class="columna">
-                        <div class="modulo">
-                            <h3>Alcance:</h3>
-                            <ul>
-                                <li>Diseño de una planilla unificada para ingresos y egresos</li>
-                                <li>Registro diferenciado de dinero en efectivo y movimientos bancarios</li>
-                                <li>Control automático de saldos diarios y mensuales</li>
-                                <li>Capacitación en la carga y actualización del sistema</li>
-                            </ul>
-                        </div>
+                    <div class="tarjeta">
+                        <h2>Diagnóstico Organizacional Rápido</h2>
+                        <p>Análisis de los procesos actuales de administración, finanzas y documentación.</p>
                     </div>
                     
-                    <div class="columna">
-                        <div class="modulo">
-                            <h3>Metodología:</h3>
-                            <ul>
-                                <li>Entrevista inicial para entender la dinámica de ingresos y pagos</li>
-                                <li>Creación de una planilla en Excel o Google Sheets con fórmulas automatizadas</li>
-                                <li>Capacitación práctica a los responsables administrativos</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="consejo">
-                    <h3>Beneficios:</h3>
-                    <p>Mejora la transparencia, facilita el seguimiento financiero y permite tomar decisiones basadas en datos reales.</p>
-                    
-                    <h3>Entregables:</h3>
-                    <ul>
-                        <li>Planilla unificada de Caja y Bancos personalizada</li>
-                        <li>Manual breve de uso paso a paso</li>
-                        <li>Reporte inicial de saldos al implementar el sistema</li>
-                    </ul>
-                </div>
-            </div>
-            
-            <!-- Página 5 -->
-            <div class="pagina" id="pagina5">
-                <h1>Conciliación Básica</h1>
-                
-                <div class="objetivo">
-                    <h3>Objetivo:</h3>
-                    <p>Enseñar a las organizaciones a conciliar el dinero físico, las operaciones bancarias y los registros administrativos, evitando errores y desbalances.</p>
-                </div>
-                
-                <div class="contenedor-flex">
-                    <div class="columna">
-                        <div class="modulo">
-                            <h3>Alcance:</h3>
-                            <ul>
-                                <li>Explicación clara del concepto de conciliación bancaria</li>
-                                <li>Diseño de un procedimiento simple para realizar conciliaciones mensuales</li>
-                                <li>Identificación de discrepancias y ajustes necesarios</li>
-                            </ul>
-                        </div>
+                    <div class="tarjeta">
+                        <h2>Sistema Básico de Caja y Bancos</h2>
+                        <p>Planilla unificada para registro diario de ingresos y egresos. Control de saldos.</p>
                     </div>
                     
-                    <div class="columna">
-                        <div class="modulo">
-                            <h3>Metodología:</h3>
-                            <ul>
-                                <li>Capacitación práctica sobre conciliación con ejemplos reales</li>
-                                <li>Uso de una planilla de conciliación que cruce datos de caja, bancos y registros</li>
-                                <li>Simulación de escenarios comunes de errores y soluciones</li>
-                            </ul>
-                        </div>
+                    <div class="tarjeta">
+                        <h2>Conciliación Básica</h2>
+                        <p>Cómo cuadrar los movimientos de dinero físico con los extractos bancarios o las anotaciones.</p>
+                    </div>
+                    
+                    <div class="tarjeta">
+                        <h2>Diseño de Herramientas de Gestión</h2>
+                        <p>Creación de planillas a medida para control de inventario, costos, socios o asistencia.</p>
+                    </div>
+                    
+                    <div class="tarjeta">
+                        <h2>Cumplimiento Laboral y Trámites Básicos</h2>
+                        <p>Asesoría sobre libro de sueldos, recibos, altas/bajas, y cómo acceder a programas específicos.</p>
+                    </div>
+                    
+                    <div class="tarjeta">
+                        <h2>Organización Documental</h2>
+                        <p>Métodos simples para archivar facturas, comprobantes y documentación legal de manera ordenada.</p>
+                    </div>
+                    
+                    <div class="metodologia">
+                        <h3>Metodología de Trabajo:</h3>
+                        <ul>
+                            <li>Sesión inicial de diagnóstico</li>
+                            <li>Propuesta de plan de trabajo con los módulos a cubrir</li>
+                            <li>Sesiones de trabajo prácticas ("hands-on")</li>
+                            <li>Entrega de material de apoyo (planillas modelo, guías, checklist)</li>
+                        </ul>
                     </div>
                 </div>
                 
-                <div class="consejo">
-                    <h3>Beneficios:</h3>
-                    <p>Garantiza que los registros administrativos reflejen la realidad financiera y fortalece la credibilidad interna y externa de la organización.</p>
+                <!-- Página 3 -->
+                <div class="pagina" id="pagina3">
+                    <h1>Diagnóstico Organizacional Rápido</h1>
                     
-                    <h3>Entregables:</h3>
-                    <ul>
-                        <li>Plantilla de conciliación bancaria lista para usar</li>
-                        <li>Guía rápida de conciliación con pasos claros</li>
-                    </ul>
-                </div>
-            </div>
-            
-            <!-- Página 6 -->
-            <div class="pagina" id="pagina6">
-                <h1>Diseño de Herramientas de Gestión</h1>
-                
-                <div class="objetivo">
-                    <h3>Objetivo:</h3>
-                    <p>Desarrollar planillas personalizadas y tableros simples para mejorar el control interno de la organización.</p>
-                </div>
-                
-                <div class="contenedor-flex">
-                    <div class="columna">
-                        <div class="modulo">
-                            <h3>Alcance:</h3>
-                            <ul>
-                                <li>Control de inventarios: registro de entradas, salidas y stock disponible</li>
-                                <li>Gestión de costos: cálculo real de costos directos e indirectos</li>
-                                <li>Seguimiento de socios o beneficiarios: datos de contacto, aportes, asistencia</li>
-                                <li>Tableros de indicadores básicos para seguimiento mensual</li>
-                            </ul>
+                    <div class="objetivo">
+                        <h3>Objetivo:</h3>
+                        <p>Identificar la situación actual de la organización en materia administrativa, financiera y documental para detectar fortalezas, debilidades y oportunidades de mejora.</p>
+                    </div>
+                    
+                    <div class="contenedor-flex">
+                        <div class="columna">
+                            <div class="modulo">
+                                <h3>Alcance:</h3>
+                                <ul>
+                                    <li>Relevamiento de procesos internos de administración y finanzas</li>
+                                    <li>Evaluación de prácticas actuales de control y registro</li>
+                                    <li>Revisión del manejo de documentación legal y contable</li>
+                                    <li>Análisis del nivel de digitalización y uso de herramientas tecnológicas</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="columna">
+                            <div class="modulo">
+                                <h3>Metodología:</h3>
+                                <ul>
+                                    <li>Entrevista inicial con referentes de la organización</li>
+                                    <li>Revisión de registros contables, planillas y documentación existente</li>
+                                    <li>Aplicación de un checklist diagnóstico diseñado para organizaciones de la economía popular</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="columna">
-                        <div class="modulo">
-                            <h3>Metodología:</h3>
-                            <ul>
-                                <li>Relevamiento de necesidades específicas de cada organización</li>
-                                <li>Desarrollo de planillas y dashboards adaptados</li>
-                                <li>Capacitación para el uso autónomo de las herramientas</li>
-                            </ul>
-                        </div>
+                    <div class="consejo">
+                        <h3>Beneficios:</h3>
+                        <p>Permite comprender rápidamente la realidad administrativa de la organización y establecer un plan de acción realista.</p>
+                        
+                        <h3>Entregables:</h3>
+                        <ul>
+                            <li>Informe breve de diagnóstico (1 a 2 páginas)</li>
+                            <li>Mapa de procesos básicos detectados</li>
+                            <li>Recomendaciones iniciales priorizadas</li>
+                        </ul>
                     </div>
                 </div>
                 
-                <div class="consejo">
-                    <h3>Beneficios:</h3>
-                    <p>Permite gestionar la organización de forma más profesional y ordenada, optimizando recursos y tiempo.</p>
+                <!-- Página 4 -->
+                <div class="pagina" id="pagina4">
+                    <h1>Sistema Básico de Caja y Bancos</h1>
                     
-                    <h3>Entregables:</h3>
-                    <ul>
-                        <li>Pack de planillas personalizadas (inventario, costos, socios, asistencia)</li>
-                        <li>Dashboard básico para indicadores clave</li>
-                        <li>Manual práctico de uso y actualización</li>
-                    </ul>
-                </div>
-            </div>
-            
-            <!-- Página 7 -->
-            <div class="pagina" id="pagina7">
-                <h1>Cumplimiento Laboral y Trámites Básicos</h1>
-                
-                <div class="objetivo">
-                    <h3>Objetivo:</h3>
-                    <p>Asesorar sobre el cumplimiento de obligaciones laborales y fiscales básicas, para reducir riesgos legales y facilitar el acceso a programas oficiales.</p>
-                </div>
-                
-                <div class="contenedor-flex">
-                    <div class="columna">
-                        <div class="modulo">
-                            <h3>Alcance:</h3>
-                            <ul>
-                                <li>Introducción al libro de sueldos y emisión de recibos</li>
-                                <li>Procedimientos para altas y bajas en AFIP</li>
-                                <li>Información sobre monotributo, autónomos e ingresos brutos</li>
-                                <li>Guía para acceder a programas y beneficios estatales</li>
-                            </ul>
+                    <div class="objetivo">
+                        <h3>Objetivo:</h3>
+                        <p>Implementar un sistema sencillo para registrar, controlar y proyectar los movimientos financieros diarios.</p>
+                    </div>
+                    
+                    <div class="contenedor-flex">
+                        <div class="columna">
+                            <div class="modulo">
+                                <h3>Alcance:</h3>
+                                <ul>
+                                    <li>Diseño de una planilla unificada para ingresos y egresos</li>
+                                    <li>Registro diferenciado de dinero en efectivo y movimientos bancarios</li>
+                                    <li>Control automático de saldos diarios y mensuales</li>
+                                    <li>Capacitación en la carga y actualización del sistema</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="columna">
+                            <div class="modulo">
+                                <h3>Metodología:</h3>
+                                <ul>
+                                    <li>Entrevista inicial para entender la dinámica de ingresos y pagos</li>
+                                    <li>Creación de una planilla en Excel o Google Sheets con fórmulas automatizadas</li>
+                                    <li>Capacitación práctica a los responsables administrativos</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="columna">
-                        <div class="modulo">
-                            <h3>Metodología:</h3>
-                            <ul>
-                                <li>Entrevista inicial para identificar obligaciones vigentes</li>
-                                <li>Asesoramiento sobre documentación laboral requerida</li>
-                                <li>Provisión de checklist de trámites con links y pasos claros</li>
-                            </ul>
-                        </div>
+                    <div class="consejo">
+                        <h3>Beneficios:</h3>
+                        <p>Mejora la transparencia, facilita el seguimiento financiero y permite tomar decisiones basadas en datos reales.</p>
+                        
+                        <h3>Entregables:</h3>
+                        <ul>
+                            <li>Planilla unificada de Caja y Bancos personalizada</li>
+                            <li>Manual breve de uso paso a paso</li>
+                            <li>Reporte inicial de saldos al implementar el sistema</li>
+                        </ul>
                     </div>
                 </div>
                 
-                <div class="consejo">
-                    <h3>Beneficios:</h3>
-                    <p>Reduce riesgos legales, facilita el acceso a subsidios y programas y mejora la formalidad institucional.</p>
+                <!-- Página 5 -->
+                <div class="pagina" id="pagina5">
+                    <h1>Conciliación Básica</h1>
                     
-                    <h3>Entregables:</h3>
-                    <ul>
-                        <li>Guía de obligaciones laborales y fiscales básicas</li>
-                        <li>Checklist de trámites con fechas y requisitos</li>
-                    </ul>
-                </div>
-            </div>
-            
-            <!-- Página 8 -->
-            <div class="pagina" id="pagina8">
-                <h1>Organización Documental</h1>
-                
-                <div class="objetivo">
-                    <h3>Objetivo:</h3>
-                    <p>Implementar un sistema simple y eficiente para la clasificación, archivo y resguardo de documentos físicos y digitales.</p>
-                </div>
-                
-                <div class="contenedor-flex">
-                    <div class="columna">
-                        <div class="modulo">
-                            <h3>Alcance:</h3>
-                            <ul>
-                                <li>Creación de un esquema de carpetas digitales organizado</li>
-                                <li>Definición de categorías para documentos legales, administrativos y contables</li>
-                                <li>Métodos de digitalización y respaldo en la nube</li>
-                                <li>Buenas prácticas para el archivo físico</li>
-                            </ul>
+                    <div class="objetivo">
+                        <h3>Objetivo:</h3>
+                        <p>Enseñar a las organizaciones a conciliar el dinero físico, las operaciones bancarias y los registros administrativos, evitando errores y desbalances.</p>
+                    </div>
+                    
+                    <div class="contenedor-flex">
+                        <div class="columna">
+                            <div class="modulo">
+                                <h3>Alcance:</h3>
+                                <ul>
+                                    <li>Explicación clara del concepto de conciliación bancaria</li>
+                                    <li>Diseño de un procedimiento simple para realizar conciliaciones mensuales</li>
+                                    <li>Identificación de discrepancias y ajustes necesarios</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="columna">
+                            <div class="modulo">
+                                <h3>Metodología:</h3>
+                                <ul>
+                                    <li>Capacitación práctica sobre conciliación con ejemplos reales</li>
+                                    <li>Uso de una planilla de conciliación que cruce datos de caja, bancos y registros</li>
+                                    <li>Simulación de escenarios comunes de errores y soluciones</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="columna">
-                        <div class="modulo">
-                            <h3>Metodología:</h3>
-                            <ul>
-                                <li>Revisión del sistema actual de archivo</li>
-                                <li>Diseño de plantillas de nomenclatura para carpetas y archivos</li>
-                                <li>Capacitación práctica sobre organización и resguardo documental</li>
-                            </ul>
-                        </div>
+                    <div class="consejo">
+                        <h3>Beneficios:</h3>
+                        <p>Garantiza que los registros administrativos reflejen la realidad financiera y fortalece la credibilidad interna y externa de la organización.</p>
+                        
+                        <h3>Entregables:</h3>
+                        <ul>
+                            <li>Plantilla de conciliación bancaria lista para usar</li>
+                            <li>Guía rápida de conciliación con pasos claros</li>
+                        </ul>
                     </div>
                 </div>
                 
-                <div class="consejo">
-                    <h3>Beneficios:</h3>
-                    <p>Facilita el acceso a la información, evita pérdidas y mejora el cumplimiento normativo.</p>
+                <!-- Página 6 -->
+                <div class="pagina" id="pagina6">
+                    <h1>Diseño de Herramientas de Gestión</h1>
                     
-                    <h3>Entregables:</h3>
-                    <ul>
-                        <li>Manual de organización documental</li>
-                        <li>Plantilla de estructura digital lista para implementar</li>
-                        <li>Checklist de control documental mensual</li>
-                    </ul>
+                    <div class="objetivo">
+                        <h3>Objetivo:</h3>
+                        <p>Desarrollar planillas personalizadas y tableros simples para mejorar el control interno de la organización.</p>
+                    </div>
+                    
+                    <div class="contenedor-flex">
+                        <div class="columna">
+                            <div class="modulo">
+                                <h3>Alcance:</h3>
+                                <ul>
+                                    <li>Control de inventarios: registro de entradas, salidas y stock disponible</li>
+                                    <li>Gestión de costos: cálculo real de costos directos e indirectos</li>
+                                    <li>Seguimiento de socios o beneficiarios: datos de contacto, aportes, asistencia</li>
+                                    <li>Tableros de indicadores básicos para seguimiento mensual</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="columna">
+                            <div class="modulo">
+                                <h3>Metodología:</h3>
+                                <ul>
+                                    <li>Relevamiento de necesidades específicas de cada organización</li>
+                                    <li>Desarrollo de planillas y dashboards adaptados</li>
+                                    <li>Capacitación para el uso autónomo de las herramientas</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="consejo">
+                        <h3>Beneficios:</h3>
+                        <p>Permite gestionar la organización de forma más profesional y ordenada, optimizando recursos y tiempo.</p>
+                        
+                        <h3>Entregables:</h3>
+                        <ul>
+                            <li>Pack de planillas personalizadas (inventario, costos, socios, asistencia)</li>
+                            <li>Dashboard básico para indicadores clave</li>
+                            <li>Manual práctico de uso y actualización</li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-            
-            <!-- Página 9 -->
-            <div class="pagina" id="pagina9">
-                <h1>Programas de Formación y Capacitación</h1>
                 
-                <div class="tarjeta">
-                    <h2>Curso A: "Herramientas Administrativas para Emprender"</h2>
-                    <p><strong>Duración:</strong> 4 encuentros de 2 horas cada uno (total 8 horas)</p>
-                    <p><strong>Modalidad:</strong> Presencial o Virtual</p>
-                    <p><strong>Objetivo:</strong> Que los participantes adquieran conocimientos prácticos para administrar su emprendimiento de manera eficiente</p>
+                <!-- Página 7 -->
+                <div class="pagina" id="pagina7">
+                    <h1>Cumplimiento Laboral y Trámites Básicos</h1>
                     
-                    <h3>Contenidos por Encuentro:</h3>
-                    <ol>
-                        <li>¿Dónde está mi dinero? Separación de finanzas personales y del emprendimiento</li>
-                        <li>¿Cuánto gano realmente? Introducción al cálculo de costos y precio de venta</li>
-                        <li>Organizarse para crecer. Control de stock e inventario simple</li>
-                        <li>Mi emprendimiento y el sistema. Trámites básicos (monotributo, ingresos brutos)</li>
-                    </ol>
+                    <div class="objetivo">
+                        <h3>Objetivo:</h3>
+                        <p>Asesorar sobre el cumplimiento de obligaciones laborales y fiscales básicas, para reducir riesgos legales y facilitar el acceso a programas oficiales.</p>
+                    </div>
+                    
+                    <div class="contenedor-flex">
+                        <div class="columna">
+                            <div class="modulo">
+                                <h3>Alcance:</h3>
+                                <ul>
+                                    <li>Introducción al libro de sueldos y emisión de recibos</li>
+                                    <li>Procedimientos para altas y bajas en AFIP</li>
+                                    <li>Información sobre monotributo, autónomos e ingresos brutos</li>
+                                    <li>Guía para acceder a programas y beneficios estatales</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="columna">
+                            <div class="modulo">
+                                <h3>Metodología:</h3>
+                                <ul>
+                                    <li>Entrevista inicial para identificar obligaciones vigentes</li>
+                                    <li>Asesoramiento sobre documentación laboral requerida</li>
+                                    <li>Provisión de checklist de trámites con links y pasos claros</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="consejo">
+                        <h3>Beneficios:</h3>
+                        <p>Reduce riesgos legales, facilita el acceso a subsidios y programas y mejora la formalidad institucional.</p>
+                        
+                        <h3>Entregables:</h3>
+                        <ul>
+                            <li>Guía de obligaciones laborales y fiscales básicas</li>
+                            <li>Checklist de trámites con fechas y requisitos</li>
+                        </ul>
+                    </div>
                 </div>
                 
-                <div class="tarjeta">
-                    <h2>Curso B: "Primeros Pasos en el Mundo Administrativo"</h2>
-                    <p><strong>Duración:</strong> 6 encuentros de 2 horas (total 12 horas)</p>
-                    <p><strong>Modalidad:</strong> Presencial</p>
-                    <p><strong>Objetivo:</strong> Capacitar a jóvenes y adultos sin experiencia para desempeñarse en un puesto entry-level en áreas administrativas</p>
+                <!-- Página 8 -->
+                <div class="pagina" id="pagina8">
+                    <h1>Organización Documental</h1>
                     
-                    <h3>Contenidos:</h3>
-                    <ul>
-                        <li>El perfil del asistente administrativo. Funciones y habilidades blandas clave</li>
-                        <li>Comunicación efectiva: atención telefónica, redacción de emails formales</li>
-                        <li>Archivo y organización documental (física y digital)</li>
-                        <li>Uso de planillas de cálculo (Excel/Google Sheets) para tareas básicas</li>
-                        <li>Gestión del tiempo y de tareas. Uso de agendas</li>
-                        <li>Simulación de entrevistas laborales y armado de CV para el sector</li>
-                    </ul>
+                    <div class="objetivo">
+                        <h3>Objetivo:</h3>
+                        <p>Implementar un sistema simple y eficiente para la clasificación, archivo y resguardo de documentos físicos y digitales.</p>
+                    </div>
+                    
+                    <div class="contenedor-flex">
+                        <div class="columna">
+                            <div class="modulo">
+                                <h3>Alcance:</h3>
+                                <ul>
+                                    <li>Creación de un esquema de carpetas digitales organizado</li>
+                                    <li>Definición de categorías para documentos legales, administrativos y contables</li>
+                                    <li>Métodos de digitalización y respaldo en la nube</li>
+                                    <li>Buenas prácticas para el archivo físico</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="columna">
+                            <div class="modulo">
+                                <h3>Metodología:</h3>
+                                <ul>
+                                    <li>Revisión del sistema actual de archivo</li>
+                                    <li>Diseño de plantillas de nomenclatura para carpetas y archivos</li>
+                                    <li>Capacitación práctica sobre organización y resguardo documental</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="consejo">
+                        <h3>Beneficios:</h3>
+                        <p>Facilita el acceso a la información, evita pérdidas y mejora el cumplimiento normativo.</p>
+                        
+                        <h3>Entregables:</h3>
+                        <ul>
+                            <li>Manual de organización documental</li>
+                            <li>Plantilla de estructura digital lista para implementar</li>
+                            <li>Checklist de control documental mensual</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Página 9 -->
+                <div class="pagina" id="pagina9">
+                    <h1>Programas de Formación y Capacitación</h1>
+                    
+                    <div class="tarjeta">
+                        <h2>Curso A: "Herramientas Administrativas para Emprender"</h2>
+                        <p><strong>Duración:</strong> 4 encuentros de 2 horas cada uno (total 8 horas)</p>
+                        <p><strong>Modalidad:</strong> Presencial o Virtual</p>
+                        <p><strong>Objetivo:</strong> Que los participantes adquieran conocimientos prácticos para administrar su emprendimiento de manera eficiente</p>
+                        
+                        <h3>Contenidos por Encuentro:</h3>
+                        <ol>
+                            <li>¿Dónde está mi dinero? Separación de finanzas personales y del emprendimiento</li>
+                            <li>¿Cuánto gano realmente? Introducción al cálculo de costos y precio de venta</li>
+                            <li>Organizarse para crecer. Control de stock e inventario simple</li>
+                            <li>Mi emprendimiento y el sistema. Trámites básicos (monotributo, ingresos brutos)</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="tarjeta">
+                        <h2>Curso B: "Primeros Pasos en el Mundo Administrativo"</h2>
+                        <p><strong>Duración:</strong> 6 encuentros de 2 horas (total 12 horas)</p>
+                        <p><strong>Modalidad:</strong> Presencial</p>
+                        <p><strong>Objetivo:</strong> Capacitar a jóvenes y adultos sin experiencia para desempeñarse en un puesto entry-level en áreas administrativas</p>
+                        
+                        <h3>Contenidos:</h3>
+                        <ul>
+                            <li>El perfil del asistente administrativo. Funciones y habilidades blandas clave</li>
+                            <li>Comunicación efectiva: atención telefónica, redacción de emails formales</li>
+                            <li>Archivo y organización documental (física y digital)</li>
+                            <li>Uso de planillas de cálculo (Excel/Google Sheets) para tareas básicas</li>
+                            <li>Gestión del tiempo y de tareas. Uso de agendas</li>
+                            <li>Simulación de entrevistas laborales y armado de CV para el sector</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
+        
+        <div class="indicadores" id="indicadores">
+            <div class="indicador activo" data-page="1"></div>
+            <div class="indicador" data-page="2"></div>
+            <div class="indicador" data-page="3"></div>
+            <div class="indicador" data-page="4"></div>
+            <div class="indicador" data-page="5"></div>
+            <div class="indicador" data-page="6"></div>
+            <div class="indicador" data-page="7"></div>
+            <div class="indicador" data-page="8"></div>
+            <div class="indicador" data-page="9"></div>
+        </div>
     </div>
     
-    <div class="indicadores" id="indicadores">
-        <div class="indicador activo" data-page="1"></div>
-        <div class="indicador" data-page="2"></div>
-        <div class="indicador" data-page="3"></div>
-        <div class="indicador" data-page="4"></div>
-        <div class="indicador" data-page="5"></div>
-        <div class="indicador" data-page="6"></div>
-        <div class="indicador" data-page="7"></div>
-        <div class="indicador" data-page="8"></div>
-        <div class="indicador" data-page="9"></div>
-    </div>
-    
+    <!-- FOOTER CORREGIDO - AHORA ESTÁ FUERA DEL CONTENEDOR PRINCIPAL -->
     <div class="navegacion">
         <button class="btn" id="btnAnterior" disabled>
             <i class="fas fa-arrow-left"></i> Anterior
